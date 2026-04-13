@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { RestaurantCard } from "@/components/restaurant-card"
 import { ArrowLeft, RefreshCw } from "lucide-react"
@@ -132,10 +133,17 @@ function getFilterSummary(filters: Filters): string {
 type ResultsSectionProps = {
   filters: Filters
   onBack: () => void
+  onRandomize: () => void
 }
 
-export function ResultsSection({ filters, onBack }: ResultsSectionProps) {
+export function ResultsSection({ filters, onBack, onRandomize }: ResultsSectionProps) {
+  const [isRandomizing, setIsRandomizing] = useState(false)
   const restaurants = getMatchedRestaurants(filters)
+
+  const handleRandomizeClick = () => {
+    setIsRandomizing(true)
+    onRandomize()
+  }
 
   return (
     <div className="space-y-4">
@@ -150,16 +158,12 @@ export function ResultsSection({ filters, onBack }: ResultsSectionProps) {
         </Button>
       </div>
 
-      <div className="space-y-1">
-        <h2 className="text-lg font-semibold text-foreground">
-          {restaurants.length > 0 ? "Here are your top picks" : "No matches found"}
-        </h2>
-        <p className="text-sm text-muted-foreground">
-          {restaurants.length > 0
-            ? getFilterSummary(filters)
-            : "Try adjusting your filters"}
-        </p>
-      </div>
+      {restaurants.length > 0 && (
+        <div className="space-y-1">
+          <h2 className="text-lg font-semibold text-foreground">Here are your top picks</h2>
+          <p className="text-sm text-muted-foreground">{getFilterSummary(filters)}</p>
+        </div>
+      )}
 
       <div className="space-y-3">
         {restaurants.map((restaurant, index) => (
@@ -179,12 +183,23 @@ export function ResultsSection({ filters, onBack }: ResultsSectionProps) {
 
       {restaurants.length === 0 && (
         <div className="rounded-lg border border-dashed border-border bg-card p-8 text-center">
-          <p className="text-muted-foreground">
-            No restaurants match your current filters. Try selecting different options.
+          <p className="text-lg font-semibold text-foreground">
+            Walang exact match 😅
           </p>
-          <Button variant="outline" onClick={onBack} className="mt-4">
-            Adjust filters
-          </Button>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Medyo specific yung napili mo. Gusto mo kami na bahala pumili?
+          </p>
+          <p className="mt-3 text-sm text-muted-foreground">
+            Pipili kami ng best options base sa setup mo
+          </p>
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
+            <Button onClick={handleRandomizeClick} size="lg" className="w-full sm:w-auto">
+              {isRandomizing ? "Sige, kami na bahala… 🍜" : "Ikaw na bahala"}
+            </Button>
+            <Button variant="outline" onClick={onBack} size="lg" className="w-full sm:w-auto">
+              Ayusin filters
+            </Button>
+          </div>
         </div>
       )}
     </div>

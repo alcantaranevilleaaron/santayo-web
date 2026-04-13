@@ -34,6 +34,15 @@ export default function Home() {
     setShowResults(false)
   }
 
+  const handleRandomize = () => {
+    setFilters((prev) => ({
+      ...prev,
+      mood: "random",
+      cuisine: "any",
+    }))
+    setShowResults(true)
+  }
+
   return (
     <main className="min-h-screen bg-background">
       <div className="mx-auto max-w-lg px-4 py-6 md:py-10">
@@ -54,7 +63,11 @@ export default function Home() {
 
         {/* Content */}
         {showResults ? (
-          <ResultsSection filters={filters} onBack={handleBack} />
+          <ResultsSection
+            filters={filters}
+            onBack={handleBack}
+            onRandomize={handleRandomize}
+          />
         ) : (
           <FilterSection
             filters={filters}
