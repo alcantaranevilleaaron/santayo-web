@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { FilterSection } from "@/components/filter-section"
 import { ResultsSection } from "@/components/results-section"
+import { getMatchedRestaurants } from "@/lib/recommendations"
 import { MapPin, Utensils } from "lucide-react"
 
 export type Filters = {
@@ -30,16 +31,43 @@ export default function Home() {
     }, 1200)
   }
 
+  const [fallbackRandom, setFallbackRandom] = useState(false)
+  const [resultsHint, setResultsHint] = useState<string | null>(null)
+
   const handleBack = () => {
     setShowResults(false)
+    setFallbackRandom(false)
+    setResultsHint(null)
   }
 
+  const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
+
   const handleRandomize = () => {
-    setFilters((prev) => ({
-      ...prev,
+    const initialFilters = {
+      ...filters,
       mood: "random",
-      cuisine: "any",
-    }))
+    }
+
+    const firstResults = getMatchedRestaurants(initialFilters, 3)
+    let nextFilters = initialFilters
+    let nextHint: string | null = null
+
+    if (firstResults.length === 0 && filters.cuisine && filters.cuisine !== "any") {
+      nextFilters = {
+        ...initialFilters,
+        cuisine: "any",
+      }
+      nextHint = "We expanded your options a bit"
+    } else if (filters.cuisine && filters.cuisine !== "any") {
+      nextHint = `${capitalize(filters.cuisine)} picks for you`
+    }
+
+    const nextResults = getMatchedRestaurants(nextFilters, 3)
+    const willFallback = nextResults.length === 0
+
+    setFilters(nextFilters)
+    setFallbackRandom(willFallback)
+    setResultsHint(willFallback ? "We expanded your options a bit" : nextHint)
     setShowResults(true)
   }
 
@@ -67,6 +95,8 @@ export default function Home() {
             filters={filters}
             onBack={handleBack}
             onRandomize={handleRandomize}
+            fallbackMode={fallbackRandom}
+            resultHint={resultsHint}
           />
         ) : (
           <FilterSection

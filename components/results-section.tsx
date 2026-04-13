@@ -5,42 +5,8 @@ import { Button } from "@/components/ui/button"
 import { RestaurantCard } from "@/components/restaurant-card"
 import { ArrowLeft, RefreshCw } from "lucide-react"
 import type { Filters } from "@/app/page"
-import { RESTAURANTS, type Restaurant } from "@/data/restaurants"
-
-function getMatchedRestaurants(filters: Filters) {
-  const budgetMax = parseInt(filters.budget || "1000")
-  const isRandom = filters.mood === "random"
-  
-  const filtered = RESTAURANTS.filter((restaurant) => {
-    // Check budget
-    if (restaurant.budgetMax > budgetMax && filters.budget !== "1000") {
-      return false
-    }
-    
-    // Check mood (skip if random)
-    if (filters.mood && !isRandom && !restaurant.tags.includes(filters.mood)) {
-      return false
-    }
-    
-    // Check cuisine
-    if (filters.cuisine && filters.cuisine !== "any") {
-      if (restaurant.cuisine.toLowerCase() !== filters.cuisine) {
-        return false
-      }
-    }
-    
-    // Check dining type
-    if (filters.dining && !restaurant.diningTypes.includes(filters.dining)) {
-      return false
-    }
-    
-    return true
-  })
-
-  // Shuffle and return up to 3
-  const shuffled = filtered.sort(() => Math.random() - 0.5)
-  return shuffled.slice(0, 3)
-}
+import { getMatchedRestaurants, getRandomFallbackRestaurants } from "@/lib/recommendations"
+import { type Restaurant } from "@/data/restaurants"
 
 function getMatchReason(restaurant: Restaurant, filters: Filters): string {
   const reasons: string[] = []
@@ -134,11 +100,15 @@ type ResultsSectionProps = {
   filters: Filters
   onBack: () => void
   onRandomize: () => void
+  fallbackMode: boolean
+  resultHint: string | null
 }
 
-export function ResultsSection({ filters, onBack, onRandomize }: ResultsSectionProps) {
+export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, resultHint }: ResultsSectionProps) {
   const [isRandomizing, setIsRandomizing] = useState(false)
-  const restaurants = getMatchedRestaurants(filters)
+  const restaurants = fallbackMode
+    ? getRandomFallbackRestaurants()
+    : getMatchedRestaurants(filters, 3)
 
   const handleRandomizeClick = () => {
     setIsRandomizing(true)
@@ -162,6 +132,9 @@ export function ResultsSection({ filters, onBack, onRandomize }: ResultsSectionP
         <div className="space-y-1">
           <h2 className="text-lg font-semibold text-foreground">Here are your top picks</h2>
           <p className="text-sm text-muted-foreground">{getFilterSummary(filters)}</p>
+          {resultHint && (
+            <p className="text-sm text-muted-foreground">{resultHint}</p>
+          )}
         </div>
       )}
 
