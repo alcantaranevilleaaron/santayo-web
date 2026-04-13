@@ -43,7 +43,9 @@ type FilterSectionProps = {
 }
 
 export function FilterSection({ filters, setFilters, onSubmit, isLoading }: FilterSectionProps) {
-  const [isOptionalOpen, setIsOptionalOpen] = useState(false)
+  const [isOptionalOpen, setIsOptionalOpen] = useState(
+    !!filters.budget || !!filters.cuisine || !!filters.dining
+  )
 
   const handleMoodSelect = (value: string) => {
     setFilters((prev) => ({
