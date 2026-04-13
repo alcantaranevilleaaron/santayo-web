@@ -79,7 +79,7 @@ export function FilterSection({ filters, setFilters, onSubmit, isLoading }: Filt
           className="flex w-full items-center justify-between px-4 py-3 text-left"
         >
           <span className="text-sm font-medium text-muted-foreground">
-            May iba ka bang gusto? (optional)
+            May iba pa ba?
           </span>
           <ChevronDown
             className={`size-4 text-muted-foreground transition-transform duration-200 ${
@@ -123,7 +123,7 @@ export function FilterSection({ filters, setFilters, onSubmit, isLoading }: Filt
         {isLoading ? (
           <>
             <span className="inline-block size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-            Eto na...
+            Hanap lang kami...
           </>
         ) : (
           <>
@@ -135,7 +135,7 @@ export function FilterSection({ filters, setFilters, onSubmit, isLoading }: Filt
 
       {!hasMoodSelected && !isLoading && (
         <p className="text-center text-sm text-muted-foreground">
-          Pick a mood to get suggestions
+          Pili ka lang, kami na bahala.
         </p>
       )}
     </div>

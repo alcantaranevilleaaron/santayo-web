@@ -43,28 +43,90 @@ function getMatchedRestaurants(filters: Filters) {
 
 function getMatchReason(restaurant: Restaurant, filters: Filters): string {
   const reasons: string[] = []
-  
+
   if (filters.mood === "random") {
-    reasons.push("A surprise pick just for you")
+    reasons.push("A strong pick for your current vibe")
   } else if (filters.mood === "comfort" && restaurant.tags.includes("comfort")) {
-    reasons.push("Perfect for comfort food cravings")
+    reasons.push("Great for comfort food")
   } else if (filters.mood === "healthy" && restaurant.tags.includes("healthy")) {
-    reasons.push("Great for a healthy meal")
+    reasons.push("Good for a healthier meal")
   } else if (filters.mood === "light" && restaurant.tags.includes("light")) {
-    reasons.push("Light and satisfying options")
+    reasons.push("Nice if you want something lighter")
   } else if (filters.mood === "filling" && restaurant.tags.includes("filling")) {
-    reasons.push("Hearty portions to fill you up")
+    reasons.push("Good if you want something filling")
   }
-  
-  if (filters.dining === "solo") {
-    reasons.push("Solo-friendly seating")
-  } else if (filters.dining === "pair") {
-    reasons.push("Great for dates or catching up")
-  } else if (filters.dining === "group") {
-    reasons.push("Ideal for group dining")
+
+  if (filters.budget && filters.budget !== "1000") {
+    const budgetValue = parseInt(filters.budget, 10)
+
+    if (!Number.isNaN(budgetValue)) {
+      if (restaurant.budgetMax <= budgetValue) {
+        reasons.push("fully within your budget")
+      } else {
+        reasons.push("with options above your budget")
+      }
+    }
   }
-  
-  return reasons.join(". ") + "."
+
+  if (filters.cuisine && filters.cuisine !== "any" && restaurant.cuisine.toLowerCase() === filters.cuisine) {
+    reasons.push(`a solid ${restaurant.cuisine.toLowerCase()} option`)
+  }
+
+  if (filters.dining === "solo" && restaurant.diningTypes.includes("solo")) {
+    reasons.push("works well for solo meals")
+  } else if (filters.dining === "pair" && restaurant.diningTypes.includes("pair")) {
+    reasons.push("nice for pairs")
+  } else if (filters.dining === "group" && restaurant.diningTypes.includes("group")) {
+    reasons.push("good for groups")
+  }
+
+  if (reasons.length === 0) {
+    return "A solid option based on your picks."
+  }
+
+  const primary = reasons[0]
+  const secondary = reasons[1]
+
+  if (!secondary) {
+    return capitalize(primary) + "."
+  }
+
+  return `${capitalize(primary)}, ${secondary}.`
+}
+
+function capitalize(text: string): string {
+  return text.charAt(0).toUpperCase() + text.slice(1)
+}
+
+function getFilterSummary(filters: Filters): string {
+  const parts: string[] = []
+
+  if (filters.mood && filters.mood !== "random") {
+    parts.push(capitalize(filters.mood))
+  }
+
+  if (filters.budget && filters.budget !== "1000") {
+    parts.push(`Under ₱${filters.budget}`)
+  }
+
+  if (filters.cuisine && filters.cuisine !== "any") {
+    parts.push(capitalize(filters.cuisine))
+  }
+
+  if (filters.dining) {
+    parts.push(capitalize(filters.dining))
+  }
+
+  // return parts.length > 0 ? parts.join(" · ") : "Based on your preferences"
+
+  if (filters.mood === "random") {
+    if (parts.length > 0) {
+      return `A mix of solid picks ${parts.join(" · ")}`
+    }
+    return "Kami na pumili"
+  }
+
+  return parts.join(" · ")
 }
 
 type ResultsSectionProps = {
@@ -94,7 +156,7 @@ export function ResultsSection({ filters, onBack }: ResultsSectionProps) {
         </h2>
         <p className="text-sm text-muted-foreground">
           {restaurants.length > 0
-            ? "Based on your preferences"
+            ? getFilterSummary(filters)
             : "Try adjusting your filters"}
         </p>
       </div>
