@@ -9,56 +9,104 @@ import { getMatchedRestaurants, getRandomFallbackRestaurants } from "@/lib/recom
 import { type Restaurant } from "@/data/restaurants"
 
 function getMatchReason(restaurant: Restaurant, filters: Filters): string {
-  const reasons: string[] = []
-
-  if (filters.mood === "random") {
-    reasons.push("A strong pick for your current vibe")
-  } else if (filters.mood === "comfort" && restaurant.tags.includes("comfort")) {
-    reasons.push("Great for comfort food")
-  } else if (filters.mood === "healthy" && restaurant.tags.includes("healthy")) {
-    reasons.push("Good for a healthier meal")
-  } else if (filters.mood === "light" && restaurant.tags.includes("light")) {
-    reasons.push("Nice if you want something lighter")
-  } else if (filters.mood === "filling" && restaurant.tags.includes("filling")) {
-    reasons.push("Good if you want something filling")
+  const attributePhraseMap: Record<string, string> = {
+    comfort: "Comfort food na safe move",
+    filling: "Heavy at satisfying",
+    healthy: "Fresh at hindi mabigat",
+    light: "Magaan pero may lasa",
+    filipino: "Pinoy flavors na familiar",
+    japanese: "Japanese comfort na sulit",
+    korean: "Korean cravings na shareable",
+    western: "Western favorites na easy order",
+    cafe: "Cafe vibes, may coffee at bakery",
+    chinese: "Chinese classics na sulit",
+    thai: "Thai na may kick",
+    italian: "Italiano na cozy",
+    indian: "Indian spice trip",
+    buffet: "Maraming choices at sulit",
+    dessert: "Sweet treat na pang-treat",
+    sosial: "Sosyal setup na shareable",
+    group: "Good for barkada",
+    pair: "Swak sa date o tandem",
+    solo: "Perfect sa solo chow",
   }
 
-  if (filters.budget && filters.budget !== "1000") {
-    const budgetValue = parseInt(filters.budget, 10)
+  const moodContexts: Record<string, string[]> = {
+    comfort: [
+      "Panalo kung gusto mo ng hug in a bowl.",
+      "Trip mo 'yong comfort food na familiar.",
+      "Bagay kapag gusto mo ng soft at satisfying.",
+    ],
+    filling: [
+      "Solid kung gutom ka na gutom.",
+      "Good move sa cravings mode.",
+      "Swak para sa heavy meal day.",
+    ],
+    healthy: [
+      "Maganda sa light pero busog na choice.",
+      "Swak kung ayaw mo ng greasy.",
+      "Ganda kung balance ang hanap mo.",
+    ],
+    light: [
+      "Magaan at easy lang, pero may lasa.",
+      "Perfect kung ayaw mo ng sobra-sobrang bigat.",
+      "Ganda sa quick bite mood.",
+    ],
+    random: [
+      "Pili kami — panalo 'to sa mood mo.",
+      "Good move kung gusto mo ng solid kahit hindi sure.",
+      "Safe choice para sa current vibe mo.",
+    ],
+  }
 
-    if (!Number.isNaN(budgetValue)) {
-      if (restaurant.budgetMax <= budgetValue) {
-        reasons.push("fully within your budget")
-      } else {
-        reasons.push("with options above your budget")
-      }
+  const getSeededChoice = <T,>(items: T[], seed: string): T => {
+    const sum = Array.from(seed).reduce((total, char) => total + char.charCodeAt(0), 0)
+    return items[sum % items.length]
+  }
+
+  const normalizedAttributes = Array.from(
+    new Set(restaurant.attributes.map((attribute) => attribute.toLowerCase()))
+  )
+
+  const preferredAttributes: string[] = []
+  const mood = filters.mood || "random"
+
+  if (mood !== "random" && normalizedAttributes.includes(mood)) {
+    preferredAttributes.push(mood)
+  }
+
+  const cuisine = restaurant.cuisine.toLowerCase()
+  if (normalizedAttributes.includes(cuisine) && !preferredAttributes.includes(cuisine)) {
+    preferredAttributes.push(cuisine)
+  }
+
+  if (filters.dining) {
+    const dining = filters.dining.toLowerCase()
+    if (normalizedAttributes.includes(dining) && !preferredAttributes.includes(dining)) {
+      preferredAttributes.push(dining)
     }
   }
 
-  if (filters.cuisine && filters.cuisine !== "any" && restaurant.cuisine.toLowerCase() === filters.cuisine) {
-    reasons.push(`a solid ${restaurant.cuisine.toLowerCase()} option`)
+  for (const attribute of normalizedAttributes) {
+    if (!preferredAttributes.includes(attribute)) {
+      preferredAttributes.push(attribute)
+    }
   }
 
-  if (filters.dining === "solo" && restaurant.diningTypes.includes("solo")) {
-    reasons.push("works well for solo meals")
-  } else if (filters.dining === "pair" && restaurant.diningTypes.includes("pair")) {
-    reasons.push("nice for pairs")
-  } else if (filters.dining === "group" && restaurant.diningTypes.includes("group")) {
-    reasons.push("good for groups")
-  }
+  const selectedAttributes = preferredAttributes.filter(
+    (attribute): attribute is keyof typeof attributePhraseMap => attribute in attributePhraseMap
+  )
 
-  if (reasons.length === 0) {
-    return "A solid option based on your picks."
-  }
+  const attributePhrases = selectedAttributes.slice(0, 2).map((attribute) => attributePhraseMap[attribute])
+  const primaryPhrase = attributePhrases[0] ?? "Good choice na swak sa mood mo"
+  const attributeText = attributePhrases.length > 1
+    ? `${primaryPhrase} at ${attributePhrases[1].toLowerCase()}`
+    : primaryPhrase
 
-  const primary = reasons[0]
-  const secondary = reasons[1]
+  const contextOptions = moodContexts[mood] ?? moodContexts.random
+  const contextPhrase = getSeededChoice(contextOptions, restaurant.name)
 
-  if (!secondary) {
-    return capitalize(primary) + "."
-  }
-
-  return `${capitalize(primary)}, ${secondary}.`
+  return `${attributeText}. ${contextPhrase}`
 }
 
 function capitalize(text: string): string {
@@ -115,6 +163,10 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
     onRandomize()
   }
 
+  const moodContext = filters.mood
+    ? `Para sa '${capitalize(filters.mood)}' mood mo`
+    : "Recommended base sa napili mo"
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -130,8 +182,8 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
 
       {restaurants.length > 0 && (
         <div className="space-y-1">
-          <h2 className="text-lg font-semibold text-foreground">Here are your top picks</h2>
-          <p className="text-sm text-muted-foreground">{getFilterSummary(filters)}</p>
+          <h2 className="text-lg font-semibold text-foreground">Best match for your mood 👇</h2>
+          <p className="text-sm text-muted-foreground">{moodContext}</p>
           {resultHint && (
             <p className="text-sm text-muted-foreground">{resultHint}</p>
           )}
@@ -149,7 +201,7 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
             priceRange={restaurant.priceRange}
             dishes={restaurant.dishes}
             matchReason={getMatchReason(restaurant, filters)}
-            isTopPick={filters.mood === "random" && index === 0}
+            isTopPick={index === 0}
           />
         ))}
       </div>
