@@ -13,6 +13,7 @@ type RestaurantCardProps = {
   dishes: string[]
   matchReason: string
   isTopPick?: boolean
+  topPickExplanation?: string
 }
 
 export function RestaurantCard({
@@ -24,6 +25,7 @@ export function RestaurantCard({
   dishes,
   matchReason,
   isTopPick = false,
+  topPickExplanation,
 }: RestaurantCardProps) {
   return (
     <Card className={`overflow-hidden transition-shadow hover:shadow-md ${isTopPick ? "border-2 border-primary ring-2 ring-primary/20" : ""}`}>
@@ -40,7 +42,10 @@ export function RestaurantCard({
             </span>
             <div>
               <CardTitle className="text-base">{name}</CardTitle>
-              <CardDescription className="mt-1 flex items-center gap-1">
+              {isTopPick && topPickExplanation ? (
+                <p className="mt-1 text-sm text-foreground">{topPickExplanation}</p>
+              ) : null}
+              <CardDescription className="mt-1 text-xs text-muted-foreground flex items-center gap-1">
                 <MapPin className="size-3" />
                 {area}
               </CardDescription>

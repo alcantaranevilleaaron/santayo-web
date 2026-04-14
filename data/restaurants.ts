@@ -315,7 +315,7 @@ export const RESTAURANTS: Restaurant[] = [
   {
     id: 26,
     name: "Mary Grace Cafe",
-    area: "SM Aura",
+    area: "Bonifacio High Street",
     cuisine: "Cafe",
     priceRange: "₱300-550",
     dishes: ["Cheese Rolls", "Chicken Inasal Pasta", "Hot Chocolate"],

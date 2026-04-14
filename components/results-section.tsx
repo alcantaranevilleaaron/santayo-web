@@ -20,12 +20,12 @@ function getMatchReason(
     filling: ["Hearty meal", "Rich plate", "Satisfying entree", "Hearty serving"],
     healthy: ["Fresh bowls", "Healthy plate", "Pure meal", "Fresh selection"],
     light: ["Light bites", "Light plate", "Refined meal", "Easy selection"],
-    filipino: ["Filipino classics", "Local favorites", "Filipino comfort", "Classic Filipino"],
+    filipino: ["Filipino staples", "Filipino classics", "Local favorites", "Filipino comfort"],
     japanese: ["Japanese variety", "Classic ramen", "Ramen spot", "Tokyo bowls"],
     korean: ["Korean grill", "Korean plates", "Korean variety", "Korean specialties"],
-    western: ["Steakhouse plates", "Western comfort", "Grilled specialties", "Western classics"],
-    cafe: ["Cafe comfort", "Cafe plates", "Coffeehouse meal", "Cafe selection"],
-    chinese: ["Chinese dimsum", "Chinese classics", "Chinese plates", "Chinese favorites"],
+    western: ["Steakhouse plates", "Rotisserie plates", "Grilled specialties", "Western comfort"],
+    cafe: ["Cafe comfort", "Warm cafe bites", "Cafe plates", "Coffeehouse meal"],
+    chinese: ["Chinese dimsum", "Chinese classics", "Dim sum favorites", "Chinese specialties"],
     thai: ["Thai classics", "Thai flavors", "Thai specialties", "Thai selection"],
     italian: ["Italian pasta", "Pasta classics", "Italian specialties", "Italian selection"],
     indian: ["Indian curry", "Indian flavors", "Indian specialties", "Indian classics"],
@@ -65,17 +65,16 @@ function getMatchReason(
     light: [
       "easy and refreshing",
       "mild but flavorful",
-      "low-impact dining",
+      "light and well-balanced",
       "light and polished",
       "clean and simple",
     ],
     random: [
       "warm and reliable",
       "balanced and satisfying",
-      "great all-around choice",
-      "something for any craving",
-      "easy pick for any craving",
       "smart and flexible",
+      "refined and approachable",
+      "broad appeal across tastes",
     ],
   }
 
@@ -113,7 +112,7 @@ function getMatchReason(
       "chosen for refined taste",
       "a polished option",
       "carefully selected for you",
-      "a balanced recommendation",
+      "balanced and thoughtful",
     ],
   }
 
@@ -196,6 +195,31 @@ function getMatchReason(
   return `${primaryPhrase} — ${contextPhrase}`
 }
 
+function getTopPickExplanation(mood: string): string {
+  const explanations: Record<string, string[]> = {
+    random: [
+      "Best overall choice across different cravings.",
+      "Strong all-around choice across cravings.",
+      "Reliable pick with broad appeal.",
+    ],
+    filling: [
+      "Top choice for hearty, satisfying plates.",
+      "Most satisfying option for a full meal.",
+    ],
+    light: [
+      "Best pick for a clean, easy meal.",
+      "Top option for a lighter, refined meal.",
+    ],
+    comfort: [
+      "Best choice for warm, comforting flavors.",
+      "Top option for familiar, feel-good meals.",
+    ],
+  }
+
+  const options = explanations[mood] ?? explanations.random
+  return options[0]
+}
+
 function capitalize(text: string): string {
   return text.charAt(0).toUpperCase() + text.slice(1)
 }
@@ -266,6 +290,10 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
     getMatchReason(restaurant, filters, fallbackMode, usedPrimaryPhrases, usedContextPhrases)
   )
 
+  const topPickExplanation = restaurants.length > 0
+    ? getTopPickExplanation(fallbackMode ? "random" : filters.mood || "random")
+    : undefined
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -301,6 +329,7 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
             dishes={restaurant.dishes}
             matchReason={matchReasons[index]}
             isTopPick={index === 0}
+            topPickExplanation={index === 0 ? topPickExplanation : undefined}
           />
         ))}
       </div>
