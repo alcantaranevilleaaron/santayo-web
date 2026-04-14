@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { FilterGroup } from "@/components/filter-group"
 import { Sparkles, ChevronDown } from "lucide-react"
@@ -55,15 +56,21 @@ export function FilterSection({
   )
 
   const handleMoodSelect = (value: string) => {
-    const nextMood = filters.mood === value ? null : value
+    setFilters((prev) => {
+      const nextMood = prev.mood === value ? null : value
+      return {
+        ...prev,
+        mood: nextMood,
+      }
+    })
+  }
+
+  const handleRandomMood = () => {
     setFilters((prev) => ({
       ...prev,
-      mood: nextMood,
+      mood: "random",
     }))
-
-    if (autoSubmitOnMood && nextMood) {
-      onSubmit()
-    }
+    onSubmit()
   }
 
   const handleOptionalFilterSelect = (key: "budget" | "cuisine" | "dining", value: string) => {
@@ -74,6 +81,9 @@ export function FilterSection({
   }
 
   const hasMoodSelected = !!filters.mood
+  const isRandomSelected = filters.mood === "random"
+  const ctaLabel = hasMoodSelected ? "Hanapin na" : "Pili na tayo"
+  const loadingLabel = "Sandali lang… 🍜"
 
   return (
     <div className="relative">
@@ -100,16 +110,16 @@ export function FilterSection({
 
             <button
               type="button"
-              onClick={() => handleMoodSelect("random")}
+              onClick={handleRandomMood}
               className={
-                filters.mood === "random"
-                  ? "w-full rounded-3xl border border-rose-500 bg-rose-100 px-5 py-4 text-left text-sm font-semibold text-rose-900 shadow-sm transition duration-150 ease-out"
-                  : "w-full rounded-3xl border border-amber-300 bg-amber-50 px-5 py-4 text-left text-sm font-semibold text-amber-900 transition duration-150 ease-out hover:border-amber-400 hover:bg-amber-100"
+                isRandomSelected
+                  ? "w-full rounded-3xl border-2 border-rose-500 bg-rose-100 px-5 py-4 text-left text-sm font-semibold text-rose-900 shadow-lg transition duration-150 ease-out"
+                  : "w-full rounded-3xl border border-rose-300 bg-rose-50 px-5 py-4 text-left text-sm font-semibold text-rose-900 transition duration-150 ease-out hover:border-rose-400 hover:bg-rose-100 hover:-translate-y-0.5"
               }
             >
               <div className="flex items-center justify-between gap-3">
                 <span>Ikaw na bahala</span>
-                <span>🤷</span>
+                <Sparkles className="size-5 text-rose-600" />
               </div>
               {/* <p className="mt-2 text-xs text-amber-700/90">
                 I’ll take care of the choice for you.
@@ -123,24 +133,24 @@ export function FilterSection({
             onClick={onSubmit}
             disabled={!hasMoodSelected || isLoading}
             size="lg"
-            className="w-full gap-2 text-base"
+            className={cn(
+              "w-full gap-2 text-base transition duration-150 ease-out",
+              hasMoodSelected && !isLoading ? "border-primary bg-primary text-primary-foreground hover:bg-primary/90" : "opacity-90"
+            )}
           >
             {isLoading ? (
               <>
                 <span className="inline-block size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                Hanap lang kami...
+                {loadingLabel}
               </>
             ) : (
-              <>
-                <Sparkles className="size-4" />
-                Pili na tayo
-              </>
+              <>{ctaLabel}</>
             )}
           </Button>
 
-          {!hasMoodSelected && !isLoading && (
+          {!isLoading && (
             <p className="mt-3 text-center text-sm text-muted-foreground">
-              Pili ka lang, kami na bahala.
+              {hasMoodSelected ? "Handa na ang iyong mood." : "Pili ka lang, kami na bahala."}
             </p>
           )}
         </div>
