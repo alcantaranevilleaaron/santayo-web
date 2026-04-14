@@ -39,7 +39,7 @@ const DINING_OPTIONS = [
 type FilterSectionProps = {
   filters: Filters
   setFilters: React.Dispatch<React.SetStateAction<Filters>>
-  onSubmit: () => void
+  onSubmit: (moodOverride?: string) => void
   isLoading: boolean
   autoSubmitOnMood?: boolean
 }
@@ -70,7 +70,7 @@ export function FilterSection({
       ...prev,
       mood: "random",
     }))
-    onSubmit()
+    onSubmit("random")
   }
 
   const handleOptionalFilterSelect = (key: "budget" | "cuisine" | "dining", value: string) => {
@@ -82,8 +82,8 @@ export function FilterSection({
 
   const hasMoodSelected = !!filters.mood
   const isRandomSelected = filters.mood === "random"
-  const ctaLabel = hasMoodSelected ? "Tara, kain! 🍜" : "Pili ka muna"
-  const loadingLabel = "Sandali lang… 🍜"
+  const ctaLabel = hasMoodSelected ? "Tara, hanap tayo! 🍽️" : "Pili ka muna ☝️"
+  const loadingLabel = "Picking something good…🍜"
   const randomLoadingMessages = [
     "Picking something good...",
     "Checking the vibe...",
@@ -131,7 +131,7 @@ export function FilterSection({
               Mood
             </p>
             <p className="text-sm text-muted-foreground">
-              Anong trip mo ngayon?
+              Anong trip mo today?
             </p>
           </div>
 
@@ -166,7 +166,7 @@ export function FilterSection({
 
         <div className="sticky bottom-0 left-0 right-0 z-20 border-t border-border/70 bg-background/95 px-4 py-3 backdrop-blur-sm shadow-[0_-10px_30px_-15px_rgba(15,23,42,0.12)] sm:static sm:border-0 sm:bg-transparent sm:py-0 sm:shadow-none">
           <Button
-            onClick={onSubmit}
+            onClick={() => onSubmit()}
             disabled={!hasMoodSelected || isLoading}
             size="lg"
             className={cn(

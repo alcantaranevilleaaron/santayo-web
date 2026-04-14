@@ -23,12 +23,14 @@ export default function Home() {
     dining: null,
   })
 
-  const handleSubmit = () => {
+  const handleSubmit = (moodOverride?: string) => {
     setIsLoading(true)
+    const duration = (moodOverride ?? filters.mood) === "random" ? 2200 : 1200
+
     setTimeout(() => {
       setIsLoading(false)
       setShowResults(true)
-    }, 2200)
+    }, duration)
   }
 
   const [fallbackRandom, setFallbackRandom] = useState(false)
