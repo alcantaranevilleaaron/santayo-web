@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { FilterGroup } from "@/components/filter-group"
@@ -84,6 +84,42 @@ export function FilterSection({
   const isRandomSelected = filters.mood === "random"
   const ctaLabel = hasMoodSelected ? "Tara, kain! 🍜" : "Pili ka muna"
   const loadingLabel = "Sandali lang… 🍜"
+  const randomLoadingMessages = [
+    "Picking something good...",
+    "Checking the vibe...",
+    "Balancing your cravings...",
+    "Trust me on this one 👀",
+  ]
+
+  const [loadingIndex, setLoadingIndex] = useState(0)
+  const [isFaded, setIsFaded] = useState(true)
+
+  useEffect(() => {
+    if (!isLoading || !isRandomSelected) {
+      setLoadingIndex(0)
+      return
+    }
+
+    const interval = window.setInterval(() => {
+      setLoadingIndex((current) => {
+        const next = Math.floor(Math.random() * randomLoadingMessages.length)
+        return next === current ? (next + 1) % randomLoadingMessages.length : next
+      })
+    }, 700)
+
+    return () => window.clearInterval(interval)
+  }, [isLoading, isRandomSelected])
+
+  useEffect(() => {
+    if (!isLoading || !isRandomSelected) {
+      return
+    }
+
+    setIsFaded(false)
+    const fadeTimer = window.setTimeout(() => setIsFaded(true), 50)
+
+    return () => window.clearTimeout(fadeTimer)
+  }, [loadingIndex, isLoading, isRandomSelected])
 
   return (
     <div className="relative">
@@ -141,10 +177,18 @@ export function FilterSection({
             )}
           >
             {isLoading ? (
-              <>
-                <span className="inline-block size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                {loadingLabel}
-              </>
+              isRandomSelected ? (
+                <div className="flex w-full flex-col items-center gap-2">
+                  <div className={`rounded-full bg-slate-950/95 px-4 py-2 text-sm font-semibold text-white transition-opacity duration-500 animate-pulse ${isFaded ? "opacity-100" : "opacity-20"}`}>
+                    {randomLoadingMessages[loadingIndex]}
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <span className="inline-block size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                  {loadingLabel}
+                </>
+              )
             ) : (
               <>{ctaLabel}</>
             )}

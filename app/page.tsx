@@ -28,7 +28,7 @@ export default function Home() {
     setTimeout(() => {
       setIsLoading(false)
       setShowResults(true)
-    }, 1200)
+    }, 2200)
   }
 
   const [fallbackRandom, setFallbackRandom] = useState(false)

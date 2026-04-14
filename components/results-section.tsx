@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { RestaurantCard } from "@/components/restaurant-card"
 import { ArrowLeft, RefreshCw } from "lucide-react"
@@ -265,14 +265,61 @@ type ResultsSectionProps = {
 
 export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, resultHint }: ResultsSectionProps) {
   const [isRandomizing, setIsRandomizing] = useState(false)
+  const [loadingIndex, setLoadingIndex] = useState(0)
+  const [isFaded, setIsFaded] = useState(true)
+
   const restaurants = fallbackMode
     ? getRandomFallbackRestaurants()
     : getMatchedRestaurants(filters, 3)
 
+  const loadingMessages = [
+    "Picking something good...",
+    "Checking the vibe...",
+    "Balancing your cravings...",
+    "Trust me on this one 👀",
+  ]
+
   const handleRandomizeClick = () => {
+    setLoadingIndex(0)
+    setIsFaded(true)
     setIsRandomizing(true)
-    onRandomize()
   }
+
+  useEffect(() => {
+    if (!isRandomizing) {
+      return
+    }
+
+    const rotate = window.setInterval(() => {
+      setLoadingIndex((current) => (current + 1) % loadingMessages.length)
+    }, 650)
+
+    return () => window.clearInterval(rotate)
+  }, [isRandomizing])
+
+  useEffect(() => {
+    if (!isRandomizing) {
+      return
+    }
+
+    setIsFaded(false)
+    const fadeTimer = window.setTimeout(() => setIsFaded(true), 50)
+
+    return () => window.clearTimeout(fadeTimer)
+  }, [loadingIndex, isRandomizing])
+
+  useEffect(() => {
+    if (!isRandomizing) {
+      return
+    }
+
+    const delay = window.setTimeout(() => {
+      onRandomize()
+      setIsRandomizing(false)
+    }, 2000)
+
+    return () => window.clearTimeout(delay)
+  }, [isRandomizing, onRandomize])
 
   const moodContext = filters.mood
     ? filters.mood === "light"
@@ -345,14 +392,28 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
           <p className="mt-3 text-sm text-muted-foreground">
             Pipili kami ng best options base sa setup mo
           </p>
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
-            <Button onClick={handleRandomizeClick} size="lg" className="w-full sm:w-auto">
-              {isRandomizing ? "Sige, kami na bahala… 🍜" : "Ikaw na bahala"}
-            </Button>
-            <Button variant="outline" onClick={onBack} size="lg" className="w-full sm:w-auto">
-              Ayusin filters
-            </Button>
-          </div>
+
+          {isRandomizing ? (
+            <div className="mt-8 flex flex-col items-center gap-4">
+              <div className="rounded-3xl border border-border/70 bg-muted/10 px-6 py-4 shadow-sm animate-pulse">
+                <p className={`text-sm font-semibold tracking-tight text-foreground transition-opacity duration-500 ${isFaded ? "opacity-100" : "opacity-0"}`}>
+                  {loadingMessages[loadingIndex]}
+                </p>
+              </div>
+              <p className="max-w-md text-sm text-muted-foreground">
+                Taking a moment to select the best match for you.
+              </p>
+            </div>
+          ) : (
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
+              <Button onClick={handleRandomizeClick} size="lg" className="w-full sm:w-auto">
+                Ikaw na bahala
+              </Button>
+              <Button variant="outline" onClick={onBack} size="lg" className="w-full sm:w-auto">
+                Ayusin filters
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </div>
