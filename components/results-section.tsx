@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { RestaurantCard } from "@/components/restaurant-card"
 import { ArrowLeft, RefreshCw } from "lucide-react"
+import { Sparkles, ChevronDown } from "lucide-react"
 import type { Filters } from "@/app/page"
 import { getMatchedRestaurants, getRandomFallbackRestaurants } from "@/lib/recommendations"
 import { type Restaurant } from "@/data/restaurants"
@@ -384,33 +385,49 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
       {restaurants.length === 0 && (
         <div className="rounded-lg border border-dashed border-border bg-card p-8 text-center">
           <p className="text-lg font-semibold text-foreground">
-            Walang exact match 😅
+            No exact match found.
           </p>
           <p className="mt-2 text-sm text-muted-foreground">
-            Medyo specific yung napili mo. Gusto mo kami na bahala pumili?
+            But we’ve curated a few strong options for you.
           </p>
           <p className="mt-3 text-sm text-muted-foreground">
-            Pipili kami ng best options base sa setup mo
+            Or let us decide — ikaw na bahala.
           </p>
 
           {isRandomizing ? (
-            <div className="mt-8 flex flex-col items-center gap-4">
-              <div className="rounded-3xl border border-border/70 bg-muted/10 px-6 py-4 shadow-sm animate-pulse">
-                <p className={`text-sm font-semibold tracking-tight text-foreground transition-opacity duration-500 ${isFaded ? "opacity-100" : "opacity-0"}`}>
-                  {loadingMessages[loadingIndex]}
-                </p>
-              </div>
-              <p className="max-w-md text-sm text-muted-foreground">
-                Taking a moment to select the best match for you.
-              </p>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
+              <Button
+                variant="outline"
+                size="lg"
+                disabled
+                className="w-full sm:w-auto border-rose-300 bg-rose-50 text-rose-900 hover:border-rose-400 hover:bg-rose-100"
+                aria-busy="true"
+              >
+                <div className="flex flex-col items-center gap-1">
+                  <span className={`text-sm font-semibold tracking-tight transition-opacity duration-500 ${isFaded ? "opacity-100" : "opacity-0"}`}>
+                    {loadingMessages[loadingIndex]}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    Taking a moment to select the best match for you.
+                  </span>
+                </div>
+              </Button>
             </div>
           ) : (
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
-              <Button onClick={handleRandomizeClick} size="lg" className="w-full sm:w-auto">
-                Ikaw na bahala
+              <Button
+                variant="outline"
+                onClick={handleRandomizeClick}
+                size="lg"
+                className="w-full sm:w-auto border-rose-300 bg-rose-50 text-rose-900 hover:border-rose-400 hover:bg-rose-100 hover:-translate-y-0.5 active:scale-95"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <span>Ikaw na bahala</span>
+                  <Sparkles className="size-5 text-rose-600" />
+                </div>
               </Button>
               <Button variant="outline" onClick={onBack} size="lg" className="w-full sm:w-auto">
-                Ayusin filters
+                Adjust filters
               </Button>
             </div>
           )}
