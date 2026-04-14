@@ -82,24 +82,24 @@ export function FilterSection({
 
   const hasMoodSelected = !!filters.mood
   const isRandomSelected = filters.mood === "random"
-  const ctaLabel = hasMoodSelected ? "Hanapin na" : "Pili na tayo"
+  const ctaLabel = hasMoodSelected ? "Tara, kain! 🍜" : "Pili ka muna"
   const loadingLabel = "Sandali lang… 🍜"
 
   return (
     <div className="relative">
-      <div className="space-y-6 pb-28">
+      <div className="space-y-4 pb-28">
         {/* Mood - Required */}
-        <div className="rounded-3xl border border-primary/10 bg-primary/5 p-5 shadow-sm">
-          <div className="space-y-2">
+        <div className="rounded-3xl border border-primary/10 bg-primary/5 p-6 shadow-sm sm:p-7">
+          <div className="space-y-3">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary">
               Mood
             </p>
             <p className="text-sm text-muted-foreground">
-              Pili ka lang, kami na bahala.
+              Anong trip mo ngayon?
             </p>
           </div>
 
-          <div className="mt-5 space-y-4">
+          <div className="mt-5 space-y-6">
             <FilterGroup
               title=""
               options={MOOD_OPTIONS.filter((option) => option.value !== "random")}
@@ -113,8 +113,8 @@ export function FilterSection({
               onClick={handleRandomMood}
               className={
                 isRandomSelected
-                  ? "w-full rounded-3xl border-2 border-rose-500 bg-rose-100 px-5 py-4 text-left text-sm font-semibold text-rose-900 shadow-lg transition duration-150 ease-out"
-                  : "w-full rounded-3xl border border-rose-300 bg-rose-50 px-5 py-4 text-left text-sm font-semibold text-rose-900 transition duration-150 ease-out hover:border-rose-400 hover:bg-rose-100 hover:-translate-y-0.5"
+                  ? "w-full rounded-3xl border-2 border-rose-500 bg-rose-100 px-5 py-4 text-left text-sm font-semibold text-rose-900 shadow-lg transition duration-200 ease-out transform-gpu"
+                  : "w-full rounded-3xl border border-rose-300 bg-rose-50 px-5 py-4 text-left text-sm font-semibold text-rose-900 transition duration-200 ease-out transform-gpu hover:border-rose-400 hover:bg-rose-100 hover:-translate-y-0.5 active:scale-95"
               }
             >
               <div className="flex items-center justify-between gap-3">
@@ -128,14 +128,16 @@ export function FilterSection({
           </div>
         </div>
 
-        <div className="sticky bottom-0 left-0 right-0 z-20 border-t border-border/70 bg-background/95 px-0 py-4 backdrop-blur-sm shadow-[0_-10px_30px_-15px_rgba(15,23,42,0.12)] sm:static sm:border-0 sm:bg-transparent sm:py-0 sm:shadow-none">
+        <div className="sticky bottom-0 left-0 right-0 z-20 border-t border-border/70 bg-background/95 px-4 py-3 backdrop-blur-sm shadow-[0_-10px_30px_-15px_rgba(15,23,42,0.12)] sm:static sm:border-0 sm:bg-transparent sm:py-0 sm:shadow-none">
           <Button
             onClick={onSubmit}
             disabled={!hasMoodSelected || isLoading}
             size="lg"
             className={cn(
-              "w-full gap-2 text-base transition duration-150 ease-out",
-              hasMoodSelected && !isLoading ? "border-primary bg-primary text-primary-foreground hover:bg-primary/90" : "opacity-90"
+              "w-full gap-2 text-base transition-all duration-250 ease-out",
+              hasMoodSelected && !isLoading
+                ? "border-primary bg-primary text-primary-foreground shadow-sm hover:bg-primary/90"
+                : "opacity-80"
             )}
           >
             {isLoading ? (
@@ -147,12 +149,6 @@ export function FilterSection({
               <>{ctaLabel}</>
             )}
           </Button>
-
-          {!isLoading && (
-            <p className="mt-3 text-center text-sm text-muted-foreground">
-              {hasMoodSelected ? "Handa na ang iyong mood." : "Pili ka lang, kami na bahala."}
-            </p>
-          )}
         </div>
 
         {/* Optional Filters - Collapsible */}
