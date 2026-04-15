@@ -198,9 +198,9 @@ function getMatchReason(
 function getTopPickExplanation(mood: string): string {
   const explanations: Record<string, string[]> = {
     random: [
-      "Best overall choice across different cravings.",
-      "Strong all-around choice across cravings.",
-      "Reliable pick with broad appeal.",
+      "Can’t go wrong with this one.",
+      "Safe, satisfying choice.",
+      "Works for almost any craving.",
     ],
     filling: [
       "Top choice for hearty, satisfying plates.",
@@ -334,7 +334,7 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
       ? "Hearty and satisfying."
       : filters.mood === "comfort"
       ? "Warm and comforting."
-      : "No specific mood."
+      : "Based on your vibe"
     : "Picked for you — refined recommendations."
 
   const usedPrimaryPhrases = new Set<string>()
@@ -362,7 +362,7 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
 
       {restaurants.length > 0 && (
         <div className="space-y-2">
-          <h2 className="text-lg font-semibold text-foreground">Best match for your mood 👇</h2>
+          <h2 className="text-lg font-semibold text-foreground">This is our pick for you ✨</h2>
           <p className="text-sm leading-6 text-muted-foreground">{moodContext}</p>
           {resultHint && (
             <p className="text-sm leading-6 text-muted-foreground">{resultHint}</p>

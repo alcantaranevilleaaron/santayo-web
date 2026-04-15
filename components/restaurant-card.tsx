@@ -32,7 +32,7 @@ export function RestaurantCard({
       <CardHeader className="pb-3">
         {isTopPick && (
           <div className="mb-2 -mt-1">
-            <Badge className="bg-primary text-primary-foreground border-transparent">Top Pick for You 🔥</Badge>
+            <Badge className="bg-primary text-primary-foreground border-transparent">Top Pick 🔥</Badge>
           </div>
         )}
         <div className="flex items-start justify-between gap-4">
