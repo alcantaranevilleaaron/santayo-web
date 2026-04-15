@@ -127,9 +127,6 @@ export function FilterSection({
         {/* Mood - Required */}
         <div className="rounded-2xl border border-primary/10 bg-primary/5 p-4 shadow-[0_4px_12px_rgba(0,0,0,0.04)]">
           <div className="space-y-3">
-            {/* <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary">
-              Mood
-            </p> */}
             <p className="text-sm text-muted-foreground">
               Anong trip mo today?
             </p>
