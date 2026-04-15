@@ -554,8 +554,8 @@ export const RESTAURANTS: Restaurant[] = [
   },
   {
     id: 46,
-    name: "Prego",
-    area: "Grand Hyatt Manila",
+    name: "Prego Trattoria",
+    area: "SM Aura",
     cuisine: "SM Aura",
     priceRange: "₱450-850",
     dishes: ["Seafood Aglio Olio", "Truffle Pizza", "Tiramisu"],
