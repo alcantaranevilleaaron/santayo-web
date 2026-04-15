@@ -173,15 +173,24 @@ export function FilterSection({
               "w-full gap-2 text-base transition-all duration-250 ease-out",
               hasMoodSelected && !isLoading
                 ? "border-primary bg-primary text-primary-foreground shadow-sm hover:bg-primary/90"
+                : isLoading && isRandomSelected
+                ? "border-primary bg-primary text-primary-foreground shadow-sm"
                 : "opacity-80"
             )}
           >
             {isLoading ? (
               isRandomSelected ? (
-                <div className="flex w-full flex-col items-center gap-2">
-                  <div className={`rounded-full bg-slate-950/95 px-4 py-2 text-sm font-semibold text-white transition-opacity duration-500 animate-pulse ${isFaded ? "opacity-100" : "opacity-20"}`}>
+                <div className="flex w-full flex-col items-center gap-1">
+                  <span
+                    className={`text-sm font-semibold tracking-tight text-primary-foreground transition-opacity duration-500 ${
+                      isFaded ? "opacity-100" : "opacity-0"
+                    }`}
+                  >
                     {randomLoadingMessages[loadingIndex]}
-                  </div>
+                  </span>
+                  <span className="text-xs text-primary-foreground/80">
+                    Taking a moment to select the best match for you.
+                  </span>
                 </div>
               ) : (
                 <>

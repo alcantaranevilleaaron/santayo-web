@@ -391,7 +391,7 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
             But we’ve curated a few strong options for you.
           </p>
           <p className="mt-3 text-sm text-muted-foreground">
-            Or let us decide — ikaw na bahala.
+            Or let us decide — kami na bahala.
           </p>
 
           {isRandomizing ? (
@@ -400,14 +400,14 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
                 variant="outline"
                 size="lg"
                 disabled
-                className="w-full sm:w-auto border-rose-300 bg-rose-50 text-rose-900 hover:border-rose-400 hover:bg-rose-100"
+                className="w-full sm:w-auto border-2 border-rose-500 bg-rose-100 text-rose-900 shadow-lg"
                 aria-busy="true"
               >
                 <div className="flex flex-col items-center gap-1">
-                  <span className={`text-sm font-semibold tracking-tight transition-opacity duration-500 ${isFaded ? "opacity-100" : "opacity-0"}`}>
+                  <span className={`text-sm font-semibold tracking-tight text-foreground transition-opacity duration-500 ${isFaded ? "opacity-100" : "opacity-0"}`}>
                     {loadingMessages[loadingIndex]}
                   </span>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-xs text-foreground/80">
                     Taking a moment to select the best match for you.
                   </span>
                 </div>

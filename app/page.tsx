@@ -59,7 +59,7 @@ export default function Home() {
         ...initialFilters,
         cuisine: "any",
       }
-      nextHint = "We expanded your options a bit"
+      nextHint = "We expanded your options a bit."
     } else if (filters.cuisine && filters.cuisine !== "any") {
       nextHint = `${capitalize(filters.cuisine)} picks for you`
     }
@@ -69,7 +69,7 @@ export default function Home() {
 
     setFilters(nextFilters)
     setFallbackRandom(willFallback)
-    setResultsHint(willFallback ? "We expanded your options a bit" : nextHint)
+    setResultsHint(willFallback ? "We expanded your options a bit." : nextHint)
     setShowResults(true)
   }
 

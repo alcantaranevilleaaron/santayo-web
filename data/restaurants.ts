@@ -598,5 +598,6 @@ export const RESTAURANTS: Restaurant[] = [
     tags: ["comfort", "filling", "japanese"],
     budgetMax: 900,
     diningTypes: ["pair", "group"],
+    attributes: []
   }
 ]
