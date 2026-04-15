@@ -3,10 +3,9 @@
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { RestaurantCard } from "@/components/restaurant-card"
-import { ArrowLeft, RefreshCw } from "lucide-react"
-import { Sparkles, ChevronDown } from "lucide-react"
+import { ArrowLeft, RefreshCw, Sparkles, ChevronDown } from "lucide-react"
 import type { Filters } from "@/app/page"
-import { getMatchedRestaurants, getRandomFallbackRestaurants } from "@/lib/recommendations"
+import { getFallbackRestaurants, getMatchedRestaurants } from "@/lib/recommendations"
 import { type Restaurant } from "@/data/restaurants"
 
 function getMatchReason(
@@ -270,7 +269,7 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
   const [isFaded, setIsFaded] = useState(true)
 
   const restaurants = fallbackMode
-    ? getRandomFallbackRestaurants()
+    ? getFallbackRestaurants(filters, 3)
     : getMatchedRestaurants(filters, 3)
 
   const loadingMessages = [

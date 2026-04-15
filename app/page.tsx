@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { FilterSection } from "@/components/filter-section"
 import { ResultsSection } from "@/components/results-section"
-import { getMatchedRestaurants } from "@/lib/recommendations"
+import { getMatchedRestaurants, getFallbackRestaurants } from "@/lib/recommendations"
 import { MapPin, Utensils } from "lucide-react"
 
 export type Filters = {
@@ -45,31 +45,29 @@ export default function Home() {
   const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
 
   const handleRandomize = () => {
-    const initialFilters = {
-      ...filters,
-      mood: "random",
-    }
-
-    const firstResults = getMatchedRestaurants(initialFilters, 3)
-    let nextFilters = initialFilters
+    const exactResults = getMatchedRestaurants(filters, 3)
     let nextHint: string | null = null
+    let willFallback = false
 
-    if (firstResults.length === 0 && filters.cuisine && filters.cuisine !== "any") {
-      nextFilters = {
-        ...initialFilters,
-        cuisine: "any",
+    if (exactResults.length === 0) {
+      willFallback = true
+      if (filters.cuisine && filters.cuisine !== "any") {
+        nextHint = `We prioritized ${capitalize(filters.cuisine)} for you.`
+      } else if (filters.mood && filters.mood !== "random") {
+        nextHint = `We kept your ${capitalize(filters.mood)} mood in mind.`
+      } else {
+        nextHint = "We found a strong fallback based on your preferences."
       }
-      nextHint = "We expanded your options a bit."
+
+      console.log("fallback_ikaw_na_bahala_triggered", {
+        originalFilters: filters,
+      })
     } else if (filters.cuisine && filters.cuisine !== "any") {
       nextHint = `${capitalize(filters.cuisine)} picks for you`
     }
 
-    const nextResults = getMatchedRestaurants(nextFilters, 3)
-    const willFallback = nextResults.length === 0
-
-    setFilters(nextFilters)
     setFallbackRandom(willFallback)
-    setResultsHint(willFallback ? "We expanded your options a bit." : nextHint)
+    setResultsHint(nextHint)
     setShowResults(true)
   }
 
