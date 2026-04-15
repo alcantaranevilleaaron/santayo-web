@@ -28,11 +28,11 @@ export function RestaurantCard({
   topPickExplanation,
 }: RestaurantCardProps) {
   return (
-    <Card className={`overflow-hidden transition-shadow hover:shadow-md ${isTopPick ? "border-2 border-primary ring-2 ring-primary/20" : ""}`}>
+    <Card className={`overflow-hidden transition-shadow duration-300 ${isTopPick ? "border-2 border-primary ring-1 ring-primary/20 shadow-[0_6px_16px_rgba(0,0,0,0.08)]" : "shadow-[0_4px_12px_rgba(0,0,0,0.06)]"}`}>
       <CardHeader className="pb-3">
         {isTopPick && (
           <div className="mb-2 -mt-1">
-            <Badge className="bg-primary text-primary-foreground">Top Pick for You 🔥</Badge>
+            <Badge className="bg-primary text-primary-foreground border-transparent">Top Pick for You 🔥</Badge>
           </div>
         )}
         <div className="flex items-start justify-between gap-4">
@@ -41,7 +41,7 @@ export function RestaurantCard({
               {index}
             </span>
             <div>
-              <CardTitle className="text-base">{name}</CardTitle>
+              <CardTitle className="text-lg">{name}</CardTitle>
               {isTopPick && topPickExplanation ? (
                 <p className="mt-1 text-sm text-foreground">{topPickExplanation}</p>
               ) : null}

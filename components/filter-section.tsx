@@ -123,13 +123,13 @@ export function FilterSection({
 
   return (
     <div className="relative">
-      <div className="space-y-4 pb-28">
+      <div className="space-y-4 pb-16">
         {/* Mood - Required */}
-        <div className="rounded-3xl border border-primary/10 bg-primary/5 p-6 shadow-sm sm:p-7">
+        <div className="rounded-2xl border border-primary/10 bg-primary/5 p-4 shadow-[0_4px_12px_rgba(0,0,0,0.04)]">
           <div className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary">
+            {/* <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary">
               Mood
-            </p>
+            </p> */}
             <p className="text-sm text-muted-foreground">
               Anong trip mo today?
             </p>
@@ -149,8 +149,8 @@ export function FilterSection({
               onClick={handleRandomMood}
               className={
                 isRandomSelected
-                  ? "w-full rounded-3xl border-2 border-rose-500 bg-rose-100 px-5 py-4 text-left text-sm font-semibold text-rose-900 shadow-lg transition duration-200 ease-out transform-gpu"
-                  : "w-full rounded-3xl border border-rose-300 bg-rose-50 px-5 py-4 text-left text-sm font-semibold text-rose-900 transition duration-200 ease-out transform-gpu hover:border-rose-400 hover:bg-rose-100 hover:-translate-y-0.5 active:scale-95"
+                  ? "w-full rounded-[14px] border-2 border-rose-500 bg-rose-100 px-4 py-4 text-left text-sm font-semibold text-rose-900 shadow-lg transition duration-200 ease-out transform-gpu"
+                  : "w-full rounded-[14px] border border-rose-300 bg-rose-50 px-4 py-4 text-left text-sm font-semibold text-rose-900 transition duration-200 ease-out transform-gpu hover:border-rose-400 hover:bg-rose-100 hover:-translate-y-0.5 active:scale-95"
               }
             >
               <div className="flex items-center justify-between gap-3">
@@ -164,13 +164,13 @@ export function FilterSection({
           </div>
         </div>
 
-        <div className="sticky bottom-0 left-0 right-0 z-20 border-t border-border/70 bg-background/95 px-4 py-3 backdrop-blur-sm shadow-[0_-10px_30px_-15px_rgba(15,23,42,0.12)] sm:static sm:border-0 sm:bg-transparent sm:py-0 sm:shadow-none">
+        <div className="sticky bottom-0 left-0 right-0 z-20 bg-background px-4 py-2 shadow-none sm:static sm:border-0 sm:bg-transparent sm:py-0 sm:shadow-none">
           <Button
             onClick={() => onSubmit()}
             disabled={!hasMoodSelected || isLoading}
             size="lg"
             className={cn(
-              "w-full gap-2 text-base transition-all duration-250 ease-out",
+              "w-full gap-2 text-sm leading-6 transition-all duration-250 ease-out",
               hasMoodSelected && !isLoading
                 ? "border-primary bg-primary text-primary-foreground shadow-sm hover:bg-primary/90"
                 : isLoading && isRandomSelected
@@ -212,8 +212,8 @@ export function FilterSection({
             className="flex w-full items-center justify-between px-4 py-3 text-left"
           >
             <span>
-              <span className="text-sm font-medium text-foreground">Refine pa natin?</span>
-              <span className="block text-xs text-muted-foreground">Optional filters</span>
+              <span className="text-sm font-medium text-foreground">Adjust filters</span>
+              <span className="block text-xs text-muted-foreground">Optional</span>
             </span>
             <ChevronDown
               className={`size-4 text-muted-foreground transition-transform duration-200 ${

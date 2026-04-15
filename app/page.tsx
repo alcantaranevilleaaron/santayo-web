@@ -73,7 +73,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="mx-auto max-w-lg px-4 py-6 md:py-10">
+      <div className="mx-auto max-w-[420px] px-4 py-6 md:max-w-lg md:py-8">
         {/* Header */}
         <header className="mb-8 text-center">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-primary">

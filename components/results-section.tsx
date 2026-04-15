@@ -267,6 +267,7 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
   const [isRandomizing, setIsRandomizing] = useState(false)
   const [loadingIndex, setLoadingIndex] = useState(0)
   const [isFaded, setIsFaded] = useState(true)
+  const [isMounted, setIsMounted] = useState(false)
 
   const restaurants = fallbackMode
     ? getFallbackRestaurants(filters, 3)
@@ -321,6 +322,11 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
     return () => window.clearTimeout(delay)
   }, [isRandomizing, onRandomize])
 
+  useEffect(() => {
+    const appear = window.setTimeout(() => setIsMounted(true), 20)
+    return () => window.clearTimeout(appear)
+  }, [])
+
   const moodContext = filters.mood
     ? filters.mood === "light"
       ? "Light and easy."
@@ -342,7 +348,7 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
     : undefined
 
   return (
-    <div className="space-y-4">
+    <div className={`space-y-4 transition-all duration-250 ease-out ${isMounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}>
       <div className="flex items-center justify-between">
         <Button variant="ghost" size="sm" onClick={onBack} className="gap-2">
           <ArrowLeft className="size-4" />
@@ -355,34 +361,44 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
       </div>
 
       {restaurants.length > 0 && (
-        <div className="space-y-1">
+        <div className="space-y-2">
           <h2 className="text-lg font-semibold text-foreground">Best match for your mood 👇</h2>
-          <p className="text-sm text-muted-foreground">{moodContext}</p>
+          <p className="text-sm leading-6 text-muted-foreground">{moodContext}</p>
           {resultHint && (
-            <p className="text-sm text-muted-foreground">{resultHint}</p>
+            <p className="text-sm leading-6 text-muted-foreground">{resultHint}</p>
           )}
         </div>
       )}
 
       <div className="space-y-3">
-        {restaurants.map((restaurant, index) => (
-          <RestaurantCard
-            key={restaurant.id}
-            index={index + 1}
-            name={restaurant.name}
-            area={restaurant.area}
-            cuisine={restaurant.cuisine}
-            priceRange={restaurant.priceRange}
-            dishes={restaurant.dishes}
-            matchReason={matchReasons[index]}
-            isTopPick={index === 0}
-            topPickExplanation={index === 0 ? topPickExplanation : undefined}
-          />
-        ))}
+        {restaurants.map((restaurant, index) => {
+          const delay = index === 0 ? 0 : 100 + (index - 1) * 50
+          const isTopPick = index === 0
+
+          return (
+            <div
+              key={restaurant.id}
+              style={{ transitionDelay: `${delay}ms` }}
+              className={`transform transition-all duration-250 ease-out ${isMounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"} ${isTopPick ? (isMounted ? "scale-100" : "scale-95") : "scale-100"}`}
+            >
+              <RestaurantCard
+                index={index + 1}
+                name={restaurant.name}
+                area={restaurant.area}
+                cuisine={restaurant.cuisine}
+                priceRange={restaurant.priceRange}
+                dishes={restaurant.dishes}
+                matchReason={matchReasons[index]}
+                isTopPick={isTopPick}
+                topPickExplanation={isTopPick ? topPickExplanation : undefined}
+              />
+            </div>
+          )
+        })}
       </div>
 
       {restaurants.length === 0 && (
-        <div className="rounded-lg border border-dashed border-border bg-card p-8 text-center">
+        <div className="rounded-[16px] border border-dashed border-border bg-card p-6 text-center">
           <p className="text-lg font-semibold text-foreground">
             No exact match found.
           </p>

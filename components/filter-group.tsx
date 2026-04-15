@@ -32,10 +32,10 @@ export function FilterGroup({ title, options, selected, onSelect, columns, fullW
               onClick={() => onSelect(option.value)}
               aria-pressed={selected === option.value}
               className={cn(
-                "rounded-full border px-4 py-2 text-sm font-medium transition duration-200 ease-out transform-gpu focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 active:scale-95",
-                columns === 4 || fullWidth ? "w-full text-left" : "",
+                "inline-flex items-center justify-center min-h-11 rounded-full border px-4 py-2 text-sm font-medium leading-none text-center transition duration-200 ease-out transform-gpu focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 active:scale-95",
+                columns === 4 || fullWidth ? "w-full" : "",
                 selected === option.value
-                  ? "border-2 border-rose-500 bg-rose-100 text-rose-900 shadow-lg ring-1 ring-rose-200 scale-[1.02]"
+                  ? "border-rose-200 bg-rose-100 text-rose-900"
                   : isRandom
                   ? "border-amber-300 bg-amber-50 text-amber-700 hover:border-amber-400 hover:bg-amber-100 hover:-translate-y-0.5"
                   : "border-border bg-card text-foreground hover:border-primary/50 hover:bg-primary/5 hover:-translate-y-0.5"
