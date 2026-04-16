@@ -6,7 +6,7 @@ import { PickAgainAction } from "@/components/pick-again-action"
 import { RestaurantCard } from "@/components/restaurant-card"
 import { ArrowLeft, RefreshCw, Sparkles, ChevronDown } from "lucide-react"
 import type { Filters } from "@/app/page"
-import { getNextPickSet, type RecommendationSessionState } from "@/lib/recommendations"
+import { getAlternativeRecommendations, getCandidatePool, getNextPickSet, type RecommendationSessionState } from "@/lib/recommendations"
 import { type Restaurant } from "@/data/restaurants"
 
 function getMatchReason(
@@ -309,9 +309,26 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
   const [alternativeStage, setAlternativeStage] = useState(0)
   const [freshTopPick, setFreshTopPick] = useState(false)
   const [isFirstLoad, setIsFirstLoad] = useState(true)
+  const [isRefreshingAlternatives, setIsRefreshingAlternatives] = useState(false)
+  const [currentAlternativeIds, setCurrentAlternativeIds] = useState<number[]>([])
+  const [selectedDirection, setSelectedDirection] = useState<string | null>(null)
+  const [directionHelperText, setDirectionHelperText] = useState<string | null>(null)
+  const [hasUserInteracted, setHasUserInteracted] = useState(false)
+  const [isExplorationVisible, setIsExplorationVisible] = useState(false)
+  const alternativesRef = useRef<HTMLDivElement | null>(null)
+  const topPickRef = useRef<HTMLDivElement | null>(null)
   const [headerTitle, setHeaderTitle] = useState(initialHeaderTitle)
   const [headerSubtitle, setHeaderSubtitle] = useState(initialHeaderSubtitle)
   const [topPickCaption, setTopPickCaption] = useState(initialTopPickCaption)
+
+  const revealExploration = () => {
+    if (isExplorationVisible) {
+      return
+    }
+
+    setIsExplorationVisible(true)
+    setHasUserInteracted(true)
+  }
 
   const restaurants = currentRestaurants
 
@@ -333,46 +350,52 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
       return
     }
 
-    setIsFirstLoad(false)
-    const nextPickSet = getNextPickSet(filters, sessionState, fallbackMode, 3)
-    if (!nextPickSet.newTopPick) {
-      return
-    }
+    revealExploration()
+    window.scrollTo({ top: 0, behavior: "smooth" })
 
-    setIsPickingAgain(true)
+    setTimeout(() => {
+      setIsFirstLoad(false)
+      const nextPickSet = getNextPickSet(filters, sessionState, fallbackMode, 3)
+      if (!nextPickSet.newTopPick) {
+        return
+      }
 
-    const thinkingDelay = window.setTimeout(() => {
-      setCardsMounted(false)
-      setAlternativeStage(0)
+      setIsPickingAgain(true)
 
-      const swapDelay = window.setTimeout(() => {
-        setCurrentRestaurants([nextPickSet.newTopPick, ...nextPickSet.newAlternatives])
-        setSessionState((prev) => ({
-          seenTopPickIds: Array.from(new Set([...prev.seenTopPickIds, nextPickSet.newTopPick!.id])),
-          seenAlternativeIds: Array.from(new Set([
-            ...prev.seenAlternativeIds,
-            ...nextPickSet.newAlternatives.map((restaurant) => restaurant.id),
-          ])),
-          lastTopPickId: nextPickSet.newTopPick!.id,
-        }))
-        setHeaderTitle((current) => getNextResultCopy(rerollHeaderTitles, current))
-        setHeaderSubtitle((current) => getNextResultCopy(rerollHeaderSubtitles, current))
-        setTopPickCaption((current) => getNextResultCopy(rerollTopPickCaptions, current))
-        setIsPickingAgain(false)
+      const thinkingDelay = window.setTimeout(() => {
+        setCardsMounted(false)
+        setAlternativeStage(0)
 
-        window.setTimeout(() => {
-          setCardsMounted(true)
-          window.setTimeout(() => setAlternativeStage(1), 120)
-          window.setTimeout(() => setAlternativeStage(2), 220)
-          setFreshTopPick(true)
-          window.setTimeout(() => setFreshTopPick(false), 260)
-        }, 20)
+        const swapDelay = window.setTimeout(() => {
+          setCurrentRestaurants([nextPickSet.newTopPick, ...nextPickSet.newAlternatives])
+          setCurrentAlternativeIds(nextPickSet.newAlternatives.map((restaurant) => restaurant.id))
+          setSessionState((prev) => ({
+            seenTopPickIds: Array.from(new Set([...prev.seenTopPickIds, nextPickSet.newTopPick!.id])),
+            seenAlternativeIds: Array.from(new Set([
+              ...prev.seenAlternativeIds,
+              ...nextPickSet.newAlternatives.map((restaurant) => restaurant.id),
+            ])),
+            lastTopPickId: nextPickSet.newTopPick!.id,
+          }))
+          setHeaderTitle((current) => getNextResultCopy(rerollHeaderTitles, current))
+          setHeaderSubtitle((current) => getNextResultCopy(rerollHeaderSubtitles, current))
+          setTopPickCaption((current) => getNextResultCopy(rerollTopPickCaptions, current))
+          setIsPickingAgain(false)
 
-        window.clearTimeout(swapDelay)
-      }, 180)
+          window.setTimeout(() => {
+            setCardsMounted(true)
+            window.setTimeout(() => setAlternativeStage(1), 120)
+            window.setTimeout(() => setAlternativeStage(2), 220)
+            setFreshTopPick(true)
+            window.setTimeout(() => setFreshTopPick(false), 260)
+          }, 20)
 
-      window.clearTimeout(thinkingDelay)
-    }, 500 + Math.floor(Math.random() * 301))
+          window.clearTimeout(swapDelay)
+        }, 180)
+
+        window.clearTimeout(thinkingDelay)
+      }, 500 + Math.floor(Math.random() * 301))
+    }, 120)
   }
 
   useEffect(() => {
@@ -412,10 +435,46 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
   }, [isRandomizing, onRandomize])
 
   useEffect(() => {
+    if (isInitialLoading || isExplorationVisible || restaurants.length === 0) {
+      return
+    }
+
+    const idleDelay = window.setTimeout(() => {
+      revealExploration()
+    }, 1400)
+
+    return () => window.clearTimeout(idleDelay)
+  }, [isInitialLoading, isExplorationVisible, restaurants.length])
+
+  useEffect(() => {
+    if (isExplorationVisible || restaurants.length === 0) {
+      return
+    }
+
+    const onScroll = () => {
+      const topPickElement = topPickRef.current
+      if (!topPickElement) {
+        return
+      }
+
+      const rect = topPickElement.getBoundingClientRect()
+      if (rect.bottom < 40) {
+        revealExploration()
+      }
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true })
+    onScroll()
+
+    return () => window.removeEventListener("scroll", onScroll)
+  }, [isExplorationVisible, restaurants.length])
+
+  useEffect(() => {
     const pickSet = getNextPickSet(filters, sessionState, fallbackMode, 3)
 
     if (pickSet.newTopPick) {
       setCurrentRestaurants([pickSet.newTopPick, ...pickSet.newAlternatives])
+      setCurrentAlternativeIds(pickSet.newAlternatives.map((restaurant) => restaurant.id))
       setSessionState({
         seenTopPickIds: [pickSet.newTopPick.id],
         seenAlternativeIds: pickSet.newAlternatives.map((restaurant) => restaurant.id),
@@ -426,6 +485,7 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
         setHeaderTitle(initialHeaderTitle)
         setHeaderSubtitle(initialHeaderSubtitle)
         setTopPickCaption(initialTopPickCaption)
+        setIsExplorationVisible(true)
       }
 
       setIsInitialLoading(true)
@@ -456,6 +516,8 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
     }
 
     setCurrentRestaurants([])
+    setCurrentAlternativeIds([])
+    setSelectedDirection(null)
     setSessionState({
       seenTopPickIds: [],
       seenAlternativeIds: [],
@@ -475,6 +537,62 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
   )
 
   const topPickExplanation = restaurants.length > 0 ? topPickCaption : undefined
+
+  const directionOptions = [
+    { key: "light", label: "Light" },
+    { key: "comfort", label: "Comfort" },
+    { key: "premium", label: "Premium" },
+    { key: "quick bite", label: "Quick bite" },
+    { key: "healthy", label: "Healthy" },
+  ]
+
+  const directionHelperCopy: Record<string, string> = {
+    light: "Showing lighter options",
+    comfort: "Switching to comfort food",
+    premium: "Exploring premium picks",
+    "quick bite": "Looking for quick bites",
+    healthy: "Showing healthier options",
+  }
+
+  const handleDirectionSelect = (direction: string) => {
+    if (isRefreshingAlternatives || restaurants.length <= 1) {
+      return
+    }
+
+    setSelectedDirection(direction)
+    setDirectionHelperText(directionHelperCopy[direction] ?? "Looking for a new direction…")
+    setIsRefreshingAlternatives(true)
+    setAlternativeStage(-1)
+
+    const pool = getCandidatePool(filters, fallbackMode)
+    const targetCount = Math.min(2, pool.length - 1)
+    const newAlternatives = getAlternativeRecommendations(
+      restaurants[0],
+      pool,
+      filters,
+      [restaurants[0].id, ...currentAlternativeIds],
+      targetCount,
+      direction
+    )
+
+    const loadingDuration = 380 + Math.floor(Math.random() * 120)
+    window.setTimeout(() => {
+      if (newAlternatives.length > 0) {
+        setCurrentRestaurants([restaurants[0], ...newAlternatives])
+        setCurrentAlternativeIds(newAlternatives.map((restaurant) => restaurant.id))
+        setAlternativeStage(0)
+        window.setTimeout(() => {
+          setAlternativeStage(1)
+          window.setTimeout(() => setAlternativeStage(2), 120)
+          alternativesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+          setDirectionHelperText(null)
+        }, 20)
+      } else {
+        setDirectionHelperText(null)
+      }
+      setIsRefreshingAlternatives(false)
+    }, loadingDuration)
+  }
 
   return (
     <div>
@@ -516,7 +634,7 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
       )}
 
       {restaurants[0] && (
-        <div className="mt-3">
+        <div className="mt-3" ref={topPickRef}>
           <div
             key={restaurants[0].id}
             style={{ transitionDelay: `0ms` }}
@@ -546,29 +664,67 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
         </div>
       )}
 
-      {restaurants.length > 0 && (
-        <div className="mt-4 space-y-4">
-          {restaurants.slice(1).map((restaurant, index) => {
-            const delay = 120 + index * 100
+      {isExplorationVisible && restaurants.length > 0 && !isInitialLoading && (
+        <div className="mt-4 rounded-2xl border border-border/60 bg-card/80 p-4 shadow-sm transition-all duration-250 ease-out">
+          <p className="text-sm font-semibold text-foreground mb-1">Not feeling this pick?</p>
+          <p className="text-sm leading-6 text-muted-foreground mb-3">Explore other directions without changing your top pick</p>
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            {directionOptions.map((direction) => {
+              const isActive = selectedDirection === direction.key
+              return (
+                <button
+                  key={direction.key}
+                  type="button"
+                  onClick={() => handleDirectionSelect(direction.key)}
+                  className={`rounded-full border px-4 py-2 text-sm font-semibold transition duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${isActive ? "border-primary bg-primary/15 text-primary shadow-sm" : "border-border bg-background text-foreground hover:border-primary/50 hover:bg-primary/5"}`}
+                  aria-pressed={isActive}
+                >
+                  {direction.label}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
-            return (
-              <div
-                key={restaurant.id}
-                style={{ transitionDelay: `${delay}ms` }}
-                className={`transform transition-all duration-250 ease-out ${alternativeStage > index ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"} scale-100`}
-              >
-                <RestaurantCard
-                  index={index + 2}
-                  name={restaurant.name}
-                  area={restaurant.area}
-                  cuisine={restaurant.cuisine}
-                  priceRange={restaurant.priceRange}
-                  dishes={restaurant.dishes}
-                  matchReason={matchReasons[index + 1]}
-                />
-              </div>
-            )
-          })}
+      {restaurants.length > 0 && (
+        <div ref={alternativesRef} className="mt-4">
+          {directionHelperText ? (
+            <p className="mb-3 text-sm text-muted-foreground">{directionHelperText}</p>
+          ) : null}
+
+          {isRefreshingAlternatives ? (
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">Looking for something different…</p>
+              {[1, 2].map((item) => (
+                <div key={item} className="h-32 rounded-[28px] bg-muted/20 animate-pulse" />
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {restaurants.slice(1).map((restaurant, index) => {
+                const delay = 120 + index * 100
+
+                return (
+                  <div
+                    key={restaurant.id}
+                    style={{ transitionDelay: `${delay}ms` }}
+                    className={`transform transition-all duration-250 ease-out ${alternativeStage > index ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"} scale-100`}
+                  >
+                    <RestaurantCard
+                      index={index + 2}
+                      name={restaurant.name}
+                      area={restaurant.area}
+                      cuisine={restaurant.cuisine}
+                      priceRange={restaurant.priceRange}
+                      dishes={restaurant.dishes}
+                      matchReason={matchReasons[index + 1]}
+                    />
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
       )}
 

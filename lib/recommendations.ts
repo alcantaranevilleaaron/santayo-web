@@ -157,15 +157,63 @@ function getVarietyBoost(restaurant: Restaurant, reference: Restaurant | null) {
   return boost
 }
 
+function getDirectionBoost(restaurant: Restaurant, direction: string | null) {
+  if (!direction) {
+    return 0
+  }
+
+  const cuisine = normalize(restaurant.cuisine)
+  const tags = restaurant.tags.map(normalize)
+  const attributes = restaurant.attributes.map(normalize)
+  const priceBand = getPriceBand(restaurant)
+
+  let boost = 0
+  switch (direction) {
+    case "light":
+      if (priceBand === "low") boost += 16
+      if (priceBand === "mid") boost += 8
+      if (tags.includes("light")) boost += 20
+      if (tags.includes("healthy")) boost += 12
+      if (cuisine === "cafe") boost += 10
+      break
+    case "comfort":
+      if (tags.includes("comfort")) boost += 20
+      if (tags.includes("filling")) boost += 12
+      if (["filipino", "western", "indian", "chinese", "japanese"].includes(cuisine)) boost += 10
+      break
+    case "premium":
+      if (priceBand === "high") boost += 22
+      if (attributes.includes("premium")) boost += 18
+      if (tags.includes("premium")) boost += 16
+      if (cuisine === "cafe") boost += 6
+      break
+    case "quick bite":
+      if (tags.includes("quick")) boost += 20
+      if (priceBand === "low") boost += 10
+      if (tags.includes("light")) boost += 8
+      break
+    case "healthy":
+      if (tags.includes("healthy")) boost += 22
+      if (tags.includes("light")) boost += 12
+      if (cuisine === "healthy") boost += 16
+      break
+    default:
+      break
+  }
+
+  return boost
+}
+
 function sortRecommendationPool(
   restaurants: Restaurant[],
   filters: Filters,
   reference: Restaurant | null,
-  preferVariety = false
+  preferVariety = false,
+  direction: string | null = null
 ) {
   return [...restaurants].sort((a, b) => {
-    const scoreA = getMatchScore(a, filters) + getVarietyBoost(a, reference)
-    const scoreB = getMatchScore(b, filters) + getVarietyBoost(b, reference)
+    const scoreA = getMatchScore(a, filters) + getVarietyBoost(a, reference) + getDirectionBoost(a, direction)
+    const scoreB = getMatchScore(b, filters) + getVarietyBoost(b, reference) + getDirectionBoost(b, direction)
 
     if (preferVariety) {
       const varietyA = getVarietyBoost(a, reference)
@@ -203,7 +251,7 @@ function chooseBestCandidate(
   return sortRecommendationPool(restaurants, filters, restaurants.find((restaurant) => restaurant.id === lastTopPickId) ?? null, preferVariety)[0]
 }
 
-function getCandidatePool(filters: Filters, fallbackMode: boolean) {
+export function getCandidatePool(filters: Filters, fallbackMode: boolean) {
   if (fallbackMode) {
     return getFallbackRestaurants(filters, RESTAURANTS.length)
   }
@@ -250,19 +298,20 @@ export function getAlternativeRecommendations(
   restaurants: Restaurant[],
   filters: Filters,
   excludeIds: number[] = [],
-  count = 2
+  count = 2,
+  direction: string | null = null
 ) {
   const available = restaurants.filter(
     (restaurant) => restaurant.id !== topPick.id && !excludeIds.includes(restaurant.id)
   )
 
-  const scored = sortRecommendationPool(available, filters, topPick, true)
+  const scored = sortRecommendationPool(available, filters, topPick, true, direction)
   if (scored.length >= count) {
     return scored.slice(0, count)
   }
 
   const fallback = restaurants.filter((restaurant) => restaurant.id !== topPick.id)
-  return sortRecommendationPool(fallback, filters, topPick, true).slice(0, count)
+  return sortRecommendationPool(fallback, filters, topPick, true, direction).slice(0, count)
 }
 
 export function getNextPickSet(
