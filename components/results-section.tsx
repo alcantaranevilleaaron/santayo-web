@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { PickAgainAction } from "@/components/pick-again-action"
 import { RestaurantCard } from "@/components/restaurant-card"
@@ -221,6 +221,34 @@ function getTopPickExplanation(mood: string): string {
   return options[0]
 }
 
+const initialHeaderTitle = "This is our pick for you ✨"
+const initialHeaderSubtitle = "Based on your vibe"
+const initialTopPickCaption = "Can’t go wrong with this one."
+
+const rerollHeaderTitles = [
+  "Here’s another option ✨",
+  "We found another good one ✨",
+  "This one might fit better ✨",
+]
+
+const rerollHeaderSubtitles = [
+  "Still based on your preferences",
+  "A fresh option for you",
+  "Another match worth checking",
+]
+
+const rerollTopPickCaptions = [
+  "This one might fit better.",
+  "Worth considering.",
+  "Another strong option.",
+]
+
+function getNextResultCopy<T extends string>(options: T[], previous?: T): T {
+  const available = previous ? options.filter((option) => option !== previous) : options
+  const pool = available.length > 0 ? available : options
+  return pool[Math.floor(Math.random() * pool.length)]
+}
+
 function capitalize(text: string): string {
   return text.charAt(0).toUpperCase() + text.slice(1)
 }
@@ -280,6 +308,10 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
   const [cardsMounted, setCardsMounted] = useState(false)
   const [alternativeStage, setAlternativeStage] = useState(0)
   const [freshTopPick, setFreshTopPick] = useState(false)
+  const [isFirstLoad, setIsFirstLoad] = useState(true)
+  const [headerTitle, setHeaderTitle] = useState(initialHeaderTitle)
+  const [headerSubtitle, setHeaderSubtitle] = useState(initialHeaderSubtitle)
+  const [topPickCaption, setTopPickCaption] = useState(initialTopPickCaption)
 
   const restaurants = currentRestaurants
 
@@ -301,6 +333,7 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
       return
     }
 
+    setIsFirstLoad(false)
     const nextPickSet = getNextPickSet(filters, sessionState, fallbackMode, 3)
     if (!nextPickSet.newTopPick) {
       return
@@ -322,6 +355,9 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
           ])),
           lastTopPickId: nextPickSet.newTopPick!.id,
         }))
+        setHeaderTitle((current) => getNextResultCopy(rerollHeaderTitles, current))
+        setHeaderSubtitle((current) => getNextResultCopy(rerollHeaderSubtitles, current))
+        setTopPickCaption((current) => getNextResultCopy(rerollTopPickCaptions, current))
         setIsPickingAgain(false)
 
         window.setTimeout(() => {
@@ -336,7 +372,7 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
       }, 180)
 
       window.clearTimeout(thinkingDelay)
-    }, 650)
+    }, 500 + Math.floor(Math.random() * 301))
   }
 
   useEffect(() => {
@@ -385,6 +421,13 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
         seenAlternativeIds: pickSet.newAlternatives.map((restaurant) => restaurant.id),
         lastTopPickId: pickSet.newTopPick.id,
       })
+
+      if (isFirstLoad) {
+        setHeaderTitle(initialHeaderTitle)
+        setHeaderSubtitle(initialHeaderSubtitle)
+        setTopPickCaption(initialTopPickCaption)
+      }
+
       setIsInitialLoading(true)
       setHeaderMounted(false)
       setCardsMounted(false)
@@ -425,28 +468,16 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
     setFreshTopPick(false)
   }, [filters, fallbackMode])
 
-  const moodContext = filters.mood
-    ? filters.mood === "light"
-      ? "Light and easy."
-      : filters.mood === "filling"
-      ? "Hearty and satisfying."
-      : filters.mood === "comfort"
-      ? "Warm and comforting."
-      : "Based on your vibe"
-    : "Picked for you — refined recommendations."
-
   const usedPrimaryPhrases = new Set<string>()
   const usedContextPhrases = new Set<string>()
   const matchReasons = restaurants.map((restaurant) =>
     getMatchReason(restaurant, filters, fallbackMode, usedPrimaryPhrases, usedContextPhrases)
   )
 
-  const topPickExplanation = restaurants.length > 0
-    ? getTopPickExplanation(fallbackMode ? "random" : filters.mood || "random")
-    : undefined
+  const topPickExplanation = restaurants.length > 0 ? topPickCaption : undefined
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <div className="flex items-center justify-between">
         <Button variant="ghost" size="sm" onClick={onBack} className="gap-2">
           <ArrowLeft className="size-4" />
@@ -468,8 +499,8 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
           ) : (
             <>
               <div className={`transform transition-all duration-250 ease-out ${headerMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
-                <h2 className="text-lg font-semibold text-foreground">This is our pick for you ✨</h2>
-                <p className="text-sm leading-6 text-muted-foreground">{moodContext}</p>
+                <h2 className="text-lg font-semibold text-foreground">{headerTitle}</h2>
+                <p className="text-sm leading-6 text-muted-foreground">{headerSubtitle}</p>
                 {resultHint && (
                   <p className="text-sm leading-6 text-muted-foreground">{resultHint}</p>
                 )}
