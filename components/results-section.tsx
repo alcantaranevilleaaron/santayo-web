@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
+import { PickAgainAction } from "@/components/pick-again-action"
 import { RestaurantCard } from "@/components/restaurant-card"
 import { ArrowLeft, RefreshCw, Sparkles, ChevronDown } from "lucide-react"
 import type { Filters } from "@/app/page"
-import { getFallbackRestaurants, getMatchedRestaurants } from "@/lib/recommendations"
+import { getNextPickSet, type RecommendationSessionState } from "@/lib/recommendations"
 import { type Restaurant } from "@/data/restaurants"
 
 function getMatchReason(
@@ -264,14 +265,23 @@ type ResultsSectionProps = {
 }
 
 export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, resultHint }: ResultsSectionProps) {
+  const [currentRestaurants, setCurrentRestaurants] = useState<Restaurant[]>([])
+  const [sessionState, setSessionState] = useState<RecommendationSessionState>({
+    seenTopPickIds: [],
+    seenAlternativeIds: [],
+    lastTopPickId: null,
+  })
+  const [isPickingAgain, setIsPickingAgain] = useState(false)
   const [isRandomizing, setIsRandomizing] = useState(false)
   const [loadingIndex, setLoadingIndex] = useState(0)
   const [isFaded, setIsFaded] = useState(true)
-  const [isMounted, setIsMounted] = useState(false)
+  const [isInitialLoading, setIsInitialLoading] = useState(true)
+  const [headerMounted, setHeaderMounted] = useState(false)
+  const [cardsMounted, setCardsMounted] = useState(false)
+  const [alternativeStage, setAlternativeStage] = useState(0)
+  const [freshTopPick, setFreshTopPick] = useState(false)
 
-  const restaurants = fallbackMode
-    ? getFallbackRestaurants(filters, 3)
-    : getMatchedRestaurants(filters, 3)
+  const restaurants = currentRestaurants
 
   const loadingMessages = [
     "Picking something good...",
@@ -284,6 +294,49 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
     setLoadingIndex(0)
     setIsFaded(true)
     setIsRandomizing(true)
+  }
+
+  const handlePickAgain = () => {
+    if (isPickingAgain || currentRestaurants.length === 0) {
+      return
+    }
+
+    const nextPickSet = getNextPickSet(filters, sessionState, fallbackMode, 3)
+    if (!nextPickSet.newTopPick) {
+      return
+    }
+
+    setIsPickingAgain(true)
+
+    const thinkingDelay = window.setTimeout(() => {
+      setCardsMounted(false)
+      setAlternativeStage(0)
+
+      const swapDelay = window.setTimeout(() => {
+        setCurrentRestaurants([nextPickSet.newTopPick, ...nextPickSet.newAlternatives])
+        setSessionState((prev) => ({
+          seenTopPickIds: Array.from(new Set([...prev.seenTopPickIds, nextPickSet.newTopPick!.id])),
+          seenAlternativeIds: Array.from(new Set([
+            ...prev.seenAlternativeIds,
+            ...nextPickSet.newAlternatives.map((restaurant) => restaurant.id),
+          ])),
+          lastTopPickId: nextPickSet.newTopPick!.id,
+        }))
+        setIsPickingAgain(false)
+
+        window.setTimeout(() => {
+          setCardsMounted(true)
+          window.setTimeout(() => setAlternativeStage(1), 120)
+          window.setTimeout(() => setAlternativeStage(2), 220)
+          setFreshTopPick(true)
+          window.setTimeout(() => setFreshTopPick(false), 260)
+        }, 20)
+
+        window.clearTimeout(swapDelay)
+      }, 180)
+
+      window.clearTimeout(thinkingDelay)
+    }, 650)
   }
 
   useEffect(() => {
@@ -323,9 +376,54 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
   }, [isRandomizing, onRandomize])
 
   useEffect(() => {
-    const appear = window.setTimeout(() => setIsMounted(true), 20)
-    return () => window.clearTimeout(appear)
-  }, [])
+    const pickSet = getNextPickSet(filters, sessionState, fallbackMode, 3)
+
+    if (pickSet.newTopPick) {
+      setCurrentRestaurants([pickSet.newTopPick, ...pickSet.newAlternatives])
+      setSessionState({
+        seenTopPickIds: [pickSet.newTopPick.id],
+        seenAlternativeIds: pickSet.newAlternatives.map((restaurant) => restaurant.id),
+        lastTopPickId: pickSet.newTopPick.id,
+      })
+      setIsInitialLoading(true)
+      setHeaderMounted(false)
+      setCardsMounted(false)
+      setAlternativeStage(0)
+      setFreshTopPick(false)
+
+      const revealDelay = 700 + Math.floor(Math.random() * 501)
+      let cardTimer: number | undefined
+      const headerTimer = window.setTimeout(() => {
+        setIsInitialLoading(false)
+        setHeaderMounted(true)
+
+        cardTimer = window.setTimeout(() => {
+          setCardsMounted(true)
+          window.setTimeout(() => setAlternativeStage(1), 120)
+          window.setTimeout(() => setAlternativeStage(2), 220)
+        }, 220)
+      }, revealDelay)
+
+      return () => {
+        window.clearTimeout(headerTimer)
+        if (cardTimer) {
+          window.clearTimeout(cardTimer)
+        }
+      }
+    }
+
+    setCurrentRestaurants([])
+    setSessionState({
+      seenTopPickIds: [],
+      seenAlternativeIds: [],
+      lastTopPickId: null,
+    })
+    setIsInitialLoading(false)
+    setHeaderMounted(false)
+    setCardsMounted(false)
+    setAlternativeStage(0)
+    setFreshTopPick(false)
+  }, [filters, fallbackMode])
 
   const moodContext = filters.mood
     ? filters.mood === "light"
@@ -348,7 +446,7 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
     : undefined
 
   return (
-    <div className={`space-y-4 transition-all duration-250 ease-out ${isMounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}>
+    <div className="space-y-3">
       <div className="flex items-center justify-between">
         <Button variant="ghost" size="sm" onClick={onBack} className="gap-2">
           <ArrowLeft className="size-4" />
@@ -362,35 +460,77 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
 
       {restaurants.length > 0 && (
         <div className="space-y-2">
-          <h2 className="text-lg font-semibold text-foreground">This is our pick for you ✨</h2>
-          <p className="text-sm leading-6 text-muted-foreground">{moodContext}</p>
-          {resultHint && (
-            <p className="text-sm leading-6 text-muted-foreground">{resultHint}</p>
+          {isInitialLoading ? (
+            <div className="space-y-2 rounded-2xl border border-border bg-card p-4">
+              <p className="text-sm font-medium text-foreground">{['Looking for the best fit...', 'Checking your options...', 'We found something good.'][Math.floor(Math.random() * 3)]}</p>
+              <div className="h-4 rounded-full bg-muted/30" />
+            </div>
+          ) : (
+            <>
+              <div className={`transform transition-all duration-250 ease-out ${headerMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
+                <h2 className="text-lg font-semibold text-foreground">This is our pick for you ✨</h2>
+                <p className="text-sm leading-6 text-muted-foreground">{moodContext}</p>
+                {resultHint && (
+                  <p className="text-sm leading-6 text-muted-foreground">{resultHint}</p>
+                )}
+                <div className="min-h-5">
+                  {isPickingAgain && (
+                    <p className="text-sm font-medium text-primary-foreground/80">
+                      Trying another option...
+                    </p>
+                  )}
+                </div>
+              </div>
+            </>
           )}
         </div>
       )}
 
       <div className="space-y-3">
-        {restaurants.map((restaurant, index) => {
-          const delay = index === 0 ? 0 : 100 + (index - 1) * 50
-          const isTopPick = index === 0
+        {restaurants[0] && (
+          <div
+            key={restaurants[0].id}
+            style={{ transitionDelay: `0ms` }}
+            className={`transform transition-all duration-250 ease-out ${cardsMounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"} ${isPickingAgain && cardsMounted ? "opacity-60 animate-pulse" : ""} ${freshTopPick ? "scale-[1.02] shadow-[0_14px_34px_rgba(0,0,0,0.08)]" : "scale-100"}`}
+          >
+            <RestaurantCard
+              index={1}
+              name={restaurants[0].name}
+              area={restaurants[0].area}
+              cuisine={restaurants[0].cuisine}
+              priceRange={restaurants[0].priceRange}
+              dishes={restaurants[0].dishes}
+              matchReason={matchReasons[0]}
+              isTopPick
+              topPickExplanation={topPickExplanation}
+            />
+          </div>
+        )}
+
+        {restaurants.length > 0 && !isInitialLoading && (
+          <PickAgainAction
+            onPickAgain={handlePickAgain}
+            isPickingAgain={isPickingAgain}
+          />
+        )}
+
+        {restaurants.slice(1).map((restaurant, index) => {
+          const delay = 120 + index * 100
 
           return (
             <div
               key={restaurant.id}
               style={{ transitionDelay: `${delay}ms` }}
-              className={`transform transition-all duration-250 ease-out ${isMounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"} ${isTopPick ? (isMounted ? "scale-100" : "scale-95") : "scale-100"}`}
+              className={`transform transition-all duration-250 ease-out ${alternativeStage > index ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"} scale-100`}
             >
               <RestaurantCard
-                index={index + 1}
+                index={index + 2}
                 name={restaurant.name}
                 area={restaurant.area}
                 cuisine={restaurant.cuisine}
                 priceRange={restaurant.priceRange}
                 dishes={restaurant.dishes}
-                matchReason={matchReasons[index]}
-                isTopPick={isTopPick}
-                topPickExplanation={isTopPick ? topPickExplanation : undefined}
+                matchReason={matchReasons[index + 1]}
               />
             </div>
           )
@@ -398,7 +538,7 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
       </div>
 
       {restaurants.length === 0 && (
-        <div className="rounded-[16px] border border-dashed border-border bg-card p-6 text-center">
+        <div className="rounded-2xl border border-dashed border-border bg-card p-6 text-center">
           <p className="text-lg font-semibold text-foreground">
             No exact match found.
           </p>
