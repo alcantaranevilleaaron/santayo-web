@@ -42,6 +42,18 @@ export default function Home() {
     setResultsHint(null)
   }
 
+  const handleReset = () => {
+    setShowResults(false)
+    setFallbackRandom(false)
+    setResultsHint(null)
+    setFilters({
+      budget: null,
+      mood: null,
+      cuisine: null,
+      dining: null,
+    })
+  }
+
   const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
 
   const handleRandomize = () => {
@@ -75,18 +87,25 @@ export default function Home() {
     <main className="min-h-screen bg-background">
       <div className="mx-auto max-w-[420px] px-4 py-6 md:max-w-lg md:py-8">
         {/* Header */}
-        <header className="mb-8 text-center">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-primary">
-            <Utensils className="size-4" />
-            <span className="text-sm font-medium">Saan tayo kakain?</span>
-          </div>
-          <h1 className="text-balance text-2xl font-bold tracking-tight text-foreground md:text-3xl">
-            Kami na bahala.
-          </h1>
-          <div className="mt-3 flex items-center justify-center gap-1.5 text-muted-foreground">
-            <MapPin className="size-4" />
-            <span className="text-sm">Bonifacio Global City</span>
-          </div>
+        <header className="mb-8">
+          <button
+            type="button"
+            onClick={handleReset}
+            aria-label="Go back to homepage and reset filters"
+            className="w-full text-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+          >
+            <div className="mb-4 inline-flex items-center justify-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-primary">
+              <Utensils className="size-4" />
+              <span className="text-sm font-medium">Saan tayo kakain?</span>
+            </div>
+            <h1 className="text-balance text-2xl font-bold tracking-tight text-foreground md:text-3xl">
+              Kami na bahala.
+            </h1>
+            <div className="mt-3 flex items-center justify-center gap-1.5 text-muted-foreground">
+              <MapPin className="size-4" />
+              <span className="text-sm">Bonifacio Global City</span>
+            </div>
+          </button>
         </header>
 
         {/* Content */}

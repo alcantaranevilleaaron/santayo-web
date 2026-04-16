@@ -477,8 +477,8 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
   const topPickExplanation = restaurants.length > 0 ? topPickCaption : undefined
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
+    <div>
+      <div className="flex items-center justify-between mb-4">
         <Button variant="ghost" size="sm" onClick={onBack} className="gap-2">
           <ArrowLeft className="size-4" />
           Back
@@ -497,28 +497,26 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
               <div className="h-4 rounded-full bg-muted/30" />
             </div>
           ) : (
-            <>
-              <div className={`transform transition-all duration-250 ease-out ${headerMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
-                <h2 className="text-lg font-semibold text-foreground">{headerTitle}</h2>
-                <p className="text-sm leading-6 text-muted-foreground">{headerSubtitle}</p>
-                {resultHint && (
-                  <p className="text-sm leading-6 text-muted-foreground">{resultHint}</p>
+            <div className={`transform transition-all duration-250 ease-out ${headerMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
+              <h2 className="text-lg font-semibold text-foreground">{headerTitle}</h2>
+              <p className="text-sm leading-6 text-muted-foreground">{headerSubtitle}</p>
+              {resultHint && (
+                <p className="text-sm leading-6 text-muted-foreground">{resultHint}</p>
+              )}
+              <div className="min-h-5">
+                {isPickingAgain && (
+                  <p className="text-sm font-medium text-primary-foreground/80">
+                    Trying another option...
+                  </p>
                 )}
-                <div className="min-h-5">
-                  {isPickingAgain && (
-                    <p className="text-sm font-medium text-primary-foreground/80">
-                      Trying another option...
-                    </p>
-                  )}
-                </div>
               </div>
-            </>
+            </div>
           )}
         </div>
       )}
 
-      <div className="space-y-3">
-        {restaurants[0] && (
+      {restaurants[0] && (
+        <div className="mt-3">
           <div
             key={restaurants[0].id}
             style={{ transitionDelay: `0ms` }}
@@ -536,37 +534,43 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
               topPickExplanation={topPickExplanation}
             />
           </div>
-        )}
+        </div>
+      )}
 
-        {restaurants.length > 0 && !isInitialLoading && (
+      {restaurants.length > 0 && !isInitialLoading && (
+        <div className="mt-4">
           <PickAgainAction
             onPickAgain={handlePickAgain}
             isPickingAgain={isPickingAgain}
           />
-        )}
+        </div>
+      )}
 
-        {restaurants.slice(1).map((restaurant, index) => {
-          const delay = 120 + index * 100
+      {restaurants.length > 0 && (
+        <div className="mt-4 space-y-4">
+          {restaurants.slice(1).map((restaurant, index) => {
+            const delay = 120 + index * 100
 
-          return (
-            <div
-              key={restaurant.id}
-              style={{ transitionDelay: `${delay}ms` }}
-              className={`transform transition-all duration-250 ease-out ${alternativeStage > index ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"} scale-100`}
-            >
-              <RestaurantCard
-                index={index + 2}
-                name={restaurant.name}
-                area={restaurant.area}
-                cuisine={restaurant.cuisine}
-                priceRange={restaurant.priceRange}
-                dishes={restaurant.dishes}
-                matchReason={matchReasons[index + 1]}
-              />
-            </div>
-          )
-        })}
-      </div>
+            return (
+              <div
+                key={restaurant.id}
+                style={{ transitionDelay: `${delay}ms` }}
+                className={`transform transition-all duration-250 ease-out ${alternativeStage > index ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"} scale-100`}
+              >
+                <RestaurantCard
+                  index={index + 2}
+                  name={restaurant.name}
+                  area={restaurant.area}
+                  cuisine={restaurant.cuisine}
+                  priceRange={restaurant.priceRange}
+                  dishes={restaurant.dishes}
+                  matchReason={matchReasons[index + 1]}
+                />
+              </div>
+            )
+          })}
+        </div>
+      )}
 
       {restaurants.length === 0 && (
         <div className="rounded-2xl border border-dashed border-border bg-card p-6 text-center">
