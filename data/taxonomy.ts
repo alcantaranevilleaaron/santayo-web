@@ -11,6 +11,12 @@ export const CUISINE_PRIMARY = [
   "Buffet",
   "Dessert",
   "Healthy",
+  "Mediterranean",
+  "Middle Eastern",
+  "French",
+  "Asian",
+  "Mexican",
+  "American"
 ] as const
 export type CuisinePrimary = (typeof CUISINE_PRIMARY)[number]
 
@@ -22,6 +28,7 @@ export const FOOD_CATEGORIES = [
   "Healthy",
   "Premium",
   "Buffet",
+  "Middle Eastern"
 ] as const
 export type FoodCategory = (typeof FOOD_CATEGORIES)[number]
 

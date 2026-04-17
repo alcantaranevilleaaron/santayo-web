@@ -1,6 +1,6 @@
-import type { Restaurant } from "./restaurant.types"
+import type { Restaurant } from "./restaurant.types";
 
-export type { Restaurant }
+export type { Restaurant };
 
 export const RESTAURANTS: Restaurant[] = [
   {
@@ -9,42 +9,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "SM Aura",
     cuisine: "Filipino",
     priceRange: "₱350-600",
-    dishes: [
-      "House Crispy Sisig",
-      "Sinigang na Beef Short Rib",
-      "Kare-Kare"
-    ],
-    tags: [
-      "comfort",
-      "filling",
-      "filipino"
-    ],
-    attributes: [
-      "comfort",
-      "filling",
-      "filipino",
-      "pair",
-      "group"
-    ],
+    dishes: ["House Crispy Sisig", "Sinigang na Beef Short Rib", "Kare-Kare"],
+    tags: ["comfort", "filling", "filipino"],
+    attributes: ["comfort", "filling", "filipino", "pair", "group"],
     budgetMax: 600,
-    diningTypes: [
-      "pair",
-      "group"
-    ],
+    diningTypes: ["pair", "group"],
     slug: "manam-sm-aura-1",
     cuisinePrimary: "Filipino",
-    foodCategories: [
-      "Asian"
-    ],
-    moodTags: [
-      "Comfort",
-      "Filling"
-    ],
-    experienceTags: [
-      "Group"
-    ],
+    foodCategories: ["Asian"],
+    moodTags: ["Comfort", "Filling"],
+    experienceTags: ["Group"],
     budgetMin: 350,
-    priceBucket: "mid"
+    priceBucket: "mid",
   },
   {
     id: 2,
@@ -52,42 +28,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "SM Aura",
     cuisine: "Korean",
     priceRange: "₱500-900",
-    dishes: [
-      "Bibimbap",
-      "Samgyeopsal",
-      "Bulgogi"
-    ],
-    tags: [
-      "filling",
-      "comfort",
-      "korean"
-    ],
-    attributes: [
-      "filling",
-      "comfort",
-      "korean",
-      "pair",
-      "group"
-    ],
+    dishes: ["Bibimbap", "Samgyeopsal", "Bulgogi"],
+    tags: ["filling", "comfort", "korean"],
+    attributes: ["filling", "comfort", "korean", "pair", "group"],
     budgetMax: 1000,
-    diningTypes: [
-      "pair",
-      "group"
-    ],
+    diningTypes: ["pair", "group"],
     slug: "jin-joo-korean-grill-sm-aura-2",
     cuisinePrimary: "Korean",
-    foodCategories: [
-      "Asian"
-    ],
-    moodTags: [
-      "Filling",
-      "Comfort"
-    ],
-    experienceTags: [
-      "Group"
-    ],
+    foodCategories: ["Asian"],
+    moodTags: ["Filling", "Comfort"],
+    experienceTags: ["Group"],
     budgetMin: 500,
-    priceBucket: "premium"
+    priceBucket: "premium",
   },
   {
     id: 3,
@@ -95,42 +47,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "BGC",
     cuisine: "Cafe",
     priceRange: "₱400-700",
-    dishes: [
-      "Brioche French Toast",
-      "Truffle Cream Pasta",
-      "Croissant"
-    ],
-    tags: [
-      "light",
-      "comfort",
-      "cafe"
-    ],
-    attributes: [
-      "light",
-      "comfort",
-      "cafe",
-      "solo",
-      "pair"
-    ],
+    dishes: ["Brioche French Toast", "Truffle Cream Pasta", "Croissant"],
+    tags: ["light", "comfort", "cafe"],
+    attributes: ["light", "comfort", "cafe", "solo", "pair"],
     budgetMax: 1000,
-    diningTypes: [
-      "solo",
-      "pair"
-    ],
+    diningTypes: ["solo", "pair"],
     slug: "wildflour-cafe-bakery-bgc-3",
     cuisinePrimary: "Cafe",
-    foodCategories: [
-      "Cafe"
-    ],
-    moodTags: [
-      "Light",
-      "Comfort"
-    ],
-    experienceTags: [
-      "Solo"
-    ],
+    foodCategories: ["Cafe"],
+    moodTags: ["Light", "Comfort"],
+    experienceTags: ["Solo"],
     budgetMin: 400,
-    priceBucket: "premium"
+    priceBucket: "premium",
   },
   {
     id: 4,
@@ -138,41 +66,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "Mitsukoshi",
     cuisine: "Japanese",
     priceRange: "₱150-300",
-    dishes: [
-      "Cheese Tart",
-      "Milk Soft Serve",
-      "Salt & Camembert Cookies"
-    ],
-    tags: [
-      "light",
-      "japanese",
-      "dessert"
-    ],
-    attributes: [
-      "light",
-      "japanese",
-      "dessert",
-      "solo",
-      "pair"
-    ],
+    dishes: ["Cheese Tart", "Milk Soft Serve", "Salt & Camembert Cookies"],
+    tags: ["light", "japanese", "dessert"],
+    attributes: ["light", "japanese", "dessert", "solo", "pair"],
     budgetMax: 400,
-    diningTypes: [
-      "solo",
-      "pair"
-    ],
+    diningTypes: ["solo", "pair"],
     slug: "tokyo-milk-cheese-factory-mitsukoshi-4",
     cuisinePrimary: "Japanese",
-    foodCategories: [
-      "Asian"
-    ],
-    moodTags: [
-      "Light"
-    ],
-    experienceTags: [
-      "Solo"
-    ],
+    foodCategories: ["Asian"],
+    moodTags: ["Light"],
+    experienceTags: ["Solo"],
     budgetMin: 150,
-    priceBucket: "budget"
+    priceBucket: "budget",
   },
   {
     id: 5,
@@ -180,42 +85,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "Forbes Town Center",
     cuisine: "Filipino",
     priceRange: "₱300-550",
-    dishes: [
-      "Sizzling Sinigang",
-      "Lechon and Oyster Sisig",
-      "Prawns"
-    ],
-    tags: [
-      "comfort",
-      "filling",
-      "filipino"
-    ],
-    attributes: [
-      "comfort",
-      "filling",
-      "filipino",
-      "pair",
-      "group"
-    ],
+    dishes: ["Sizzling Sinigang", "Lechon and Oyster Sisig", "Prawns"],
+    tags: ["comfort", "filling", "filipino"],
+    attributes: ["comfort", "filling", "filipino", "pair", "group"],
     budgetMax: 600,
-    diningTypes: [
-      "pair",
-      "group"
-    ],
+    diningTypes: ["pair", "group"],
     slug: "locavore-forbes-town-center-5",
     cuisinePrimary: "Filipino",
-    foodCategories: [
-      "Asian"
-    ],
-    moodTags: [
-      "Comfort",
-      "Filling"
-    ],
-    experienceTags: [
-      "Group"
-    ],
+    foodCategories: ["Asian"],
+    moodTags: ["Comfort", "Filling"],
+    experienceTags: ["Group"],
     budgetMin: 300,
-    priceBucket: "mid"
+    priceBucket: "mid",
   },
   {
     id: 6,
@@ -223,45 +104,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "Uptown Mall",
     cuisine: "Western",
     priceRange: "₱250-450",
-    dishes: [
-      "ShackBurger",
-      "Crinkle Cut Fries",
-      "Frozen Custard"
-    ],
-    tags: [
-      "comfort",
-      "filling",
-      "western"
-    ],
-    attributes: [
-      "comfort",
-      "filling",
-      "western",
-      "solo",
-      "pair",
-      "group"
-    ],
+    dishes: ["ShackBurger", "Crinkle Cut Fries", "Frozen Custard"],
+    tags: ["comfort", "filling", "western"],
+    attributes: ["comfort", "filling", "western", "solo", "pair", "group"],
     budgetMax: 600,
-    diningTypes: [
-      "solo",
-      "pair",
-      "group"
-    ],
+    diningTypes: ["solo", "pair", "group"],
     slug: "shake-shack-uptown-mall-6",
     cuisinePrimary: "Western",
-    foodCategories: [
-      "Western"
-    ],
-    moodTags: [
-      "Comfort",
-      "Filling"
-    ],
-    experienceTags: [
-      "Solo",
-      "Group"
-    ],
+    foodCategories: ["Western"],
+    moodTags: ["Comfort", "Filling"],
+    experienceTags: ["Solo", "Group"],
     budgetMin: 250,
-    priceBucket: "mid"
+    priceBucket: "mid",
   },
   {
     id: 7,
@@ -269,45 +123,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "BGC",
     cuisine: "Indian",
     priceRange: "₱300-550",
-    dishes: [
-      "Butter Chicken",
-      "Tandoori",
-      "Biryani"
-    ],
-    tags: [
-      "comfort",
-      "filling",
-      "indian"
-    ],
-    attributes: [
-      "comfort",
-      "filling",
-      "indian",
-      "solo",
-      "pair",
-      "group"
-    ],
+    dishes: ["Butter Chicken", "Tandoori", "Biryani"],
+    tags: ["comfort", "filling", "indian"],
+    attributes: ["comfort", "filling", "indian", "solo", "pair", "group"],
     budgetMax: 600,
-    diningTypes: [
-      "solo",
-      "pair",
-      "group"
-    ],
+    diningTypes: ["solo", "pair", "group"],
     slug: "brick-corner-bgc-7",
     cuisinePrimary: "Indian",
-    foodCategories: [
-      "Asian"
-    ],
-    moodTags: [
-      "Comfort",
-      "Filling"
-    ],
-    experienceTags: [
-      "Solo",
-      "Group"
-    ],
+    foodCategories: ["Asian"],
+    moodTags: ["Comfort", "Filling"],
+    experienceTags: ["Solo", "Group"],
     budgetMin: 300,
-    priceBucket: "mid"
+    priceBucket: "mid",
   },
   {
     id: 8,
@@ -315,38 +142,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "Bonifacio High Street",
     cuisine: "Healthy",
     priceRange: "₱220-380",
-    dishes: [
-      "Protein Bowl",
-      "Caesar Salad",
-      "Wrap"
-    ],
-    tags: [
-      "healthy",
-      "light"
-    ],
-    attributes: [
-      "healthy",
-      "light",
-      "solo"
-    ],
+    dishes: ["Protein Bowl", "Caesar Salad", "Wrap"],
+    tags: ["healthy", "light"],
+    attributes: ["healthy", "light", "solo"],
     budgetMax: 400,
-    diningTypes: [
-      "solo"
-    ],
+    diningTypes: ["solo"],
     slug: "saladstop-bonifacio-high-street-8",
     cuisinePrimary: "Healthy",
-    foodCategories: [
-      "Healthy"
-    ],
-    moodTags: [
-      "Healthy",
-      "Light"
-    ],
-    experienceTags: [
-      "Solo"
-    ],
+    foodCategories: ["Healthy"],
+    moodTags: ["Healthy", "Light"],
+    experienceTags: ["Solo"],
     budgetMin: 220,
-    priceBucket: "budget"
+    priceBucket: "budget",
   },
   {
     id: 9,
@@ -354,42 +161,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "SM Aura",
     cuisine: "Japanese",
     priceRange: "₱380-550",
-    dishes: [
-      "Butao King",
-      "Black King",
-      "Gyoza"
-    ],
-    tags: [
-      "filling",
-      "comfort",
-      "japanese"
-    ],
-    attributes: [
-      "filling",
-      "comfort",
-      "japanese",
-      "solo",
-      "pair"
-    ],
+    dishes: ["Butao King", "Black King", "Gyoza"],
+    tags: ["filling", "comfort", "japanese"],
+    attributes: ["filling", "comfort", "japanese", "solo", "pair"],
     budgetMax: 600,
-    diningTypes: [
-      "solo",
-      "pair"
-    ],
+    diningTypes: ["solo", "pair"],
     slug: "ramen-nagi-sm-aura-9",
     cuisinePrimary: "Japanese",
-    foodCategories: [
-      "Asian"
-    ],
-    moodTags: [
-      "Filling",
-      "Comfort"
-    ],
-    experienceTags: [
-      "Solo"
-    ],
+    foodCategories: ["Asian"],
+    moodTags: ["Filling", "Comfort"],
+    experienceTags: ["Solo"],
     budgetMin: 380,
-    priceBucket: "mid"
+    priceBucket: "mid",
   },
   {
     id: 10,
@@ -397,45 +180,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "Bonifacio High Street",
     cuisine: "Western",
     priceRange: "₱200-350",
-    dishes: [
-      "Rotisserie Chicken",
-      "Aji Verde Rice",
-      "Plantains"
-    ],
-    tags: [
-      "filling",
-      "comfort",
-      "western"
-    ],
-    attributes: [
-      "filling",
-      "comfort",
-      "western",
-      "solo",
-      "pair",
-      "group"
-    ],
+    dishes: ["Rotisserie Chicken", "Aji Verde Rice", "Plantains"],
+    tags: ["filling", "comfort", "western"],
+    attributes: ["filling", "comfort", "western", "solo", "pair", "group"],
     budgetMax: 400,
-    diningTypes: [
-      "solo",
-      "pair",
-      "group"
-    ],
+    diningTypes: ["solo", "pair", "group"],
     slug: "se-or-pollo-bonifacio-high-street-10",
     cuisinePrimary: "Western",
-    foodCategories: [
-      "Western"
-    ],
-    moodTags: [
-      "Filling",
-      "Comfort"
-    ],
-    experienceTags: [
-      "Solo",
-      "Group"
-    ],
+    foodCategories: ["Western"],
+    moodTags: ["Filling", "Comfort"],
+    experienceTags: ["Solo", "Group"],
     budgetMin: 200,
-    priceBucket: "budget"
+    priceBucket: "budget",
   },
   {
     id: 11,
@@ -443,42 +199,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "Bonifacio High Street Central",
     cuisine: "Western",
     priceRange: "₱350-650",
-    dishes: [
-      "Steak and Eggs",
-      "Chicken Parmigiana",
-      "Flat White"
-    ],
-    tags: [
-      "light",
-      "comfort",
-      "western"
-    ],
-    attributes: [
-      "light",
-      "comfort",
-      "western",
-      "solo",
-      "pair"
-    ],
+    dishes: ["Steak and Eggs", "Chicken Parmigiana", "Flat White"],
+    tags: ["light", "comfort", "western"],
+    attributes: ["light", "comfort", "western", "solo", "pair"],
     budgetMax: 1000,
-    diningTypes: [
-      "solo",
-      "pair"
-    ],
+    diningTypes: ["solo", "pair"],
     slug: "bondi-bourke-bonifacio-high-street-central-11",
     cuisinePrimary: "Western",
-    foodCategories: [
-      "Western"
-    ],
-    moodTags: [
-      "Light",
-      "Comfort"
-    ],
-    experienceTags: [
-      "Solo"
-    ],
+    foodCategories: ["Western"],
+    moodTags: ["Light", "Comfort"],
+    experienceTags: ["Solo"],
     budgetMin: 350,
-    priceBucket: "premium"
+    priceBucket: "premium",
   },
   {
     id: 12,
@@ -486,42 +218,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "SM Aura",
     cuisine: "Filipino",
     priceRange: "₱350-650",
-    dishes: [
-      "Crispy Boneless Pata",
-      "Tinapa Rice",
-      "Beef Caldereta"
-    ],
-    tags: [
-      "comfort",
-      "filling",
-      "filipino"
-    ],
-    attributes: [
-      "comfort",
-      "filling",
-      "filipino",
-      "pair",
-      "group"
-    ],
+    dishes: ["Crispy Boneless Pata", "Tinapa Rice", "Beef Caldereta"],
+    tags: ["comfort", "filling", "filipino"],
+    attributes: ["comfort", "filling", "filipino", "pair", "group"],
     budgetMax: 1000,
-    diningTypes: [
-      "pair",
-      "group"
-    ],
+    diningTypes: ["pair", "group"],
     slug: "mesa-sm-aura-12",
     cuisinePrimary: "Filipino",
-    foodCategories: [
-      "Asian"
-    ],
-    moodTags: [
-      "Comfort",
-      "Filling"
-    ],
-    experienceTags: [
-      "Group"
-    ],
+    foodCategories: ["Asian"],
+    moodTags: ["Comfort", "Filling"],
+    experienceTags: ["Group"],
     budgetMin: 350,
-    priceBucket: "premium"
+    priceBucket: "premium",
   },
   {
     id: 13,
@@ -532,39 +240,19 @@ export const RESTAURANTS: Restaurant[] = [
     dishes: [
       "Xiao Long Bao",
       "Pork Chop Fried Rice",
-      "Shrimp and Pork Wontons"
+      "Shrimp and Pork Wontons",
     ],
-    tags: [
-      "filling",
-      "comfort",
-      "chinese"
-    ],
-    attributes: [
-      "filling",
-      "comfort",
-      "chinese",
-      "pair",
-      "group"
-    ],
+    tags: ["filling", "comfort", "chinese"],
+    attributes: ["filling", "comfort", "chinese", "pair", "group"],
     budgetMax: 1000,
-    diningTypes: [
-      "pair",
-      "group"
-    ],
+    diningTypes: ["pair", "group"],
     slug: "din-tai-fung-bonifacio-high-street-13",
     cuisinePrimary: "Chinese",
-    foodCategories: [
-      "Asian"
-    ],
-    moodTags: [
-      "Filling",
-      "Comfort"
-    ],
-    experienceTags: [
-      "Group"
-    ],
+    foodCategories: ["Asian"],
+    moodTags: ["Filling", "Comfort"],
+    experienceTags: ["Group"],
     budgetMin: 450,
-    priceBucket: "premium"
+    priceBucket: "premium",
   },
   {
     id: 14,
@@ -572,45 +260,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "SM Aura",
     cuisine: "Chinese",
     priceRange: "₱250-450",
-    dishes: [
-      "Baked BBQ Pork Buns",
-      "Hakaw",
-      "Siu Mai"
-    ],
-    tags: [
-      "light",
-      "filling",
-      "chinese"
-    ],
-    attributes: [
-      "light",
-      "filling",
-      "chinese",
-      "solo",
-      "pair",
-      "group"
-    ],
+    dishes: ["Baked BBQ Pork Buns", "Hakaw", "Siu Mai"],
+    tags: ["light", "filling", "chinese"],
+    attributes: ["light", "filling", "chinese", "solo", "pair", "group"],
     budgetMax: 600,
-    diningTypes: [
-      "solo",
-      "pair",
-      "group"
-    ],
+    diningTypes: ["solo", "pair", "group"],
     slug: "tim-ho-wan-sm-aura-14",
     cuisinePrimary: "Chinese",
-    foodCategories: [
-      "Asian"
-    ],
-    moodTags: [
-      "Light",
-      "Filling"
-    ],
-    experienceTags: [
-      "Solo",
-      "Group"
-    ],
+    foodCategories: ["Asian"],
+    moodTags: ["Light", "Filling"],
+    experienceTags: ["Solo", "Group"],
     budgetMin: 250,
-    priceBucket: "mid"
+    priceBucket: "mid",
   },
   {
     id: 15,
@@ -618,42 +279,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "Mitsukoshi",
     cuisine: "Japanese",
     priceRange: "₱450-600",
-    dishes: [
-      "Shio Ramen",
-      "Shoyu Ramen",
-      "Gyoza"
-    ],
-    tags: [
-      "filling",
-      "comfort",
-      "japanese"
-    ],
-    attributes: [
-      "filling",
-      "comfort",
-      "japanese",
-      "solo",
-      "pair"
-    ],
+    dishes: ["Shio Ramen", "Shoyu Ramen", "Gyoza"],
+    tags: ["filling", "comfort", "japanese"],
+    attributes: ["filling", "comfort", "japanese", "solo", "pair"],
     budgetMax: 600,
-    diningTypes: [
-      "solo",
-      "pair"
-    ],
+    diningTypes: ["solo", "pair"],
     slug: "mendokoro-ramenba-mitsukoshi-15",
     cuisinePrimary: "Japanese",
-    foodCategories: [
-      "Asian"
-    ],
-    moodTags: [
-      "Filling",
-      "Comfort"
-    ],
-    experienceTags: [
-      "Solo"
-    ],
+    foodCategories: ["Asian"],
+    moodTags: ["Filling", "Comfort"],
+    experienceTags: ["Solo"],
     budgetMin: 450,
-    priceBucket: "mid"
+    priceBucket: "mid",
   },
   {
     id: 16,
@@ -661,42 +298,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "Bonifacio High Street",
     cuisine: "Japanese",
     priceRange: "₱180-300",
-    dishes: [
-      "Kake Udon",
-      "Beef Ontama Bukkake",
-      "Tempura"
-    ],
-    tags: [
-      "light",
-      "filling",
-      "japanese"
-    ],
-    attributes: [
-      "light",
-      "filling",
-      "japanese",
-      "solo",
-      "pair"
-    ],
+    dishes: ["Kake Udon", "Beef Ontama Bukkake", "Tempura"],
+    tags: ["light", "filling", "japanese"],
+    attributes: ["light", "filling", "japanese", "solo", "pair"],
     budgetMax: 400,
-    diningTypes: [
-      "solo",
-      "pair"
-    ],
+    diningTypes: ["solo", "pair"],
     slug: "marugame-udon-bonifacio-high-street-16",
     cuisinePrimary: "Japanese",
-    foodCategories: [
-      "Asian"
-    ],
-    moodTags: [
-      "Light",
-      "Filling"
-    ],
-    experienceTags: [
-      "Solo"
-    ],
+    foodCategories: ["Asian"],
+    moodTags: ["Light", "Filling"],
+    experienceTags: ["Solo"],
     budgetMin: 180,
-    priceBucket: "budget"
+    priceBucket: "budget",
   },
   {
     id: 17,
@@ -707,39 +320,19 @@ export const RESTAURANTS: Restaurant[] = [
     dishes: [
       "Fried Truffle Cheese Wontons",
       "Nono's Homestyle Fried Chicken",
-      "Chocolate Oblivion"
+      "Chocolate Oblivion",
     ],
-    tags: [
-      "comfort",
-      "filling",
-      "western"
-    ],
-    attributes: [
-      "comfort",
-      "filling",
-      "western",
-      "pair",
-      "group"
-    ],
+    tags: ["comfort", "filling", "western"],
+    attributes: ["comfort", "filling", "western", "pair", "group"],
     budgetMax: 1000,
-    diningTypes: [
-      "pair",
-      "group"
-    ],
+    diningTypes: ["pair", "group"],
     slug: "nono-s-uptown-mall-17",
     cuisinePrimary: "Western",
-    foodCategories: [
-      "Western"
-    ],
-    moodTags: [
-      "Comfort",
-      "Filling"
-    ],
-    experienceTags: [
-      "Group"
-    ],
+    foodCategories: ["Western"],
+    moodTags: ["Comfort", "Filling"],
+    experienceTags: ["Group"],
     budgetMin: 350,
-    priceBucket: "premium"
+    priceBucket: "premium",
   },
   {
     id: 18,
@@ -747,42 +340,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "BGC",
     cuisine: "Western",
     priceRange: "₱220-380",
-    dishes: [
-      "Buffalo Wings",
-      "Salted Egg Wings",
-      "Fries"
-    ],
-    tags: [
-      "filling",
-      "western"
-    ],
-    attributes: [
-      "filling",
-      "western",
-      "solo",
-      "pair",
-      "group"
-    ],
+    dishes: ["Buffalo Wings", "Salted Egg Wings", "Fries"],
+    tags: ["filling", "western"],
+    attributes: ["filling", "western", "solo", "pair", "group"],
     budgetMax: 400,
-    diningTypes: [
-      "solo",
-      "pair",
-      "group"
-    ],
+    diningTypes: ["solo", "pair", "group"],
     slug: "frankie-s-new-york-buffalo-wings-bgc-18",
     cuisinePrimary: "Western",
-    foodCategories: [
-      "Western"
-    ],
-    moodTags: [
-      "Filling"
-    ],
-    experienceTags: [
-      "Solo",
-      "Group"
-    ],
+    foodCategories: ["Western"],
+    moodTags: ["Filling"],
+    experienceTags: ["Solo", "Group"],
     budgetMin: 220,
-    priceBucket: "budget"
+    priceBucket: "budget",
   },
   {
     id: 19,
@@ -790,42 +359,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "Bonifacio High Street",
     cuisine: "Cafe",
     priceRange: "₱300-550",
-    dishes: [
-      "Pancakes",
-      "Pasta",
-      "Coffee"
-    ],
-    tags: [
-      "light",
-      "comfort",
-      "cafe"
-    ],
-    attributes: [
-      "light",
-      "comfort",
-      "cafe",
-      "solo",
-      "pair"
-    ],
+    dishes: ["Pancakes", "Pasta", "Coffee"],
+    tags: ["light", "comfort", "cafe"],
+    attributes: ["light", "comfort", "cafe", "solo", "pair"],
     budgetMax: 600,
-    diningTypes: [
-      "solo",
-      "pair"
-    ],
+    diningTypes: ["solo", "pair"],
     slug: "sunnies-cafe-bonifacio-high-street-19",
     cuisinePrimary: "Cafe",
-    foodCategories: [
-      "Cafe"
-    ],
-    moodTags: [
-      "Light",
-      "Comfort"
-    ],
-    experienceTags: [
-      "Solo"
-    ],
+    foodCategories: ["Cafe"],
+    moodTags: ["Light", "Comfort"],
+    experienceTags: ["Solo"],
     budgetMin: 300,
-    priceBucket: "mid"
+    priceBucket: "mid",
   },
   {
     id: 20,
@@ -833,42 +378,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "BGC",
     cuisine: "Filipino",
     priceRange: "₱180-320",
-    dishes: [
-      "Tapa de Morning",
-      "Breakfast Burrito",
-      "Charlie Chan"
-    ],
-    tags: [
-      "comfort",
-      "filling",
-      "filipino"
-    ],
-    attributes: [
-      "comfort",
-      "filling",
-      "filipino",
-      "solo",
-      "pair"
-    ],
+    dishes: ["Tapa de Morning", "Breakfast Burrito", "Charlie Chan"],
+    tags: ["comfort", "filling", "filipino"],
+    attributes: ["comfort", "filling", "filipino", "solo", "pair"],
     budgetMax: 400,
-    diningTypes: [
-      "solo",
-      "pair"
-    ],
+    diningTypes: ["solo", "pair"],
     slug: "recovery-food-bgc-20",
     cuisinePrimary: "Filipino",
-    foodCategories: [
-      "Asian"
-    ],
-    moodTags: [
-      "Comfort",
-      "Filling"
-    ],
-    experienceTags: [
-      "Solo"
-    ],
+    foodCategories: ["Asian"],
+    moodTags: ["Comfort", "Filling"],
+    experienceTags: ["Solo"],
     budgetMin: 180,
-    priceBucket: "budget"
+    priceBucket: "budget",
   },
   {
     id: 21,
@@ -876,39 +397,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "One Bonifacio High Street",
     cuisine: "Cafe",
     priceRange: "₱250-450",
-    dishes: [
-      "Egg Sando",
-      "Ice Cream Sandwich",
-      "Coffee"
-    ],
-    tags: [
-      "light",
-      "cafe"
-    ],
-    attributes: [
-      "light",
-      "cafe",
-      "solo",
-      "pair"
-    ],
+    dishes: ["Egg Sando", "Ice Cream Sandwich", "Coffee"],
+    tags: ["light", "cafe"],
+    attributes: ["light", "cafe", "solo", "pair"],
     budgetMax: 600,
-    diningTypes: [
-      "solo",
-      "pair"
-    ],
+    diningTypes: ["solo", "pair"],
     slug: "elephant-grounds-one-bonifacio-high-street-21",
     cuisinePrimary: "Cafe",
-    foodCategories: [
-      "Cafe"
-    ],
-    moodTags: [
-      "Light"
-    ],
-    experienceTags: [
-      "Solo"
-    ],
+    foodCategories: ["Cafe"],
+    moodTags: ["Light"],
+    experienceTags: ["Solo"],
     budgetMin: 250,
-    priceBucket: "mid"
+    priceBucket: "mid",
   },
   {
     id: 22,
@@ -916,45 +416,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "Serendra",
     cuisine: "Western",
     priceRange: "₱250-450",
-    dishes: [
-      "Cheeseburger",
-      "Onion Rings",
-      "Milkshake"
-    ],
-    tags: [
-      "comfort",
-      "filling",
-      "western"
-    ],
-    attributes: [
-      "comfort",
-      "filling",
-      "western",
-      "solo",
-      "pair",
-      "group"
-    ],
+    dishes: ["Cheeseburger", "Onion Rings", "Milkshake"],
+    tags: ["comfort", "filling", "western"],
+    attributes: ["comfort", "filling", "western", "solo", "pair", "group"],
     budgetMax: 600,
-    diningTypes: [
-      "solo",
-      "pair",
-      "group"
-    ],
+    diningTypes: ["solo", "pair", "group"],
     slug: "8cuts-burgers-serendra-22",
     cuisinePrimary: "Western",
-    foodCategories: [
-      "Western"
-    ],
-    moodTags: [
-      "Comfort",
-      "Filling"
-    ],
-    experienceTags: [
-      "Solo",
-      "Group"
-    ],
+    foodCategories: ["Western"],
+    moodTags: ["Comfort", "Filling"],
+    experienceTags: ["Solo", "Group"],
     budgetMin: 250,
-    priceBucket: "mid"
+    priceBucket: "mid",
   },
   {
     id: 23,
@@ -962,39 +435,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "One Bonifacio High Street",
     cuisine: "Chinese",
     priceRange: "₱180-320",
-    dishes: [
-      "Soy Chicken Rice",
-      "Char Siew",
-      "Noodles"
-    ],
-    tags: [
-      "filling",
-      "chinese"
-    ],
-    attributes: [
-      "filling",
-      "chinese",
-      "solo",
-      "pair"
-    ],
+    dishes: ["Soy Chicken Rice", "Char Siew", "Noodles"],
+    tags: ["filling", "chinese"],
+    attributes: ["filling", "chinese", "solo", "pair"],
     budgetMax: 400,
-    diningTypes: [
-      "solo",
-      "pair"
-    ],
+    diningTypes: ["solo", "pair"],
     slug: "hawker-chan-one-bonifacio-high-street-23",
     cuisinePrimary: "Chinese",
-    foodCategories: [
-      "Asian"
-    ],
-    moodTags: [
-      "Filling"
-    ],
-    experienceTags: [
-      "Solo"
-    ],
+    foodCategories: ["Asian"],
+    moodTags: ["Filling"],
+    experienceTags: ["Solo"],
     budgetMin: 180,
-    priceBucket: "budget"
+    priceBucket: "budget",
   },
   {
     id: 24,
@@ -1002,42 +454,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "Uptown Mall",
     cuisine: "Japanese",
     priceRange: "₱450-750",
-    dishes: [
-      "Shiromaru",
-      "Akamaru",
-      "Pork Buns"
-    ],
-    tags: [
-      "comfort",
-      "filling",
-      "japanese"
-    ],
-    attributes: [
-      "comfort",
-      "filling",
-      "japanese",
-      "solo",
-      "pair"
-    ],
+    dishes: ["Shiromaru", "Akamaru", "Pork Buns"],
+    tags: ["comfort", "filling", "japanese"],
+    attributes: ["comfort", "filling", "japanese", "solo", "pair"],
     budgetMax: 1000,
-    diningTypes: [
-      "solo",
-      "pair"
-    ],
+    diningTypes: ["solo", "pair"],
     slug: "ippudo-uptown-mall-24",
     cuisinePrimary: "Japanese",
-    foodCategories: [
-      "Asian"
-    ],
-    moodTags: [
-      "Comfort",
-      "Filling"
-    ],
-    experienceTags: [
-      "Solo"
-    ],
+    foodCategories: ["Asian"],
+    moodTags: ["Comfort", "Filling"],
+    experienceTags: ["Solo"],
     budgetMin: 450,
-    priceBucket: "premium"
+    priceBucket: "premium",
   },
   {
     id: 25,
@@ -1045,42 +473,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "Serendra",
     cuisine: "Filipino",
     priceRange: "₱450-800",
-    dishes: [
-      "Bamboo Rice",
-      "Crispy Adobo Flakes",
-      "Lamb Adobo"
-    ],
-    tags: [
-      "comfort",
-      "filling",
-      "filipino"
-    ],
-    attributes: [
-      "comfort",
-      "filling",
-      "filipino",
-      "pair",
-      "group"
-    ],
+    dishes: ["Bamboo Rice", "Crispy Adobo Flakes", "Lamb Adobo"],
+    tags: ["comfort", "filling", "filipino"],
+    attributes: ["comfort", "filling", "filipino", "pair", "group"],
     budgetMax: 1000,
-    diningTypes: [
-      "pair",
-      "group"
-    ],
+    diningTypes: ["pair", "group"],
     slug: "abe-serendra-25",
     cuisinePrimary: "Filipino",
-    foodCategories: [
-      "Asian"
-    ],
-    moodTags: [
-      "Comfort",
-      "Filling"
-    ],
-    experienceTags: [
-      "Group"
-    ],
+    foodCategories: ["Asian"],
+    moodTags: ["Comfort", "Filling"],
+    experienceTags: ["Group"],
     budgetMin: 450,
-    priceBucket: "premium"
+    priceBucket: "premium",
   },
   {
     id: 26,
@@ -1088,42 +492,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "Bonifacio High Street",
     cuisine: "Cafe",
     priceRange: "₱300-550",
-    dishes: [
-      "Cheese Rolls",
-      "Chicken Inasal Pasta",
-      "Hot Chocolate"
-    ],
-    tags: [
-      "light",
-      "comfort",
-      "cafe"
-    ],
-    attributes: [
-      "light",
-      "comfort",
-      "cafe",
-      "solo",
-      "pair"
-    ],
+    dishes: ["Cheese Rolls", "Chicken Inasal Pasta", "Hot Chocolate"],
+    tags: ["light", "comfort", "cafe"],
+    attributes: ["light", "comfort", "cafe", "solo", "pair"],
     budgetMax: 600,
-    diningTypes: [
-      "solo",
-      "pair"
-    ],
+    diningTypes: ["solo", "pair"],
     slug: "mary-grace-cafe-bonifacio-high-street-26",
     cuisinePrimary: "Cafe",
-    foodCategories: [
-      "Cafe"
-    ],
-    moodTags: [
-      "Light",
-      "Comfort"
-    ],
-    experienceTags: [
-      "Solo"
-    ],
+    foodCategories: ["Cafe"],
+    moodTags: ["Light", "Comfort"],
+    experienceTags: ["Solo"],
     budgetMin: 300,
-    priceBucket: "mid"
+    priceBucket: "mid",
   },
   {
     id: 27,
@@ -1131,42 +511,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "One Bonifacio High Street",
     cuisine: "Japanese",
     priceRange: "₱350-650",
-    dishes: [
-      "Okonomiyaki",
-      "Takoyaki",
-      "Ramen"
-    ],
-    tags: [
-      "filling",
-      "comfort",
-      "japanese"
-    ],
-    attributes: [
-      "filling",
-      "comfort",
-      "japanese",
-      "pair",
-      "group"
-    ],
+    dishes: ["Okonomiyaki", "Takoyaki", "Ramen"],
+    tags: ["filling", "comfort", "japanese"],
+    attributes: ["filling", "comfort", "japanese", "pair", "group"],
     budgetMax: 1000,
-    diningTypes: [
-      "pair",
-      "group"
-    ],
+    diningTypes: ["pair", "group"],
     slug: "botejyu-one-bonifacio-high-street-27",
     cuisinePrimary: "Japanese",
-    foodCategories: [
-      "Asian"
-    ],
-    moodTags: [
-      "Filling",
-      "Comfort"
-    ],
-    experienceTags: [
-      "Group"
-    ],
+    foodCategories: ["Asian"],
+    moodTags: ["Filling", "Comfort"],
+    experienceTags: ["Group"],
     budgetMin: 350,
-    priceBucket: "premium"
+    priceBucket: "premium",
   },
   {
     id: 28,
@@ -1174,42 +530,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "SM Aura",
     cuisine: "Thai",
     priceRange: "₱350-650",
-    dishes: [
-      "Pad Thai",
-      "Complicated Noodles",
-      "Tom Yum"
-    ],
-    tags: [
-      "light",
-      "filling",
-      "thai"
-    ],
-    attributes: [
-      "light",
-      "filling",
-      "thai",
-      "pair",
-      "group"
-    ],
+    dishes: ["Pad Thai", "Complicated Noodles", "Tom Yum"],
+    tags: ["light", "filling", "thai"],
+    attributes: ["light", "filling", "thai", "pair", "group"],
     budgetMax: 1000,
-    diningTypes: [
-      "pair",
-      "group"
-    ],
+    diningTypes: ["pair", "group"],
     slug: "greyhound-cafe-sm-aura-28",
     cuisinePrimary: "Thai",
-    foodCategories: [
-      "Asian"
-    ],
-    moodTags: [
-      "Light",
-      "Filling"
-    ],
-    experienceTags: [
-      "Group"
-    ],
+    foodCategories: ["Asian"],
+    moodTags: ["Light", "Filling"],
+    experienceTags: ["Group"],
     budgetMin: 350,
-    priceBucket: "premium"
+    priceBucket: "premium",
   },
   {
     id: 29,
@@ -1217,42 +549,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "Grand Hyatt Manila",
     cuisine: "Japanese",
     priceRange: "₱450-750",
-    dishes: [
-      "Teishoku Set",
-      "Chicken Nanban",
-      "Katsu"
-    ],
-    tags: [
-      "comfort",
-      "filling",
-      "japanese"
-    ],
-    attributes: [
-      "comfort",
-      "filling",
-      "japanese",
-      "solo",
-      "pair"
-    ],
+    dishes: ["Teishoku Set", "Chicken Nanban", "Katsu"],
+    tags: ["comfort", "filling", "japanese"],
+    attributes: ["comfort", "filling", "japanese", "solo", "pair"],
     budgetMax: 1000,
-    diningTypes: [
-      "solo",
-      "pair"
-    ],
+    diningTypes: ["solo", "pair"],
     slug: "ootoya-grand-hyatt-manila-29",
     cuisinePrimary: "Japanese",
-    foodCategories: [
-      "Asian"
-    ],
-    moodTags: [
-      "Comfort",
-      "Filling"
-    ],
-    experienceTags: [
-      "Solo"
-    ],
+    foodCategories: ["Asian"],
+    moodTags: ["Comfort", "Filling"],
+    experienceTags: ["Solo"],
     budgetMin: 450,
-    priceBucket: "premium"
+    priceBucket: "premium",
   },
   {
     id: 30,
@@ -1260,42 +568,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "Uptown Parade",
     cuisine: "Italian",
     priceRange: "₱500-900",
-    dishes: [
-      "Pasta",
-      "Pizza",
-      "Small Plates"
-    ],
-    tags: [
-      "comfort",
-      "filling",
-      "italian"
-    ],
-    attributes: [
-      "comfort",
-      "filling",
-      "italian",
-      "pair",
-      "group"
-    ],
+    dishes: ["Pasta", "Pizza", "Small Plates"],
+    tags: ["comfort", "filling", "italian"],
+    attributes: ["comfort", "filling", "italian", "pair", "group"],
     budgetMax: 1000,
-    diningTypes: [
-      "pair",
-      "group"
-    ],
+    diningTypes: ["pair", "group"],
     slug: "moderna-uptown-parade-30",
     cuisinePrimary: "Italian",
-    foodCategories: [
-      "Western"
-    ],
-    moodTags: [
-      "Comfort",
-      "Filling"
-    ],
-    experienceTags: [
-      "Group"
-    ],
+    foodCategories: ["Western"],
+    moodTags: ["Comfort", "Filling"],
+    experienceTags: ["Group"],
     budgetMin: 500,
-    priceBucket: "premium"
+    priceBucket: "premium",
   },
   {
     id: 31,
@@ -1303,42 +587,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "Bonifacio High Street Central",
     cuisine: "Western",
     priceRange: "₱500-900",
-    dishes: [
-      "Steak",
-      "Potato Pavé",
-      "Flatbread Pizza"
-    ],
-    tags: [
-      "comfort",
-      "filling",
-      "western"
-    ],
-    attributes: [
-      "comfort",
-      "filling",
-      "western",
-      "pair",
-      "group"
-    ],
+    dishes: ["Steak", "Potato Pavé", "Flatbread Pizza"],
+    tags: ["comfort", "filling", "western"],
+    attributes: ["comfort", "filling", "western", "pair", "group"],
     budgetMax: 1000,
-    diningTypes: [
-      "pair",
-      "group"
-    ],
+    diningTypes: ["pair", "group"],
     slug: "burnt-bean-bonifacio-high-street-central-31",
     cuisinePrimary: "Western",
-    foodCategories: [
-      "Western"
-    ],
-    moodTags: [
-      "Comfort",
-      "Filling"
-    ],
-    experienceTags: [
-      "Group"
-    ],
+    foodCategories: ["Western"],
+    moodTags: ["Comfort", "Filling"],
+    experienceTags: ["Group"],
     budgetMin: 500,
-    priceBucket: "premium"
+    priceBucket: "premium",
   },
   {
     id: 32,
@@ -1346,45 +606,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "One Bonifacio High Street",
     cuisine: "Italian",
     priceRange: "₱250-450",
-    dishes: [
-      "Pizza",
-      "Pasta",
-      "Gelato"
-    ],
-    tags: [
-      "comfort",
-      "filling",
-      "italian"
-    ],
-    attributes: [
-      "comfort",
-      "filling",
-      "italian",
-      "solo",
-      "pair",
-      "group"
-    ],
+    dishes: ["Pizza", "Pasta", "Gelato"],
+    tags: ["comfort", "filling", "italian"],
+    attributes: ["comfort", "filling", "italian", "solo", "pair", "group"],
     budgetMax: 600,
-    diningTypes: [
-      "solo",
-      "pair",
-      "group"
-    ],
+    diningTypes: ["solo", "pair", "group"],
     slug: "amici-one-bonifacio-high-street-32",
     cuisinePrimary: "Italian",
-    foodCategories: [
-      "Western"
-    ],
-    moodTags: [
-      "Comfort",
-      "Filling"
-    ],
-    experienceTags: [
-      "Solo",
-      "Group"
-    ],
+    foodCategories: ["Western"],
+    moodTags: ["Comfort", "Filling"],
+    experienceTags: ["Solo", "Group"],
     budgetMin: 250,
-    priceBucket: "mid"
+    priceBucket: "mid",
   },
   {
     id: 33,
@@ -1392,36 +625,16 @@ export const RESTAURANTS: Restaurant[] = [
     area: "BGC",
     cuisine: "Spanish",
     priceRange: "₱500-900",
-    dishes: [
-      "Pintxos",
-      "Paella",
-      "Sangria"
-    ],
-    tags: [
-      "light",
-      "group",
-      "spanish"
-    ],
-    attributes: [
-      "light",
-      "group",
-      "spanish",
-      "pair"
-    ],
+    dishes: ["Pintxos", "Paella", "Sangria"],
+    tags: ["light", "group", "spanish"],
+    attributes: ["light", "group", "spanish", "pair"],
     budgetMax: 1000,
-    diningTypes: [
-      "pair",
-      "group"
-    ],
+    diningTypes: ["pair", "group"],
     slug: "bar-pintxos-bgc-33",
-    moodTags: [
-      "Light"
-    ],
-    experienceTags: [
-      "Group"
-    ],
+    moodTags: ["Light"],
+    experienceTags: ["Group"],
     budgetMin: 500,
-    priceBucket: "premium"
+    priceBucket: "premium",
   },
   {
     id: 34,
@@ -1429,41 +642,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "One Bonifacio High Street",
     cuisine: "Filipino",
     priceRange: "₱600-1000",
-    dishes: [
-      "Modern Filipino Plates",
-      "Rice Bowls",
-      "Desserts"
-    ],
-    tags: [
-      "comfort",
-      "filipino",
-      "sosyal"
-    ],
-    attributes: [
-      "comfort",
-      "filipino",
-      "premium",
-      "pair",
-      "group"
-    ],
+    dishes: ["Modern Filipino Plates", "Rice Bowls", "Desserts"],
+    tags: ["comfort", "filipino", "sosyal"],
+    attributes: ["comfort", "filipino", "premium", "pair", "group"],
     budgetMax: 1000,
-    diningTypes: [
-      "pair",
-      "group"
-    ],
+    diningTypes: ["pair", "group"],
     slug: "lore-by-chef-tatung-one-bonifacio-high-street-34",
     cuisinePrimary: "Filipino",
-    foodCategories: [
-      "Asian"
-    ],
-    moodTags: [
-      "Comfort"
-    ],
-    experienceTags: [
-      "Group"
-    ],
+    foodCategories: ["Asian"],
+    moodTags: ["Comfort"],
+    experienceTags: ["Group"],
     budgetMin: 600,
-    priceBucket: "premium"
+    priceBucket: "premium",
   },
   {
     id: 35,
@@ -1471,42 +661,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "Bonifacio High Street",
     cuisine: "Italian",
     priceRange: "₱400-750",
-    dishes: [
-      "Spaghetti and Meatballs",
-      "Pizza",
-      "Chicken Parmesan"
-    ],
-    tags: [
-      "comfort",
-      "filling",
-      "italian"
-    ],
-    attributes: [
-      "comfort",
-      "filling",
-      "italian",
-      "pair",
-      "group"
-    ],
+    dishes: ["Spaghetti and Meatballs", "Pizza", "Chicken Parmesan"],
+    tags: ["comfort", "filling", "italian"],
+    attributes: ["comfort", "filling", "italian", "pair", "group"],
     budgetMax: 1000,
-    diningTypes: [
-      "pair",
-      "group"
-    ],
+    diningTypes: ["pair", "group"],
     slug: "italianni-s-bonifacio-high-street-35",
     cuisinePrimary: "Italian",
-    foodCategories: [
-      "Western"
-    ],
-    moodTags: [
-      "Comfort",
-      "Filling"
-    ],
-    experienceTags: [
-      "Group"
-    ],
+    foodCategories: ["Western"],
+    moodTags: ["Comfort", "Filling"],
+    experienceTags: ["Group"],
     budgetMin: 400,
-    priceBucket: "premium"
+    priceBucket: "premium",
   },
   {
     id: 36,
@@ -1514,41 +680,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "BGC",
     cuisine: "Western",
     priceRange: "₱1000+",
-    dishes: [
-      "USDA Prime Steak",
-      "Creamed Spinach",
-      "Mashed Potatoes"
-    ],
-    tags: [
-      "filling",
-      "western",
-      "sosyal"
-    ],
-    attributes: [
-      "filling",
-      "western",
-      "premium",
-      "pair",
-      "group"
-    ],
+    dishes: ["USDA Prime Steak", "Creamed Spinach", "Mashed Potatoes"],
+    tags: ["filling", "western", "sosyal"],
+    attributes: ["filling", "western", "premium", "pair", "group"],
     budgetMax: 1000,
-    diningTypes: [
-      "pair",
-      "group"
-    ],
+    diningTypes: ["pair", "group"],
     slug: "wolfgang-s-steakhouse-bgc-36",
     cuisinePrimary: "Western",
-    foodCategories: [
-      "Western"
-    ],
-    moodTags: [
-      "Filling"
-    ],
-    experienceTags: [
-      "Group"
-    ],
+    foodCategories: ["Western"],
+    moodTags: ["Filling"],
+    experienceTags: ["Group"],
     budgetMin: 1000,
-    priceBucket: "premium"
+    priceBucket: "premium",
   },
   {
     id: 37,
@@ -1556,41 +699,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "Finance Centre",
     cuisine: "Western",
     priceRange: "₱1000+",
-    dishes: [
-      "Ribeye",
-      "Steakhouse Sides",
-      "Cocktails"
-    ],
-    tags: [
-      "filling",
-      "western",
-      "sosyal"
-    ],
-    attributes: [
-      "filling",
-      "western",
-      "premium",
-      "pair",
-      "group"
-    ],
+    dishes: ["Ribeye", "Steakhouse Sides", "Cocktails"],
+    tags: ["filling", "western", "sosyal"],
+    attributes: ["filling", "western", "premium", "pair", "group"],
     budgetMax: 1000,
-    diningTypes: [
-      "pair",
-      "group"
-    ],
+    diningTypes: ["pair", "group"],
     slug: "smith-wollensky-finance-centre-37",
     cuisinePrimary: "Western",
-    foodCategories: [
-      "Western"
-    ],
-    moodTags: [
-      "Filling"
-    ],
-    experienceTags: [
-      "Group"
-    ],
+    foodCategories: ["Western"],
+    moodTags: ["Filling"],
+    experienceTags: ["Group"],
     budgetMin: 1000,
-    priceBucket: "premium"
+    priceBucket: "premium",
   },
   {
     id: 38,
@@ -1598,41 +718,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "BGC",
     cuisine: "Western",
     priceRange: "₱1000+",
-    dishes: [
-      "Filet",
-      "Ribeye",
-      "Sizzling Plates"
-    ],
-    tags: [
-      "filling",
-      "western",
-      "sosyal"
-    ],
-    attributes: [
-      "filling",
-      "western",
-      "premium",
-      "pair",
-      "group"
-    ],
+    dishes: ["Filet", "Ribeye", "Sizzling Plates"],
+    tags: ["filling", "western", "sosyal"],
+    attributes: ["filling", "western", "premium", "pair", "group"],
     budgetMax: 1000,
-    diningTypes: [
-      "pair",
-      "group"
-    ],
+    diningTypes: ["pair", "group"],
     slug: "ruth-s-chris-steak-house-bgc-38",
     cuisinePrimary: "Western",
-    foodCategories: [
-      "Western"
-    ],
-    moodTags: [
-      "Filling"
-    ],
-    experienceTags: [
-      "Group"
-    ],
+    foodCategories: ["Western"],
+    moodTags: ["Filling"],
+    experienceTags: ["Group"],
     budgetMin: 1000,
-    priceBucket: "premium"
+    priceBucket: "premium",
   },
   {
     id: 39,
@@ -1640,39 +737,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "SM Aura",
     cuisine: "Buffet",
     priceRange: "₱1000+",
-    dishes: [
-      "Seafood",
-      "Roasts",
-      "Dessert Station"
-    ],
-    tags: [
-      "filling",
-      "group"
-    ],
-    attributes: [
-      "filling",
-      "group",
-      "buffet",
-      "pair"
-    ],
+    dishes: ["Seafood", "Roasts", "Dessert Station"],
+    tags: ["filling", "group"],
+    attributes: ["filling", "group", "buffet", "pair"],
     budgetMax: 1000,
-    diningTypes: [
-      "pair",
-      "group"
-    ],
+    diningTypes: ["pair", "group"],
     slug: "niu-by-vikings-sm-aura-39",
     cuisinePrimary: "Buffet",
-    foodCategories: [
-      "Buffet"
-    ],
-    moodTags: [
-      "Filling"
-    ],
-    experienceTags: [
-      "Group"
-    ],
+    foodCategories: ["Buffet"],
+    moodTags: ["Filling"],
+    experienceTags: ["Group"],
     budgetMin: 1000,
-    priceBucket: "premium"
+    priceBucket: "premium",
   },
   {
     id: 40,
@@ -1680,42 +756,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "Uptown Mall",
     cuisine: "Western",
     priceRange: "₱450-800",
-    dishes: [
-      "Steak",
-      "Ribs",
-      "Rolls"
-    ],
-    tags: [
-      "comfort",
-      "filling",
-      "western"
-    ],
-    attributes: [
-      "comfort",
-      "filling",
-      "western",
-      "pair",
-      "group"
-    ],
+    dishes: ["Steak", "Ribs", "Rolls"],
+    tags: ["comfort", "filling", "western"],
+    attributes: ["comfort", "filling", "western", "pair", "group"],
     budgetMax: 1000,
-    diningTypes: [
-      "pair",
-      "group"
-    ],
+    diningTypes: ["pair", "group"],
     slug: "texas-roadhouse-uptown-mall-40",
     cuisinePrimary: "Western",
-    foodCategories: [
-      "Western"
-    ],
-    moodTags: [
-      "Comfort",
-      "Filling"
-    ],
-    experienceTags: [
-      "Group"
-    ],
+    foodCategories: ["Western"],
+    moodTags: ["Comfort", "Filling"],
+    experienceTags: ["Group"],
     budgetMin: 450,
-    priceBucket: "premium"
+    priceBucket: "premium",
   },
   {
     id: 41,
@@ -1723,42 +775,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "SM Aura",
     cuisine: "Western",
     priceRange: "₱250-450",
-    dishes: [
-      "Pastrami Sandwich",
-      "Chorizo Sandwich",
-      "Fries"
-    ],
-    tags: [
-      "light",
-      "filling",
-      "western"
-    ],
-    attributes: [
-      "light",
-      "filling",
-      "western",
-      "solo",
-      "pair"
-    ],
+    dishes: ["Pastrami Sandwich", "Chorizo Sandwich", "Fries"],
+    tags: ["light", "filling", "western"],
+    attributes: ["light", "filling", "western", "solo", "pair"],
     budgetMax: 600,
-    diningTypes: [
-      "solo",
-      "pair"
-    ],
+    diningTypes: ["solo", "pair"],
     slug: "deli-by-chele-sm-aura-41",
     cuisinePrimary: "Western",
-    foodCategories: [
-      "Western"
-    ],
-    moodTags: [
-      "Light",
-      "Filling"
-    ],
-    experienceTags: [
-      "Solo"
-    ],
+    foodCategories: ["Western"],
+    moodTags: ["Light", "Filling"],
+    experienceTags: ["Solo"],
     budgetMin: 250,
-    priceBucket: "mid"
+    priceBucket: "mid",
   },
   {
     id: 42,
@@ -1766,39 +794,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "SM Aura",
     cuisine: "Chinese",
     priceRange: "₱250-450",
-    dishes: [
-      "Roasted Duck",
-      "Char Siu",
-      "Fried Rice"
-    ],
-    tags: [
-      "filling",
-      "chinese"
-    ],
-    attributes: [
-      "filling",
-      "chinese",
-      "solo",
-      "pair"
-    ],
+    dishes: ["Roasted Duck", "Char Siu", "Fried Rice"],
+    tags: ["filling", "chinese"],
+    attributes: ["filling", "chinese", "solo", "pair"],
     budgetMax: 600,
-    diningTypes: [
-      "solo",
-      "pair"
-    ],
+    diningTypes: ["solo", "pair"],
     slug: "teakha-sm-aura-42",
     cuisinePrimary: "Chinese",
-    foodCategories: [
-      "Asian"
-    ],
-    moodTags: [
-      "Filling"
-    ],
-    experienceTags: [
-      "Solo"
-    ],
+    foodCategories: ["Asian"],
+    moodTags: ["Filling"],
+    experienceTags: ["Solo"],
     budgetMin: 250,
-    priceBucket: "mid"
+    priceBucket: "mid",
   },
   {
     id: 43,
@@ -1806,45 +813,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "SM Aura",
     cuisine: "Filipino",
     priceRange: "₱250-450",
-    dishes: [
-      "Lechon Roll",
-      "Sisig",
-      "Pinoy Paella Rice"
-    ],
-    tags: [
-      "comfort",
-      "filling",
-      "filipino"
-    ],
-    attributes: [
-      "comfort",
-      "filling",
-      "filipino",
-      "solo",
-      "pair",
-      "group"
-    ],
+    dishes: ["Lechon Roll", "Sisig", "Pinoy Paella Rice"],
+    tags: ["comfort", "filling", "filipino"],
+    attributes: ["comfort", "filling", "filipino", "solo", "pair", "group"],
     budgetMax: 600,
-    diningTypes: [
-      "solo",
-      "pair",
-      "group"
-    ],
+    diningTypes: ["solo", "pair", "group"],
     slug: "le-chon-prime-sm-aura-43",
     cuisinePrimary: "Filipino",
-    foodCategories: [
-      "Asian"
-    ],
-    moodTags: [
-      "Comfort",
-      "Filling"
-    ],
-    experienceTags: [
-      "Solo",
-      "Group"
-    ],
+    foodCategories: ["Asian"],
+    moodTags: ["Comfort", "Filling"],
+    experienceTags: ["Solo", "Group"],
     budgetMin: 250,
-    priceBucket: "mid"
+    priceBucket: "mid",
   },
   {
     id: 44,
@@ -1852,42 +832,18 @@ export const RESTAURANTS: Restaurant[] = [
     area: "SM Aura",
     cuisine: "Western",
     priceRange: "₱280-450",
-    dishes: [
-      "Smash Burger",
-      "Fries",
-      "Softdrinks"
-    ],
-    tags: [
-      "comfort",
-      "filling",
-      "western"
-    ],
-    attributes: [
-      "comfort",
-      "filling",
-      "western",
-      "solo",
-      "pair"
-    ],
+    dishes: ["Smash Burger", "Fries", "Softdrinks"],
+    tags: ["comfort", "filling", "western"],
+    attributes: ["comfort", "filling", "western", "solo", "pair"],
     budgetMax: 600,
-    diningTypes: [
-      "solo",
-      "pair"
-    ],
+    diningTypes: ["solo", "pair"],
     slug: "bored-hungry-sm-aura-44",
     cuisinePrimary: "Western",
-    foodCategories: [
-      "Western"
-    ],
-    moodTags: [
-      "Comfort",
-      "Filling"
-    ],
-    experienceTags: [
-      "Solo"
-    ],
+    foodCategories: ["Western"],
+    moodTags: ["Comfort", "Filling"],
+    experienceTags: ["Solo"],
     budgetMin: 280,
-    priceBucket: "mid"
+    priceBucket: "mid",
   },
   {
     id: 45,
@@ -1895,82 +851,35 @@ export const RESTAURANTS: Restaurant[] = [
     area: "Bonifacio High Street",
     cuisine: "Thai",
     priceRange: "₱450-800",
-    dishes: [
-      "Pad Thai",
-      "Green Curry",
-      "Tom Yum"
-    ],
-    tags: [
-      "light",
-      "filling",
-      "thai"
-    ],
-    attributes: [
-      "light",
-      "filling",
-      "thai",
-      "pair",
-      "group"
-    ],
+    dishes: ["Pad Thai", "Green Curry", "Tom Yum"],
+    tags: ["light", "filling", "thai"],
+    attributes: ["light", "filling", "thai", "pair", "group"],
     budgetMax: 1000,
-    diningTypes: [
-      "pair",
-      "group"
-    ],
+    diningTypes: ["pair", "group"],
     slug: "mango-tree-bonifacio-high-street-45",
     cuisinePrimary: "Thai",
-    foodCategories: [
-      "Asian"
-    ],
-    moodTags: [
-      "Light",
-      "Filling"
-    ],
-    experienceTags: [
-      "Group"
-    ],
+    foodCategories: ["Asian"],
+    moodTags: ["Light", "Filling"],
+    experienceTags: ["Group"],
     budgetMin: 450,
-    priceBucket: "premium"
+    priceBucket: "premium",
   },
   {
     id: 46,
     name: "Prego Trattoria",
     area: "SM Aura",
-    cuisine: "SM Aura",
+    cuisine: "Italian",
     priceRange: "₱450-850",
-    dishes: [
-      "Seafood Aglio Olio",
-      "Truffle Pizza",
-      "Tiramisu"
-    ],
-    tags: [
-      "comfort",
-      "filling",
-      "italian"
-    ],
-    attributes: [
-      "comfort",
-      "filling",
-      "italian",
-      "sm aura",
-      "pair",
-      "group"
-    ],
+    dishes: ["Seafood Aglio Olio", "Truffle Pizza", "Tiramisu"],
+    tags: ["comfort", "filling", "italian"],
+    attributes: ["comfort", "filling", "italian", "sm aura", "pair", "group"],
     budgetMax: 1000,
-    diningTypes: [
-      "pair",
-      "group"
-    ],
+    diningTypes: ["pair", "group"],
     slug: "prego-trattoria-sm-aura-46",
-    moodTags: [
-      "Comfort",
-      "Filling"
-    ],
-    experienceTags: [
-      "Group"
-    ],
+    moodTags: ["Comfort", "Filling"],
+    experienceTags: ["Group"],
     budgetMin: 450,
-    priceBucket: "premium"
+    priceBucket: "premium",
   },
   {
     id: 47,
@@ -1978,39 +887,16 @@ export const RESTAURANTS: Restaurant[] = [
     area: "BGC",
     cuisine: "German",
     priceRange: "₱350-650",
-    dishes: [
-      "Bratwurst Platter",
-      "Sauerkraut",
-      "Pretzel"
-    ],
-    tags: [
-      "comfort",
-      "filling",
-      "western"
-    ],
-    attributes: [
-      "comfort",
-      "filling",
-      "western",
-      "german",
-      "pair",
-      "group"
-    ],
+    dishes: ["Bratwurst Platter", "Sauerkraut", "Pretzel"],
+    tags: ["comfort", "filling", "western"],
+    attributes: ["comfort", "filling", "western", "german", "pair", "group"],
     budgetMax: 700,
-    diningTypes: [
-      "pair",
-      "group"
-    ],
+    diningTypes: ["pair", "group"],
     slug: "brotzeit-bgc-47",
-    moodTags: [
-      "Comfort",
-      "Filling"
-    ],
-    experienceTags: [
-      "Group"
-    ],
+    moodTags: ["Comfort", "Filling"],
+    experienceTags: ["Group"],
     budgetMin: 350,
-    priceBucket: "mid"
+    priceBucket: "mid",
   },
   {
     id: 48,
@@ -2018,75 +904,548 @@ export const RESTAURANTS: Restaurant[] = [
     area: "BGC",
     cuisine: "Korean",
     priceRange: "₱400-700",
-    dishes: [
-      "Samgyeopsal",
-      "Bibimbap",
-      "Haemul Pajeon"
-    ],
-    tags: [
-      "filling",
-      "comfort",
-      "korean"
-    ],
-    attributes: [
-      "filling",
-      "comfort",
-      "korean",
-      "pair",
-      "group"
-    ],
+    dishes: ["Samgyeopsal", "Bibimbap", "Haemul Pajeon"],
+    tags: ["filling", "comfort", "korean"],
+    attributes: ["filling", "comfort", "korean", "pair", "group"],
     budgetMax: 800,
-    diningTypes: [
-      "pair",
-      "group"
-    ],
+    diningTypes: ["pair", "group"],
     slug: "daraejung-bgc-48",
     cuisinePrimary: "Korean",
-    foodCategories: [
-      "Asian"
-    ],
-    moodTags: [
-      "Filling",
-      "Comfort"
-    ],
-    experienceTags: [
-      "Group"
-    ],
+    foodCategories: ["Asian"],
+    moodTags: ["Filling", "Comfort"],
+    experienceTags: ["Group"],
     budgetMin: 400,
-    priceBucket: "premium"
+    priceBucket: "premium",
   },
   {
     id: 49,
     name: "Keizo",
-    area: "BGC",
+    area: "Burgos Circle",
     cuisine: "Japanese",
     priceRange: "₱450-750",
-    dishes: [
-      "Omakase",
-      "Tempura",
-      "Chirashi"
-    ],
-    tags: [
-      "comfort",
-      "filling",
-      "japanese"
-    ],
+    dishes: ["Omakase", "Tempura", "Chirashi"],
+    tags: ["comfort", "filling", "japanese"],
     budgetMax: 900,
-    diningTypes: [
-      "pair",
-      "group"
-    ],
+    diningTypes: ["pair", "group"],
     attributes: [],
     slug: "keizo-bgc-49",
     cuisinePrimary: "Japanese",
-    foodCategories: [
-      "Asian"
-    ],
-    moodTags: [
-      "Comfort",
-      "Filling"
-    ],
+    foodCategories: ["Asian"],
+    moodTags: ["Comfort", "Filling"],
     budgetMin: 450,
-    priceBucket: "premium"
-  }
-]
+    priceBucket: "premium",
+  },
+  {
+    id: 50,
+    name: "L'Entrecôte",
+    area: "Burgos Circle",
+    cuisine: "French",
+    priceRange: "₱900-1500",
+    dishes: ["Steak Frites", "Entrecôte", "Burrata"],
+    tags: ["comfort", "premium", "filling", "french"],
+    attributes: ["comfort", "premium", "filling", "french", "pair", "group"],
+    budgetMax: 1500,
+    diningTypes: ["pair", "group"],
+    slug: "l-entrecote-burgos-circle-50",
+    cuisinePrimary: "French",
+    foodCategories: ["Western"],
+    moodTags: ["Comfort", "Premium", "Filling"],
+    experienceTags: ["Group"],
+    budgetMin: 900,
+    priceBucket: "premium",
+  },
+  {
+    id: 51,
+    name: "Noor Manila",
+    area: "Burgos Circle",
+    cuisine: "Mediterranean",
+    priceRange: "₱500-900",
+    dishes: ["Souvlaki", "Lamb Baklava", "Fish Kebab"],
+    tags: ["light", "premium", "mediterranean"],
+    attributes: ["light", "premium", "mediterranean", "pair", "group"],
+    budgetMax: 1000,
+    diningTypes: ["pair", "group"],
+    slug: "noor-manila-burgos-circle-51",
+    cuisinePrimary: "Mediterranean",
+    foodCategories: ["Middle Eastern"],
+    moodTags: ["Light", "Premium"],
+    experienceTags: ["Group"],
+    budgetMin: 500,
+    priceBucket: "premium",
+  },
+  {
+    id: 52,
+    name: "Eesome",
+    area: "Burgos Circle",
+    cuisine: "Cafe",
+    priceRange: "₱350-700",
+    dishes: ["Coffee", "Cocktails", "Brunch Plates"],
+    tags: ["light", "cafe", "premium"],
+    attributes: ["light", "cafe", "premium", "solo", "pair", "group"],
+    budgetMax: 800,
+    diningTypes: ["solo", "pair", "group"],
+    slug: "eesome-burgos-circle-52",
+    cuisinePrimary: "Cafe",
+    foodCategories: ["Cafe"],
+    moodTags: ["Light", "Premium"],
+    experienceTags: ["Solo", "Group"],
+    budgetMin: 350,
+    priceBucket: "premium",
+  },
+  {
+    id: 53,
+    name: "Mendiola's Resto - BGC",
+    area: "Burgos Circle",
+    cuisine: "Filipino",
+    priceRange: "₱250-450",
+    dishes: ["Crispy Pata", "Sisig", "Rice Meals"],
+    tags: ["comfort", "filling", "filipino"],
+    attributes: ["comfort", "filling", "filipino", "pair", "group"],
+    budgetMax: 500,
+    diningTypes: ["pair", "group"],
+    slug: "mendiola-s-resto-bgc-burgos-circle-58",
+    cuisinePrimary: "Filipino",
+    foodCategories: ["Asian"],
+    moodTags: ["Comfort", "Filling"],
+    experienceTags: ["Group"],
+    budgetMin: 250,
+    priceBucket: "mid",
+  },
+  {
+    id: 54,
+    name: "ChiMac BGC",
+    area: "Burgos Circle",
+    cuisine: "Korean",
+    priceRange: "₱350-650",
+    dishes: ["Korean Fried Chicken", "Tteokbokki", "Kimchi Rice"],
+    tags: ["comfort", "filling", "korean"],
+    attributes: ["comfort", "filling", "korean", "pair", "group"],
+    budgetMax: 700,
+    diningTypes: ["pair", "group"],
+    slug: "chimac-bgc-burgos-circle-54",
+    cuisinePrimary: "Korean",
+    foodCategories: ["Asian"],
+    moodTags: ["Comfort", "Filling"],
+    experienceTags: ["Group"],
+    budgetMin: 350,
+    priceBucket: "mid",
+  },
+  {
+    id: 55,
+    name: "Melo's Forbestown",
+    area: "Burgos Circle",
+    cuisine: "Western",
+    priceRange: "₱900-1600",
+    dishes: ["Steak", "Ribeye", "Grilled Seafood"],
+    tags: ["premium", "filling", "western"],
+    attributes: ["premium", "filling", "western", "pair", "group"],
+    budgetMax: 1600,
+    diningTypes: ["pair", "group"],
+    slug: "melo-s-forbestown-burgos-circle-55",
+    cuisinePrimary: "Western",
+    foodCategories: ["Western"],
+    moodTags: ["Premium", "Filling"],
+    experienceTags: ["Group"],
+    budgetMin: 900,
+    priceBucket: "premium",
+  },
+  {
+    id: 56,
+    name: "Big Belly Burger Bar",
+    area: "Burgos Circle",
+    cuisine: "Western",
+    priceRange: "₱250-450",
+    dishes: ["Smash Burger", "Fries", "Burger Combo"],
+    tags: ["comfort", "filling", "western"],
+    attributes: ["comfort", "filling", "western", "solo", "pair"],
+    budgetMax: 500,
+    diningTypes: ["solo", "pair"],
+    slug: "big-belly-manila-burgos-circle-56",
+    cuisinePrimary: "Western",
+    foodCategories: ["Western"],
+    moodTags: ["Comfort", "Filling"],
+    experienceTags: ["Solo"],
+    budgetMin: 250,
+    priceBucket: "mid",
+  },
+  {
+    id: 57,
+    name: "Tea & Toast",
+    area: "Burgos Circle",
+    cuisine: "Cafe",
+    priceRange: "₱250-450",
+    dishes: ["Coffee", "Toast", "Brunch Plates"],
+    tags: ["light", "cafe", "comfort"],
+    attributes: ["light", "cafe", "comfort", "solo", "pair"],
+    budgetMax: 500,
+    diningTypes: ["solo", "pair"],
+    slug: "tea-and-toast-burgos-circle-57",
+    cuisinePrimary: "Cafe",
+    foodCategories: ["Cafe"],
+    moodTags: ["Light", "Comfort"],
+    experienceTags: ["Solo"],
+    budgetMin: 250,
+    priceBucket: "mid",
+  },
+  {
+    id: 58,
+    name: "Vito's BBQ",
+    area: "Burgos Circle",
+    cuisine: "Filipino",
+    priceRange: "₱180-350",
+    dishes: ["Chicken BBQ", "Isaw", "Rice Meals"],
+    tags: ["comfort", "filling", "filipino"],
+    attributes: ["comfort", "filling", "filipino", "solo", "pair"],
+    budgetMax: 400,
+    diningTypes: ["solo", "pair"],
+    slug: "vito-s-bbq-burgos-circle-67",
+    cuisinePrimary: "Filipino",
+    foodCategories: ["Asian"],
+    moodTags: ["Comfort", "Filling"],
+    experienceTags: ["Solo"],
+    budgetMin: 180,
+    priceBucket: "budget",
+  },
+  {
+    id: 59,
+    name: "Tipsy Pig",
+    area: "Burgos Circle",
+    cuisine: "Filipino",
+    priceRange: "₱350-700",
+    dishes: ["Crispy Pata", "Monggo", "Lava Cake"],
+    tags: ["comfort", "filling", "filipino"],
+    attributes: ["comfort", "filling", "filipino", "pair", "group"],
+    budgetMax: 800,
+    diningTypes: ["pair", "group"],
+    slug: "tipsy-pig-burgos-circle-59",
+    cuisinePrimary: "Filipino",
+    foodCategories: ["Asian"],
+    moodTags: ["Comfort", "Filling"],
+    experienceTags: ["Group"],
+    budgetMin: 350,
+    priceBucket: "premium",
+  },
+  {
+    id: 60,
+    name: "UCC Cafe Terrace",
+    area: "Burgos Circle",
+    cuisine: "Cafe",
+    priceRange: "₱300-600",
+    dishes: ["Coffee", "Pasta", "Desserts"],
+    tags: ["light", "comfort", "cafe"],
+    attributes: ["light", "comfort", "cafe", "solo", "pair"],
+    budgetMax: 600,
+    diningTypes: ["solo", "pair"],
+    slug: "ucc-cafe-terrace-burgos-circle-60",
+    cuisinePrimary: "Cafe",
+    foodCategories: ["Cafe"],
+    moodTags: ["Light", "Comfort"],
+    experienceTags: ["Solo"],
+    budgetMin: 300,
+    priceBucket: "mid",
+  },
+  {
+    id: 61,
+    name: "Pizzulu",
+    area: "Burgos Circle",
+    cuisine: "Italian",
+    priceRange: "₱400-800",
+    dishes: ["Pizza", "Pasta", "Brunch Plates"],
+    tags: ["comfort", "filling", "italian"],
+    attributes: ["comfort", "filling", "italian", "pair", "group"],
+    budgetMax: 800,
+    diningTypes: ["pair", "group"],
+    slug: "pizzulu-burgos-circle-61",
+    cuisinePrimary: "Italian",
+    foodCategories: ["Western"],
+    moodTags: ["Comfort", "Filling"],
+    experienceTags: ["Group"],
+    budgetMin: 400,
+    priceBucket: "premium",
+  },
+  {
+    id: 62,
+    name: "Starbucks",
+    area: "Burgos Circle",
+    cuisine: "Cafe",
+    priceRange: "₱180-450",
+    dishes: ["Latte", "Cold Brew", "Pastries"],
+    tags: ["light", "cafe", "comfort"],
+    attributes: ["light", "cafe", "comfort", "solo", "pair"],
+    budgetMax: 500,
+    diningTypes: ["solo", "pair"],
+    slug: "starbucks-burgos-circle-62",
+    cuisinePrimary: "Cafe",
+    foodCategories: ["Cafe"],
+    moodTags: ["Light", "Comfort"],
+    experienceTags: ["Solo"],
+    budgetMin: 180,
+    priceBucket: "mid",
+  },
+  {
+    id: 63,
+    name: "CoCo Ichibanya",
+    area: "Burgos Circle",
+    cuisine: "Japanese",
+    priceRange: "₱300-600",
+    dishes: ["Japanese Curry", "Katsu Curry", "Omelette Curry"],
+    tags: ["comfort", "filling", "japanese"],
+    attributes: ["comfort", "filling", "japanese", "solo", "pair"],
+    budgetMax: 600,
+    diningTypes: ["solo", "pair"],
+    slug: "coco-ichibanya-burgos-circle-63",
+    cuisinePrimary: "Japanese",
+    foodCategories: ["Asian"],
+    moodTags: ["Comfort", "Filling"],
+    experienceTags: ["Solo"],
+    budgetMin: 300,
+    priceBucket: "mid",
+  },
+  {
+    id: 64,
+    name: "Max's Restaurant",
+    area: "Burgos Circle",
+    cuisine: "Filipino",
+    priceRange: "₱250-500",
+    dishes: ["Fried Chicken", "Kare-Kare", "Sinigang"],
+    tags: ["comfort", "filling", "filipino"],
+    attributes: ["comfort", "filling", "filipino", "pair", "group"],
+    budgetMax: 600,
+    diningTypes: ["pair", "group"],
+    slug: "max-s-restaurant-burgos-circle-64",
+    cuisinePrimary: "Filipino",
+    foodCategories: ["Asian"],
+    moodTags: ["Comfort", "Filling"],
+    experienceTags: ["Group"],
+    budgetMin: 250,
+    priceBucket: "mid",
+  },
+  {
+    id: 65,
+    name: "Dr. Wine BGC",
+    area: "Burgos Circle",
+    cuisine: "French",
+    priceRange: "₱700-1500",
+    dishes: ["Cheese Board", "Charcuterie Platter", "Chicken Liver Mousse"],
+    tags: ["premium", "light", "french"],
+    attributes: ["premium", "light", "french", "pair", "group"],
+    budgetMax: 1500,
+    diningTypes: ["pair", "group"],
+    slug: "dr-wine-bgc-burgos-circle-65",
+    cuisinePrimary: "French",
+    foodCategories: ["Western"],
+    moodTags: ["Premium", "Light"],
+    experienceTags: ["Group"],
+    budgetMin: 700,
+    priceBucket: "premium",
+  },
+  {
+    id: 66,
+    name: "Zion-1 PH",
+    area: "Burgos Circle",
+    cuisine: "Japanese",
+    priceRange: "₱500-1000",
+    dishes: ["Wagyu Cubes", "Katsu Bites", "Beef Gyudon Bowl"],
+    tags: ["premium", "filling", "japanese"],
+    attributes: ["premium", "filling", "japanese", "pair", "group"],
+    budgetMax: 1000,
+    diningTypes: ["pair", "group"],
+    slug: "zion-1-ph-burgos-circle-66",
+    cuisinePrimary: "Japanese",
+    foodCategories: ["Asian"],
+    moodTags: ["Premium", "Filling"],
+    experienceTags: ["Group"],
+    budgetMin: 500,
+    priceBucket: "premium",
+  },
+  {
+    id: 77,
+    name: "Tokyo Bubble Tea",
+    area: "Burgos Circle",
+    cuisine: "Japanese",
+    priceRange: "₱150-300",
+    dishes: ["Milk Tea", "Takoyaki", "Snacks"],
+    tags: ["light", "snack", "japanese"],
+    attributes: ["light", "snack", "japanese", "solo"],
+    budgetMax: 300,
+    diningTypes: ["solo"],
+    slug: "tokyo-bubble-tea-burgos-circle-77",
+    cuisinePrimary: "Japanese",
+    foodCategories: ["Asian"],
+    moodTags: ["Light"],
+    experienceTags: ["Solo"],
+    budgetMin: 150,
+    priceBucket: "budget",
+  },
+  {
+    id: 68,
+    name: "Al Dente Pasta Bar",
+    area: "Burgos Circle",
+    cuisine: "Italian",
+    priceRange: "₱350-700",
+    dishes: ["Carbonara", "Truffle Pasta", "Lasagna"],
+    tags: ["comfort", "filling", "italian"],
+    attributes: ["comfort", "filling", "italian", "pair", "group"],
+    budgetMax: 700,
+    diningTypes: ["pair", "group"],
+    slug: "al-dente-pasta-bar-burgos-circle-68",
+    cuisinePrimary: "Italian",
+    foodCategories: ["Western"],
+    moodTags: ["Comfort", "Filling"],
+    experienceTags: ["Group"],
+    budgetMin: 350,
+    priceBucket: "mid",
+  },
+  {
+    id: 69,
+    name: "Reserve PH",
+    area: "Burgos Circle",
+    cuisine: "Western",
+    priceRange: "₱600-1200",
+    dishes: ["Steak", "Pasta", "Wine"],
+    tags: ["premium", "comfort", "western"],
+    attributes: ["premium", "comfort", "western", "pair", "group"],
+    budgetMax: 1200,
+    diningTypes: ["pair", "group"],
+    slug: "reserve-ph-burgos-circle-69",
+    cuisinePrimary: "Western",
+    foodCategories: ["Western"],
+    moodTags: ["Premium", "Comfort"],
+    experienceTags: ["Group"],
+    budgetMin: 600,
+    priceBucket: "premium",
+  },
+  {
+    id: 70,
+    name: "Purple Rice",
+    area: "Burgos Circle",
+    cuisine: "Asian",
+    priceRange: "₱300-600",
+    dishes: ["Rice Bowls", "Grilled Chicken", "Beef Bowl"],
+    tags: ["comfort", "filling", "asian"],
+    attributes: ["comfort", "filling", "asian", "solo", "pair"],
+    budgetMax: 600,
+    diningTypes: ["solo", "pair"],
+    slug: "purple-rice-burgos-circle-70",
+    cuisinePrimary: "Asian",
+    foodCategories: ["Asian"],
+    moodTags: ["Comfort", "Filling"],
+    experienceTags: ["Solo"],
+    budgetMin: 300,
+    priceBucket: "mid",
+  },
+  {
+    id: 71,
+    name: "Rue Bourbon",
+    area: "Burgos Circle",
+    cuisine: "American",
+    priceRange: "₱400-800",
+    dishes: ["Wings", "Burger", "Beer"],
+    tags: ["comfort", "filling", "american"],
+    attributes: ["comfort", "filling", "american", "group"],
+    budgetMax: 800,
+    diningTypes: ["group"],
+    slug: "rue-bourbon-burgos-circle-71",
+    cuisinePrimary: "American",
+    foodCategories: ["Western"],
+    moodTags: ["Comfort", "Filling"],
+    experienceTags: ["Group"],
+    budgetMin: 400,
+    priceBucket: "premium",
+  },
+  {
+    id: 72,
+    name: "The Coffee Bean & Tea Leaf",
+    area: "Burgos Circle",
+    cuisine: "Cafe",
+    priceRange: "₱200-450",
+    dishes: ["Coffee", "Tea", "Sandwiches"],
+    tags: ["light", "cafe", "comfort"],
+    attributes: ["light", "cafe", "comfort", "solo", "pair"],
+    budgetMax: 500,
+    diningTypes: ["solo", "pair"],
+    slug: "the-coffee-bean-and-tea-leaf-burgos-circle-72",
+    cuisinePrimary: "Cafe",
+    foodCategories: ["Cafe"],
+    moodTags: ["Light", "Comfort"],
+    experienceTags: ["Solo"],
+    budgetMin: 200,
+    priceBucket: "mid",
+  },
+  {
+    id: 73,
+    name: "UCC Clockwork",
+    area: "Burgos Circle",
+    cuisine: "Cafe",
+    priceRange: "₱300-650",
+    dishes: ["Specialty Coffee", "Pasta", "Desserts"],
+    tags: ["light", "cafe", "premium"],
+    attributes: ["light", "cafe", "premium", "solo", "pair"],
+    budgetMax: 700,
+    diningTypes: ["solo", "pair"],
+    slug: "ucc-clockwork-burgos-circle-73",
+    cuisinePrimary: "Cafe",
+    foodCategories: ["Cafe"],
+    moodTags: ["Light", "Premium"],
+    experienceTags: ["Solo"],
+    budgetMin: 300,
+    priceBucket: "mid",
+  },
+  {
+    id: 74,
+    name: "Pancake House",
+    area: "Burgos Circle",
+    cuisine: "Filipino",
+    priceRange: "₱250-500",
+    dishes: ["Pancakes", "Spaghetti", "Chicken"],
+    tags: ["comfort", "filling", "filipino"],
+    attributes: ["comfort", "filling", "filipino", "pair", "group"],
+    budgetMax: 500,
+    diningTypes: ["pair", "group"],
+    slug: "pancake-house-burgos-circle-74",
+    cuisinePrimary: "Filipino",
+    foodCategories: ["Asian"],
+    moodTags: ["Comfort", "Filling"],
+    experienceTags: ["Group"],
+    budgetMin: 250,
+    priceBucket: "mid",
+  },
+  {
+    id: 75,
+    name: "Yellow Cab Pizza Co.",
+    area: "Burgos Circle",
+    cuisine: "Italian",
+    priceRange: "₱350-800",
+    dishes: ["Pizza", "Pasta", "Wings"],
+    tags: ["comfort", "filling", "italian"],
+    attributes: ["comfort", "filling", "italian", "group"],
+    budgetMax: 800,
+    diningTypes: ["group"],
+    slug: "yellow-cab-pizza-co-burgos-circle-75",
+    cuisinePrimary: "Italian",
+    foodCategories: ["Western"],
+    moodTags: ["Comfort", "Filling"],
+    experienceTags: ["Group"],
+    budgetMin: 350,
+    priceBucket: "premium",
+  },
+  {
+    id: 76,
+    name: "Gringo Chicken Ribs Friends",
+    area: "Burgos Circle",
+    cuisine: "Mexican",
+    priceRange: "₱300-700",
+    dishes: ["Chicken", "Ribs", "Nachos"],
+    tags: ["comfort", "filling", "mexican"],
+    attributes: ["comfort", "filling", "mexican", "group"],
+    budgetMax: 700,
+    diningTypes: ["group"],
+    slug: "gringo-chicken-ribs-friends-burgos-circle-76",
+    cuisinePrimary: "Mexican",
+    foodCategories: ["Western"],
+    moodTags: ["Comfort", "Filling"],
+    experienceTags: ["Group"],
+    budgetMin: 300,
+    priceBucket: "mid",
+  },
+];
