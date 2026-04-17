@@ -1,15 +1,6 @@
-export type Restaurant = {
-  id: number
-  name: string
-  area: string
-  cuisine: string
-  priceRange: string
-  dishes: string[]
-  tags: string[]
-  budgetMax: number
-  attributes: string[]
-  diningTypes: string[]
-}
+import type { Restaurant } from "./restaurant.types"
+
+export type { Restaurant }
 
 export const RESTAURANTS: Restaurant[] = [
   {
