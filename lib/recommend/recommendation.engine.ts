@@ -1,6 +1,11 @@
 import type { Filters } from "@/app/page"
 import { RESTAURANTS, type Restaurant } from "@/data/restaurants"
-import { getEffectiveCuisine, getEffectiveDiningTypes, getEffectiveTags } from "@/data/restaurant.helpers"
+import {
+  getEffectiveAttributes,
+  getEffectiveCuisine,
+  getEffectiveDiningTypes,
+  getEffectiveTags,
+} from "@/data/restaurant.helpers"
 
 export type RecommendationSessionState = {
   seenTopPickIds: number[]
@@ -32,6 +37,37 @@ function parseBudgetValue(budget: string | null | undefined) {
   return budget && budget !== "1000" ? parseInt(budget, 10) : 1000
 }
 
+function isOpenRestaurant(restaurant: Restaurant) {
+  return restaurant.operatingStatus !== "closed"
+}
+
+function getConfidencePenalty(restaurant: Restaurant) {
+  switch (restaurant.dataConfidence) {
+    case "low":
+      return -18
+    case "medium":
+      return -6
+    default:
+      return 0
+  }
+}
+
+function getEffectivePriceBand(restaurant: Restaurant) {
+  if (restaurant.priceBucket) {
+    switch (restaurant.priceBucket) {
+      case "budget":
+        return "low"
+      case "mid":
+        return "mid"
+      case "premium":
+      case "splurge":
+        return "high"
+    }
+  }
+
+  return getPriceBand(restaurant)
+}
+
 function scoreFallbackRestaurant(restaurant: Restaurant, filters: Filters) {
   const selectedCuisine = filters.cuisine && filters.cuisine !== "any" ? normalize(filters.cuisine) : null
   const mood = filters.mood && filters.mood !== "random" ? normalize(filters.mood) : null
@@ -43,6 +79,7 @@ function scoreFallbackRestaurant(restaurant: Restaurant, filters: Filters) {
   const priceMatch = restaurant.budgetMax <= budgetMax ? 1 : 0
   const diningMatch = dining && getEffectiveDiningTypes(restaurant).includes(dining) ? 1 : 0
   const popularityScore = Math.min(restaurant.dishes.length, 4)
+  const confidencePenalty = getConfidencePenalty(restaurant)
 
   const cuisineWeight = selectedCuisine ? 100 : 0
   const moodWeight = mood ? 30 : 0
@@ -54,7 +91,8 @@ function scoreFallbackRestaurant(restaurant: Restaurant, filters: Filters) {
     moodMatch * moodWeight +
     priceMatch * priceWeight +
     diningMatch * diningWeight +
-    popularityScore * 5
+    popularityScore * 5 +
+    confidencePenalty
   )
 }
 
@@ -63,6 +101,10 @@ export function getMatchedRestaurants(filters: Filters, count = 3): Restaurant[]
   const isRandom = filters.mood === "random"
 
   const filtered = RESTAURANTS.filter((restaurant) => {
+    if (!isOpenRestaurant(restaurant)) {
+      return false
+    }
+
     if (restaurant.budgetMax > budgetMax && filters.budget !== "1000") {
       return false
     }
@@ -89,11 +131,12 @@ export function getMatchedRestaurants(filters: Filters, count = 3): Restaurant[]
 
 export function getFallbackRestaurants(filters: Filters, count = 3): Restaurant[] {
   const selectedCuisine = filters.cuisine && filters.cuisine !== "any" ? normalize(filters.cuisine) : null
+  const eligibleRestaurants = RESTAURANTS.filter(isOpenRestaurant)
   const candidates = selectedCuisine
-    ? RESTAURANTS.filter((restaurant) => normalize(getEffectiveCuisine(restaurant)) === selectedCuisine)
-    : RESTAURANTS
+    ? eligibleRestaurants.filter((restaurant) => normalize(getEffectiveCuisine(restaurant)) === selectedCuisine)
+    : eligibleRestaurants
 
-  const pool = candidates.length > 0 ? candidates : RESTAURANTS
+  const pool = candidates.length > 0 ? candidates : eligibleRestaurants
 
   const scored = [...pool].sort((a, b) => {
     const scoreB = scoreFallbackRestaurant(b, filters)
@@ -110,7 +153,7 @@ export function getFallbackRestaurants(filters: Filters, count = 3): Restaurant[
     return result
   }
 
-  const remaining = [...RESTAURANTS]
+  const remaining = eligibleRestaurants
     .filter((restaurant) => !result.some((selected) => selected.id === restaurant.id))
     .sort((a, b) => {
       const scoreB = scoreFallbackRestaurant(b, filters)
@@ -142,6 +185,7 @@ function getMatchScore(restaurant: Restaurant, filters: Filters) {
   if (restaurant.budgetMax <= budgetMax) score += 25
   if (dining && getEffectiveDiningTypes(restaurant).includes(dining)) score += 15
   score += Math.min(restaurant.dishes.length, 4)
+  score += getConfidencePenalty(restaurant)
 
   return score
 }
@@ -153,7 +197,7 @@ function getVarietyBoost(restaurant: Restaurant, reference: Restaurant | null) {
 
   let boost = 0
   if (normalize(getEffectiveCuisine(restaurant)) !== normalize(getEffectiveCuisine(reference))) boost += 18
-  if (getPriceBand(restaurant) !== getPriceBand(reference)) boost += 12
+  if (getEffectivePriceBand(restaurant) !== getEffectivePriceBand(reference)) boost += 12
   if (!getEffectiveDiningTypes(restaurant).some((type) => getEffectiveDiningTypes(reference).includes(type))) boost += 8
   return boost
 }
@@ -165,8 +209,8 @@ function getDirectionBoost(restaurant: Restaurant, direction: string | null) {
 
   const cuisine = normalize(getEffectiveCuisine(restaurant))
   const tags = getEffectiveTags(restaurant).map(normalize)
-  const attributes = restaurant.attributes.map(normalize)
-  const priceBand = getPriceBand(restaurant)
+  const attributes = getEffectiveAttributes(restaurant).map(normalize)
+  const priceBand = getEffectivePriceBand(restaurant)
 
   let boost = 0
   switch (direction) {
@@ -276,6 +320,10 @@ export function getCandidatePool(filters: Filters, fallbackMode: boolean) {
   const isRandom = filters.mood === "random"
 
   return RESTAURANTS.filter((restaurant) => {
+    if (!isOpenRestaurant(restaurant)) {
+      return false
+    }
+
     if (restaurant.budgetMax > budgetMax && filters.budget !== "1000") {
       return false
     }
