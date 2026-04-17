@@ -4,6 +4,7 @@ import {
   getEffectiveAttributes,
   getEffectiveCuisine,
   getEffectiveDiningTypes,
+  getEffectivePriceBucket,
   getEffectiveTags,
 } from "@/data/restaurant.helpers"
 
@@ -53,16 +54,14 @@ function getConfidencePenalty(restaurant: Restaurant) {
 }
 
 function getEffectivePriceBand(restaurant: Restaurant) {
-  if (restaurant.priceBucket) {
-    switch (restaurant.priceBucket) {
-      case "budget":
-        return "low"
-      case "mid":
-        return "mid"
-      case "premium":
-      case "splurge":
-        return "high"
-    }
+  switch (getEffectivePriceBucket(restaurant)) {
+    case "budget":
+      return "low"
+    case "mid":
+      return "mid"
+    case "premium":
+    case "splurge":
+      return "high"
   }
 
   return getPriceBand(restaurant)

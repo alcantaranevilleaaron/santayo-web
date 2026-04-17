@@ -1,4 +1,5 @@
 import type { Restaurant } from "./restaurant.types"
+import { inferPriceBucket } from "./restaurant.rules"
 
 const normalizeArray = (values: Array<string | undefined> = []): string[] => {
   return Array.from(new Set(values.filter(Boolean).map((value) => value!.trim())))
@@ -53,18 +54,25 @@ export const getEffectiveDiningTypes = (restaurant: Restaurant): string[] => {
   return normalizeArray(restaurant.diningTypes)
 }
 
+export const getEffectivePriceBucket = (restaurant: Restaurant) => {
+  return restaurant.priceBucket ?? inferPriceBucket({
+    budgetMin: restaurant.budgetMin,
+    budgetMax: restaurant.budgetMax,
+  })
+}
+
 export const getEffectivePriceLabel = (restaurant: Restaurant): string => {
-  if (restaurant.priceBucket) {
-    switch (restaurant.priceBucket) {
-      case "budget":
-        return "Budget"
-      case "mid":
-        return "Mid-range"
-      case "premium":
-        return "Premium"
-      case "splurge":
-        return "Splurge"
-    }
+  const priceBucket = getEffectivePriceBucket(restaurant)
+
+  switch (priceBucket) {
+    case "budget":
+      return "Budget"
+    case "mid":
+      return "Mid-range"
+    case "premium":
+      return "Premium"
+    case "splurge":
+      return "Splurge"
   }
 
   if (restaurant.budgetMin != null && restaurant.budgetMax != null) {
