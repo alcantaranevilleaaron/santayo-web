@@ -1,17 +1,366 @@
-export type RecommendationInput = {
-  restaurantId: number
-  filters?: Record<string, unknown>
+import type { Filters } from "@/app/page"
+import { RESTAURANTS, type Restaurant } from "@/data/restaurants"
+import { getEffectiveCuisine, getEffectiveDiningTypes, getEffectiveTags } from "@/data/restaurant.helpers"
+
+export type RecommendationSessionState = {
+  seenTopPickIds: number[]
+  seenAlternativeIds: number[]
+  lastTopPickId: number | null
 }
 
-export type RecommendationResult = {
-  restaurantId: number
-  score: number
-  reason?: string
+export type RecommendationPickSet = {
+  newTopPick: Restaurant | null
+  newAlternatives: Restaurant[]
 }
 
-export const scoreRestaurant = (_input: RecommendationInput): RecommendationResult => {
+function shuffle<T>(array: T[]): T[] {
+  const result = [...array]
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    const temp = result[i]
+    result[i] = result[j]
+    result[j] = temp
+  }
+  return result
+}
+
+function normalize(value: string) {
+  return value.trim().toLowerCase()
+}
+
+function parseBudgetValue(budget: string | null | undefined) {
+  return budget && budget !== "1000" ? parseInt(budget, 10) : 1000
+}
+
+function scoreFallbackRestaurant(restaurant: Restaurant, filters: Filters) {
+  const selectedCuisine = filters.cuisine && filters.cuisine !== "any" ? normalize(filters.cuisine) : null
+  const mood = filters.mood && filters.mood !== "random" ? normalize(filters.mood) : null
+  const budgetMax = parseBudgetValue(filters.budget)
+  const dining = filters.dining || null
+
+  const cuisineMatch = selectedCuisine && normalize(getEffectiveCuisine(restaurant)) === selectedCuisine ? 1 : 0
+  const moodMatch = mood && getEffectiveTags(restaurant).map(normalize).includes(mood) ? 1 : 0
+  const priceMatch = restaurant.budgetMax <= budgetMax ? 1 : 0
+  const diningMatch = dining && getEffectiveDiningTypes(restaurant).includes(dining) ? 1 : 0
+  const popularityScore = Math.min(restaurant.dishes.length, 4)
+
+  const cuisineWeight = selectedCuisine ? 100 : 0
+  const moodWeight = mood ? 30 : 0
+  const priceWeight = 20
+  const diningWeight = 10
+
+  return (
+    cuisineMatch * cuisineWeight +
+    moodMatch * moodWeight +
+    priceMatch * priceWeight +
+    diningMatch * diningWeight +
+    popularityScore * 5
+  )
+}
+
+export function getMatchedRestaurants(filters: Filters, count = 3): Restaurant[] {
+  const budgetMax = parseInt(filters.budget || "1000", 10)
+  const isRandom = filters.mood === "random"
+
+  const filtered = RESTAURANTS.filter((restaurant) => {
+    if (restaurant.budgetMax > budgetMax && filters.budget !== "1000") {
+      return false
+    }
+
+    if (filters.mood && !isRandom && !getEffectiveTags(restaurant).includes(filters.mood)) {
+      return false
+    }
+
+    if (filters.cuisine && filters.cuisine !== "any") {
+      if (getEffectiveCuisine(restaurant).toLowerCase() !== filters.cuisine) {
+        return false
+      }
+    }
+
+    if (filters.dining && !getEffectiveDiningTypes(restaurant).includes(filters.dining)) {
+      return false
+    }
+
+    return true
+  })
+
+  return shuffle(filtered).slice(0, count)
+}
+
+export function getFallbackRestaurants(filters: Filters, count = 3): Restaurant[] {
+  const selectedCuisine = filters.cuisine && filters.cuisine !== "any" ? normalize(filters.cuisine) : null
+  const candidates = selectedCuisine
+    ? RESTAURANTS.filter((restaurant) => normalize(getEffectiveCuisine(restaurant)) === selectedCuisine)
+    : RESTAURANTS
+
+  const pool = candidates.length > 0 ? candidates : RESTAURANTS
+
+  const scored = [...pool].sort((a, b) => {
+    const scoreB = scoreFallbackRestaurant(b, filters)
+    const scoreA = scoreFallbackRestaurant(a, filters)
+    if (scoreB !== scoreA) {
+      return scoreB - scoreA
+    }
+    return a.name.localeCompare(b.name)
+  })
+
+  const result = scored.slice(0, count)
+
+  if (result.length === count) {
+    return result
+  }
+
+  const remaining = [...RESTAURANTS]
+    .filter((restaurant) => !result.some((selected) => selected.id === restaurant.id))
+    .sort((a, b) => {
+      const scoreB = scoreFallbackRestaurant(b, filters)
+      const scoreA = scoreFallbackRestaurant(a, filters)
+      if (scoreB !== scoreA) {
+        return scoreB - scoreA
+      }
+      return a.name.localeCompare(b.name)
+    })
+
+  return [...result, ...remaining.slice(0, count - result.length)]
+}
+
+function getPriceBand(restaurant: Restaurant) {
+  if (restaurant.budgetMax <= 300) return "low"
+  if (restaurant.budgetMax <= 600) return "mid"
+  return "high"
+}
+
+function getMatchScore(restaurant: Restaurant, filters: Filters) {
+  const selectedCuisine = filters.cuisine && filters.cuisine !== "any" ? normalize(filters.cuisine) : null
+  const mood = filters.mood && filters.mood !== "random" ? normalize(filters.mood) : null
+  const budgetMax = parseInt(filters.budget || "1000", 10)
+  const dining = filters.dining || null
+
+  let score = 0
+  if (selectedCuisine && normalize(getEffectiveCuisine(restaurant)) === selectedCuisine) score += 100
+  if (mood && getEffectiveTags(restaurant).map(normalize).includes(mood)) score += 60
+  if (restaurant.budgetMax <= budgetMax) score += 25
+  if (dining && getEffectiveDiningTypes(restaurant).includes(dining)) score += 15
+  score += Math.min(restaurant.dishes.length, 4)
+
+  return score
+}
+
+function getVarietyBoost(restaurant: Restaurant, reference: Restaurant | null) {
+  if (!reference) {
+    return 0
+  }
+
+  let boost = 0
+  if (normalize(getEffectiveCuisine(restaurant)) !== normalize(getEffectiveCuisine(reference))) boost += 18
+  if (getPriceBand(restaurant) !== getPriceBand(reference)) boost += 12
+  if (!getEffectiveDiningTypes(restaurant).some((type) => getEffectiveDiningTypes(reference).includes(type))) boost += 8
+  return boost
+}
+
+function getDirectionBoost(restaurant: Restaurant, direction: string | null) {
+  if (!direction) {
+    return 0
+  }
+
+  const cuisine = normalize(getEffectiveCuisine(restaurant))
+  const tags = getEffectiveTags(restaurant).map(normalize)
+  const attributes = restaurant.attributes.map(normalize)
+  const priceBand = getPriceBand(restaurant)
+
+  let boost = 0
+  switch (direction) {
+    case "light":
+      if (priceBand === "low") boost += 16
+      if (priceBand === "mid") boost += 8
+      if (tags.includes("light")) boost += 20
+      if (tags.includes("healthy")) boost += 12
+      if (cuisine === "cafe") boost += 10
+      break
+    case "comfort":
+      if (tags.includes("comfort")) boost += 20
+      if (tags.includes("filling")) boost += 12
+      if (["filipino", "western", "indian", "chinese", "japanese"].includes(cuisine)) boost += 10
+      break
+    case "premium":
+      if (priceBand === "high") boost += 22
+      if (attributes.includes("premium")) boost += 18
+      if (tags.includes("premium")) boost += 16
+      if (cuisine === "cafe") boost += 6
+      break
+    case "quick bite":
+      if (tags.includes("quick")) boost += 20
+      if (priceBand === "low") boost += 10
+      if (tags.includes("light")) boost += 8
+      break
+    case "healthy":
+      if (tags.includes("healthy")) boost += 22
+      if (tags.includes("light")) boost += 12
+      if (cuisine === "healthy") boost += 16
+      break
+    default:
+      break
+  }
+
+  return boost
+}
+
+function sortRecommendationPool(
+  restaurants: Restaurant[],
+  filters: Filters,
+  reference: Restaurant | null,
+  preferVariety = false,
+  direction: string | null = null
+) {
+  return [...restaurants].sort((a, b) => {
+    const scoreA = getMatchScore(a, filters) + getVarietyBoost(a, reference) + getDirectionBoost(a, direction)
+    const scoreB = getMatchScore(b, filters) + getVarietyBoost(b, reference) + getDirectionBoost(b, direction)
+
+    if (preferVariety) {
+      const varietyA = getVarietyBoost(a, reference)
+      const varietyB = getVarietyBoost(b, reference)
+      if (varietyA !== varietyB) {
+        return varietyB - varietyA
+      }
+    }
+
+    if (scoreB !== scoreA) {
+      return scoreB - scoreA
+    }
+
+    return a.name.localeCompare(b.name)
+  })
+}
+
+function chooseBestCandidate(
+  restaurants: Restaurant[],
+  filters: Filters,
+  excludeIds: number[],
+  lastTopPickId: number | null,
+  preferVariety = false
+) {
+  const available = restaurants.filter((restaurant) => !excludeIds.includes(restaurant.id))
+  if (available.length > 0) {
+    return sortRecommendationPool(
+      available,
+      filters,
+      restaurants.find((restaurant) => restaurant.id === lastTopPickId) ?? null,
+      preferVariety
+    )[0]
+  }
+
+  const fallbackCandidates = restaurants.filter((restaurant) => restaurant.id !== lastTopPickId)
+  if (fallbackCandidates.length > 0) {
+    return sortRecommendationPool(
+      fallbackCandidates,
+      filters,
+      restaurants.find((restaurant) => restaurant.id === lastTopPickId) ?? null,
+      preferVariety
+    )[0]
+  }
+
+  return sortRecommendationPool(
+    restaurants,
+    filters,
+    restaurants.find((restaurant) => restaurant.id === lastTopPickId) ?? null,
+    preferVariety
+  )[0]
+}
+
+export function getCandidatePool(filters: Filters, fallbackMode: boolean) {
+  if (fallbackMode) {
+    return getFallbackRestaurants(filters, RESTAURANTS.length)
+  }
+
+  const budgetMax = parseInt(filters.budget || "1000", 10)
+  const isRandom = filters.mood === "random"
+
+  return RESTAURANTS.filter((restaurant) => {
+    if (restaurant.budgetMax > budgetMax && filters.budget !== "1000") {
+      return false
+    }
+
+    if (filters.mood && !isRandom && !getEffectiveTags(restaurant).includes(filters.mood)) {
+      return false
+    }
+
+    if (filters.cuisine && filters.cuisine !== "any") {
+      if (getEffectiveCuisine(restaurant).toLowerCase() !== filters.cuisine) {
+        return false
+      }
+    }
+
+    if (filters.dining && !getEffectiveDiningTypes(restaurant).includes(filters.dining)) {
+      return false
+    }
+
+    return true
+  })
+}
+
+export function getTopPick(
+  restaurants: Restaurant[],
+  filters: Filters,
+  excludeIds: number[] = [],
+  lastTopPickId: number | null = null,
+  fallbackMode = false
+) {
+  return chooseBestCandidate(
+    restaurants,
+    filters,
+    excludeIds,
+    lastTopPickId,
+    fallbackMode || filters.mood === "random"
+  )
+}
+
+export function getAlternativeRecommendations(
+  topPick: Restaurant,
+  restaurants: Restaurant[],
+  filters: Filters,
+  excludeIds: number[] = [],
+  count = 2,
+  direction: string | null = null
+) {
+  const available = restaurants.filter(
+    (restaurant) => restaurant.id !== topPick.id && !excludeIds.includes(restaurant.id)
+  )
+
+  const scored = sortRecommendationPool(available, filters, topPick, true, direction)
+  if (scored.length >= count) {
+    return scored.slice(0, count)
+  }
+
+  const fallback = restaurants.filter((restaurant) => restaurant.id !== topPick.id)
+  return sortRecommendationPool(fallback, filters, topPick, true, direction).slice(0, count)
+}
+
+export function getNextPickSet(
+  filters: Filters,
+  seenIds: {
+    seenTopPickIds: number[]
+    seenAlternativeIds: number[]
+    lastTopPickId: number | null
+  },
+  fallbackMode: boolean,
+  count = 3
+) {
+  const pool = getCandidatePool(filters, fallbackMode)
+  if (pool.length === 0) {
+    return {
+      newTopPick: null,
+      newAlternatives: [] as Restaurant[],
+    }
+  }
+
+  const excludeIds = Array.from(new Set([...seenIds.seenTopPickIds, ...seenIds.seenAlternativeIds]))
+  const nextTopPick = getTopPick(pool, filters, excludeIds, seenIds.lastTopPickId, fallbackMode)
+  const nextAlternatives = nextTopPick
+    ? getAlternativeRecommendations(nextTopPick, pool, filters, [...excludeIds, nextTopPick.id], count - 1)
+    : []
+
   return {
-    restaurantId: _input.restaurantId,
-    score: 0,
+    newTopPick: nextTopPick,
+    newAlternatives: nextAlternatives,
   }
 }
