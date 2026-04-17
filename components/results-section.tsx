@@ -668,7 +668,7 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
         <div className="mt-4 rounded-2xl border border-border/60 bg-card/80 p-4 shadow-sm transition-all duration-250 ease-out">
           <p className="text-sm font-semibold text-foreground mb-1">Not feeling this pick?</p>
           <p className="text-sm leading-6 text-muted-foreground mb-3">Explore other directions without changing your top pick</p>
-          <div className="flex gap-2 overflow-x-auto pb-1">
+          <div className="flex gap-2 flex-nowrap overflow-x-auto overflow-y-hidden px-1 pr-3 pb-1 snap-x snap-mandatory touch-pan-x">
             {directionOptions.map((direction) => {
               const isActive = selectedDirection === direction.key
               return (
@@ -676,7 +676,7 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
                   key={direction.key}
                   type="button"
                   onClick={() => handleDirectionSelect(direction.key)}
-                  className={`rounded-full border px-4 py-2 text-sm font-semibold transition duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${isActive ? "border-primary bg-primary/15 text-primary shadow-sm" : "border-border bg-background text-foreground hover:border-primary/50 hover:bg-primary/5"}`}
+                  className={`flex-shrink-0 min-w-max snap-start rounded-full border px-4 py-2 text-sm font-semibold transition duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${isActive ? "border-primary bg-primary/15 text-primary shadow-sm" : "border-border bg-background text-foreground hover:border-primary/50 hover:bg-primary/5"}`}
                   aria-pressed={isActive}
                 >
                   {direction.label}
