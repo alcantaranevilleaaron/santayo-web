@@ -16,7 +16,13 @@ export const CUISINE_PRIMARY = [
   "French",
   "Asian",
   "Mexican",
-  "American"
+  "American",
+  "Bakery",
+  "Vietnamese",
+  "Spanish",
+  "Vegetarian",
+  "Indonesian",
+  "Peruvian"
 ] as const
 export type CuisinePrimary = (typeof CUISINE_PRIMARY)[number]
 
@@ -28,7 +34,8 @@ export const FOOD_CATEGORIES = [
   "Healthy",
   "Premium",
   "Buffet",
-  "Middle Eastern"
+  "Middle Eastern",
+  "International"
 ] as const
 export type FoodCategory = (typeof FOOD_CATEGORIES)[number]
 
@@ -60,6 +67,7 @@ export const EXPERIENCE_TAGS = [
   "Solo",
   "Family",
   "Group",
+  "Quick"
 ] as const
 export type ExperienceTag = (typeof EXPERIENCE_TAGS)[number]
 
