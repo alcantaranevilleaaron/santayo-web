@@ -360,6 +360,7 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
         return
       }
 
+      const topPick = nextPickSet.newTopPick
       setIsPickingAgain(true)
 
       const thinkingDelay = window.setTimeout(() => {
@@ -367,15 +368,15 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
         setAlternativeStage(0)
 
         const swapDelay = window.setTimeout(() => {
-          setCurrentRestaurants([nextPickSet.newTopPick, ...nextPickSet.newAlternatives])
+          setCurrentRestaurants([topPick, ...nextPickSet.newAlternatives])
           setCurrentAlternativeIds(nextPickSet.newAlternatives.map((restaurant) => restaurant.id))
           setSessionState((prev) => ({
-            seenTopPickIds: Array.from(new Set([...prev.seenTopPickIds, nextPickSet.newTopPick!.id])),
+            seenTopPickIds: Array.from(new Set([...prev.seenTopPickIds, topPick.id])),
             seenAlternativeIds: Array.from(new Set([
               ...prev.seenAlternativeIds,
               ...nextPickSet.newAlternatives.map((restaurant) => restaurant.id),
             ])),
-            lastTopPickId: nextPickSet.newTopPick!.id,
+            lastTopPickId: topPick.id,
           }))
           setHeaderTitle((current) => getNextResultCopy(rerollHeaderTitles, current))
           setHeaderSubtitle((current) => getNextResultCopy(rerollHeaderSubtitles, current))
