@@ -78,8 +78,8 @@ export const UPTOWN_RESTAURANTS: Restaurant[] = [
     foodCategories: ["Asian"],
     moodTags: ["Comfort", "Filling"],
     experienceTags: ["Solo"],
-    budgetMin: 450,
-    priceBucket: "premium",
+    budgetMin: 500,
+    priceBucket: "mid",
   },
 {
     id: 29,

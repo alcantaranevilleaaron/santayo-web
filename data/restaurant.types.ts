@@ -39,4 +39,8 @@ export type Restaurant = {
   dataConfidence?: DataConfidence
   verifiedAt?: ISODateString
   lastUpdatedAt?: ISODateString
+  // New semantic fields for improved scoring
+  category?: "steakhouse" | "fine-dining" | "casual" | "bistro" | "cafe" | "fast-casual" | "dessert" | "drinks" | "bar" | "buffet"
+  mealType?: "snack" | "light-meal" | "full-meal" | "dessert-focused" | "drinks-focused" | "fast-casual"
+  occasions?: Array<"date" | "business" | "celebration" | "casual-hangout" | "family">
 }
