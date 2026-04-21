@@ -298,6 +298,9 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
     seenTopPickIds: [],
     seenAlternativeIds: [],
     lastTopPickId: null,
+    rejectedRestaurantIds: [],
+    rejectedCuisines: [],
+    rejectedTags: [],
   })
   const [isPickingAgain, setIsPickingAgain] = useState(false)
   const [isRandomizing, setIsRandomizing] = useState(false)
@@ -330,6 +333,17 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
     setHasUserInteracted(true)
   }
 
+  const toRejectionSignals = (restaurant: Restaurant, state: RecommendationSessionState) => {
+    const nextCuisine = restaurant.cuisine.toLowerCase()
+    const nextTags = (restaurant.attributes ?? restaurant.tags).map((tag) => tag.toLowerCase())
+
+    return {
+      rejectedRestaurantIds: Array.from(new Set([...state.rejectedRestaurantIds, restaurant.id])),
+      rejectedCuisines: Array.from(new Set([...state.rejectedCuisines, nextCuisine])),
+      rejectedTags: Array.from(new Set([...state.rejectedTags, ...nextTags])),
+    }
+  }
+
   const restaurants = currentRestaurants
 
   const loadingMessages = [
@@ -355,7 +369,27 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
 
     setTimeout(() => {
       setIsFirstLoad(false)
-      const nextPickSet = getNextPickSet(filters, sessionState, fallbackMode, 3)
+      const currentTopPick = currentRestaurants[0]
+      const nextSessionState = currentTopPick
+        ? {
+            ...sessionState,
+            ...toRejectionSignals(currentTopPick, sessionState),
+          }
+        : sessionState
+      if (currentTopPick) {
+        const debugSignals = toRejectionSignals(currentTopPick, sessionState)
+        // console.info("[recommendation-feedback] top pick rejected via pick again", {
+        //   rejectedRestaurantId: currentTopPick.id,
+        //   rejectedCuisine: currentTopPick.cuisine,
+        //   rejectedTags: (currentTopPick.attributes ?? currentTopPick.tags).map((tag) =>
+        //     tag.toLowerCase()
+        //   ),
+        //   cumulativeRejectedRestaurantIds: debugSignals.rejectedRestaurantIds,
+        //   cumulativeRejectedCuisines: debugSignals.rejectedCuisines,
+        //   cumulativeRejectedTags: debugSignals.rejectedTags,
+        // })
+      }
+      const nextPickSet = getNextPickSet(filters, nextSessionState, fallbackMode, 3)
       if (!nextPickSet.newTopPick) {
         return
       }
@@ -370,14 +404,27 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
         const swapDelay = window.setTimeout(() => {
           setCurrentRestaurants([topPick, ...nextPickSet.newAlternatives])
           setCurrentAlternativeIds(nextPickSet.newAlternatives.map((restaurant) => restaurant.id))
-          setSessionState((prev) => ({
-            seenTopPickIds: Array.from(new Set([...prev.seenTopPickIds, topPick.id])),
-            seenAlternativeIds: Array.from(new Set([
-              ...prev.seenAlternativeIds,
-              ...nextPickSet.newAlternatives.map((restaurant) => restaurant.id),
-            ])),
-            lastTopPickId: topPick.id,
-          }))
+          setSessionState((prev) => {
+            const rejectionSignals = currentTopPick
+              ? toRejectionSignals(currentTopPick, prev)
+              : {
+                  rejectedRestaurantIds: prev.rejectedRestaurantIds,
+                  rejectedCuisines: prev.rejectedCuisines,
+                  rejectedTags: prev.rejectedTags,
+                }
+
+            return {
+              seenTopPickIds: Array.from(new Set([...prev.seenTopPickIds, topPick.id])),
+              seenAlternativeIds: Array.from(new Set([
+                ...prev.seenAlternativeIds,
+                ...nextPickSet.newAlternatives.map((restaurant) => restaurant.id),
+              ])),
+              lastTopPickId: topPick.id,
+              rejectedRestaurantIds: rejectionSignals.rejectedRestaurantIds,
+              rejectedCuisines: rejectionSignals.rejectedCuisines,
+              rejectedTags: rejectionSignals.rejectedTags,
+            }
+          })
           setHeaderTitle((current) => getNextResultCopy(rerollHeaderTitles, current))
           setHeaderSubtitle((current) => getNextResultCopy(rerollHeaderSubtitles, current))
           setTopPickCaption((current) => getNextResultCopy(rerollTopPickCaptions, current))
@@ -480,6 +527,9 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
         seenTopPickIds: [pickSet.newTopPick.id],
         seenAlternativeIds: pickSet.newAlternatives.map((restaurant) => restaurant.id),
         lastTopPickId: pickSet.newTopPick.id,
+        rejectedRestaurantIds: [],
+        rejectedCuisines: [],
+        rejectedTags: [],
       })
 
       if (isFirstLoad) {
@@ -523,6 +573,9 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
       seenTopPickIds: [],
       seenAlternativeIds: [],
       lastTopPickId: null,
+      rejectedRestaurantIds: [],
+      rejectedCuisines: [],
+      rejectedTags: [],
     })
     setIsInitialLoading(false)
     setHeaderMounted(false)
@@ -567,13 +620,30 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
 
     const pool = getCandidatePool(filters, fallbackMode)
     const targetCount = Math.min(2, pool.length - 1)
+    const rejectionSignals = toRejectionSignals(restaurants[0], sessionState)
+    // console.info("[recommendation-feedback] top pick rejected via direction change", {
+    //   direction,
+    //   rejectedRestaurantId: restaurants[0].id,
+    //   rejectedCuisine: restaurants[0].cuisine,
+    //   rejectedTags: (restaurants[0].attributes ?? restaurants[0].tags).map((tag) =>
+    //     tag.toLowerCase()
+    //   ),
+    //   cumulativeRejectedRestaurantIds: rejectionSignals.rejectedRestaurantIds,
+    //   cumulativeRejectedCuisines: rejectionSignals.rejectedCuisines,
+    //   cumulativeRejectedTags: rejectionSignals.rejectedTags,
+    // })
+    setSessionState((prev) => ({
+      ...prev,
+      ...toRejectionSignals(restaurants[0], prev),
+    }))
     const newAlternatives = getAlternativeRecommendations(
       restaurants[0],
       pool,
       filters,
       [restaurants[0].id, ...currentAlternativeIds],
       targetCount,
-      direction
+      direction,
+      rejectionSignals
     )
 
     const loadingDuration = 380 + Math.floor(Math.random() * 120)
