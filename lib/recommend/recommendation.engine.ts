@@ -12,11 +12,20 @@ export type RecommendationSessionState = {
   seenTopPickIds: number[]
   seenAlternativeIds: number[]
   lastTopPickId: number | null
+  rejectedRestaurantIds: number[]
+  rejectedCuisines: string[]
+  rejectedTags: string[]
 }
 
 export type RecommendationPickSet = {
   newTopPick: Restaurant | null
   newAlternatives: Restaurant[]
+}
+
+type RejectionSignals = {
+  rejectedRestaurantIds: number[]
+  rejectedCuisines: string[]
+  rejectedTags: string[]
 }
 
 function shuffle<T>(array: T[]): T[] {
@@ -207,16 +216,44 @@ function getDirectionBoost(restaurant: Restaurant, direction: string | null) {
   return boost
 }
 
+function getRejectionPenalty(restaurant: Restaurant, rejectionSignals?: RejectionSignals) {
+  if (!rejectionSignals) {
+    return 0
+  }
+
+  const normalizedCuisine = normalize(getEffectiveCuisine(restaurant))
+  const normalizedTags = getEffectiveTags(restaurant).map(normalize)
+
+  let penalty = 0
+
+  if (rejectionSignals.rejectedRestaurantIds.includes(restaurant.id)) {
+    penalty -= 1000
+  }
+
+  if (rejectionSignals.rejectedCuisines.includes(normalizedCuisine)) {
+    penalty -= 28
+  }
+
+  const overlappingTags = normalizedTags.filter((tag) =>
+    rejectionSignals.rejectedTags.includes(tag)
+  ).length
+  penalty -= overlappingTags * 10
+
+  return penalty
+}
+
 function getRecommendationScore(
   restaurant: Restaurant,
   filters: Filters,
   reference: Restaurant | null,
-  direction: string | null = null
+  direction: string | null = null,
+  rejectionSignals?: RejectionSignals
 ) {
   return (
     getMatchScore(restaurant, filters) +
     getVarietyBoost(restaurant, reference) +
-    getDirectionBoost(restaurant, direction)
+    getDirectionBoost(restaurant, direction) +
+    getRejectionPenalty(restaurant, rejectionSignals)
   )
 }
 
@@ -225,13 +262,14 @@ function sortRecommendationPool(
   filters: Filters,
   reference: Restaurant | null,
   preferVariety = false,
-  direction: string | null = null
+  direction: string | null = null,
+  rejectionSignals?: RejectionSignals
 ) {
   const randomized = shuffle(restaurants)
 
   return randomized.sort((a, b) => {
-    const scoreA = getRecommendationScore(a, filters, reference, direction)
-    const scoreB = getRecommendationScore(b, filters, reference, direction)
+    const scoreA = getRecommendationScore(a, filters, reference, direction, rejectionSignals)
+    const scoreB = getRecommendationScore(b, filters, reference, direction, rejectionSignals)
 
     if (preferVariety) {
       const varietyA = getVarietyBoost(a, reference)
@@ -256,28 +294,36 @@ function chooseFromTopBand(
   filters: Filters,
   reference: Restaurant | null,
   preferVariety = false,
-  direction: string | null = null
+  direction: string | null = null,
+  rejectionSignals?: RejectionSignals
 ) {
   const sorted = sortRecommendationPool(
     restaurants,
     filters,
     reference,
     preferVariety,
-    direction
+    direction,
+    rejectionSignals
   )
 
   if (sorted.length === 0) {
     return null
   }
 
-  const bestScore = getRecommendationScore(sorted[0], filters, reference, direction)
+  const bestScore = getRecommendationScore(
+    sorted[0],
+    filters,
+    reference,
+    direction,
+    rejectionSignals
+  )
 
   // Allow similarly strong candidates to rotate.
   const TOP_BAND_DELTA = 5
 
   const topBand = sorted.filter(
     (restaurant) =>
-      getRecommendationScore(restaurant, filters, reference, direction) >=
+      getRecommendationScore(restaurant, filters, reference, direction, rejectionSignals) >=
       bestScore - TOP_BAND_DELTA
   )
 
@@ -290,24 +336,32 @@ function chooseBestCandidate(
   filters: Filters,
   excludeIds: number[],
   lastTopPickId: number | null,
-  preferVariety = false
+  preferVariety = false,
+  rejectionSignals?: RejectionSignals
 ) {
   const reference =
     restaurants.find((restaurant) => restaurant.id === lastTopPickId) ?? null
 
   const available = restaurants.filter((restaurant) => !excludeIds.includes(restaurant.id))
   if (available.length > 0) {
-    return chooseFromTopBand(available, filters, reference, preferVariety)
+    return chooseFromTopBand(available, filters, reference, preferVariety, null, rejectionSignals)
   }
 
   const fallbackCandidates = restaurants.filter(
     (restaurant) => restaurant.id !== lastTopPickId
   )
   if (fallbackCandidates.length > 0) {
-    return chooseFromTopBand(fallbackCandidates, filters, reference, preferVariety)
+    return chooseFromTopBand(
+      fallbackCandidates,
+      filters,
+      reference,
+      preferVariety,
+      null,
+      rejectionSignals
+    )
   }
 
-  return chooseFromTopBand(restaurants, filters, reference, preferVariety)
+  return chooseFromTopBand(restaurants, filters, reference, preferVariety, null, rejectionSignals)
 }
 
 export function getMatchedRestaurants(filters: Filters, count = 3): Restaurant[] {
@@ -440,14 +494,16 @@ export function getTopPick(
   filters: Filters,
   excludeIds: number[] = [],
   lastTopPickId: number | null = null,
-  fallbackMode = false
+  fallbackMode = false,
+  rejectionSignals?: RejectionSignals
 ) {
   return chooseBestCandidate(
     restaurants,
     filters,
     excludeIds,
     lastTopPickId,
-    fallbackMode || filters.mood === "random"
+    fallbackMode || filters.mood === "random",
+    rejectionSignals
   )
 }
 
@@ -457,19 +513,34 @@ export function getAlternativeRecommendations(
   filters: Filters,
   excludeIds: number[] = [],
   count = 2,
-  direction: string | null = null
+  direction: string | null = null,
+  rejectionSignals?: RejectionSignals
 ) {
   const available = restaurants.filter(
     (restaurant) => restaurant.id !== topPick.id && !excludeIds.includes(restaurant.id)
   )
 
-  const scored = sortRecommendationPool(available, filters, topPick, true, direction)
+  const scored = sortRecommendationPool(
+    available,
+    filters,
+    topPick,
+    true,
+    direction,
+    rejectionSignals
+  )
   if (scored.length >= count) {
     return scored.slice(0, count)
   }
 
   const fallback = restaurants.filter((restaurant) => restaurant.id !== topPick.id)
-  return sortRecommendationPool(fallback, filters, topPick, true, direction).slice(0, count)
+  return sortRecommendationPool(
+    fallback,
+    filters,
+    topPick,
+    true,
+    direction,
+    rejectionSignals
+  ).slice(0, count)
 }
 
 export function getNextPickSet(
@@ -478,6 +549,9 @@ export function getNextPickSet(
     seenTopPickIds: number[]
     seenAlternativeIds: number[]
     lastTopPickId: number | null
+    rejectedRestaurantIds?: number[]
+    rejectedCuisines?: string[]
+    rejectedTags?: string[]
   },
   fallbackMode: boolean,
   count = 3
@@ -500,12 +574,19 @@ export function getNextPickSet(
       ? Array.from(new Set([...baseExcludeIds, seenIds.lastTopPickId]))
       : baseExcludeIds
 
+  const rejectionSignals: RejectionSignals = {
+    rejectedRestaurantIds: seenIds.rejectedRestaurantIds ?? [],
+    rejectedCuisines: (seenIds.rejectedCuisines ?? []).map(normalize),
+    rejectedTags: (seenIds.rejectedTags ?? []).map(normalize),
+  }
+
   const nextTopPick = getTopPick(
     pool,
     filters,
     strongerExcludeIds,
     seenIds.lastTopPickId,
-    fallbackMode
+    fallbackMode,
+    rejectionSignals
   )
 
   const nextAlternatives = nextTopPick
@@ -514,9 +595,20 @@ export function getNextPickSet(
         pool,
         filters,
         [...strongerExcludeIds, nextTopPick.id],
-        count - 1
+        count - 1,
+        null,
+        rejectionSignals
       )
     : []
+
+  // console.info("[recommendation-feedback] generated next pick set", {
+  //   rejectedRestaurantIds: rejectionSignals.rejectedRestaurantIds,
+  //   rejectedCuisines: rejectionSignals.rejectedCuisines,
+  //   rejectedTags: rejectionSignals.rejectedTags,
+  //   previousTopPickId: seenIds.lastTopPickId,
+  //   nextTopPickId: nextTopPick?.id ?? null,
+  //   nextAlternativeIds: nextAlternatives.map((restaurant) => restaurant.id),
+  // })
 
   return {
     newTopPick: nextTopPick,
