@@ -95,7 +95,11 @@ export default function Home() {
             className="w-full text-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
           >
             <div className="mb-4 inline-flex items-center justify-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-primary">
-              <Utensils className="size-4" />
+              <img
+                src="/saan-tayo-logo.png"
+                alt="Saan tayo kakain"
+                className="h-5 w-auto"
+              />
               <span className="text-sm font-medium">Saan tayo kakain?</span>
             </div>
             <h1 className="text-balance text-2xl font-bold tracking-tight text-foreground md:text-3xl">
