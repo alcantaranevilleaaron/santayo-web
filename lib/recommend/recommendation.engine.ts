@@ -274,6 +274,41 @@ function getDirectionBoost(restaurant: Restaurant, direction: string | null) {
   return boost;
 }
 
+function isEligibleForDirection(
+  restaurant: Restaurant,
+  direction: string | null,
+) {
+  if (!direction) {
+    return true;
+  }
+
+  const priceBand = getEffectivePriceBand(restaurant);
+  const tags = getEffectiveTags(restaurant).map(normalize);
+
+  switch (direction) {
+    case "premium":
+      if (priceBand === "low") return false;
+      if (restaurant.mealType === "snack") return false;
+      return true;
+    case "quick bite":
+      if (priceBand === "high" && restaurant.mealType === "full-meal") {
+        return false;
+      }
+      return true;
+    case "healthy":
+      // Only block explicit heavy/fried places when there is no healthy counter-signal.
+      if (
+        tags.some((tag) => ["fried", "heavy"].includes(tag)) &&
+        !tags.some((tag) => ["healthy", "light", "salad", "grilled"].includes(tag))
+      ) {
+        return false;
+      }
+      return true;
+    default:
+      return true;
+  }
+}
+
 function getRecommendationScore(
   restaurant: Restaurant,
   filters: Filters,
@@ -580,27 +615,53 @@ export function getAlternativeRecommendations(
   count = 2,
   direction: string | null = null,
 ) {
-  const available = restaurants.filter(
+  const strictEligible = restaurants.filter(
     (restaurant) =>
-      restaurant.id !== topPick.id && !excludeIds.includes(restaurant.id),
+      restaurant.id !== topPick.id &&
+      !excludeIds.includes(restaurant.id) &&
+      isEligibleForDirection(restaurant, direction),
   );
 
-  const scored = sortRecommendationPool(
-    available,
+  const strictRanked = sortRecommendationPool(
+    strictEligible,
     filters,
     topPick,
     true,
     direction,
   );
-  if (scored.length >= count) {
-    return scored.slice(0, count);
+
+  if (strictRanked.length >= count) {
+    return strictRanked.slice(0, count);
   }
 
-  const fallback = restaurants.filter(
-    (restaurant) => restaurant.id !== topPick.id,
+  if (strictRanked.length > 0) {
+    return strictRanked.slice(0, count);
+  }
+
+  const directionOnlyFallback = restaurants.filter(
+    (restaurant) =>
+      restaurant.id !== topPick.id &&
+      isEligibleForDirection(restaurant, direction),
   );
+
+  const directionOnlyRanked = sortRecommendationPool(
+    directionOnlyFallback,
+    filters,
+    topPick,
+    true,
+    direction,
+  );
+
+  if (directionOnlyRanked.length > 0) {
+    return directionOnlyRanked.slice(0, count);
+  }
+
+  const generalFallback = restaurants.filter(
+    (restaurant) => restaurant.id !== topPick.id && !excludeIds.includes(restaurant.id),
+  );
+
   return sortRecommendationPool(
-    fallback,
+    generalFallback,
     filters,
     topPick,
     true,
@@ -619,7 +680,14 @@ export function getNextPickSet(
   count = 3,
   direction: string | null = null,
 ) {
-  const pool = getCandidatePool(filters, fallbackMode);
+  void fallbackMode;
+
+  // Global-scoring model: start from all open restaurants and apply only light eligibility.
+  const pool = RESTAURANTS.filter(
+    (restaurant) =>
+      isOpenRestaurant(restaurant) &&
+      isEligibleForDirection(restaurant, direction),
+  );
 
   if (pool.length === 0) {
     return {
@@ -635,54 +703,69 @@ export function getNextPickSet(
   const recentTopPickIds = seenIds.seenTopPickIds.slice(-RECENT_TOP_PICKS);
   const recentAlternativeIds =
     seenIds.seenAlternativeIds.slice(-RECENT_ALTERNATIVES);
-  let baseExcludeIds = Array.from(
+  let excludeIds = Array.from(
     new Set([...recentTopPickIds, ...recentAlternativeIds]),
   );
 
-  // Minimum pool guard: relax exclusion if pool is too small
-  let availablePool = pool.filter((r) => !baseExcludeIds.includes(r.id));
+  // Minimum pool guard: relax only recent exclusions if pool is too small.
+  let availablePool = pool.filter((r) => !excludeIds.includes(r.id));
   if (availablePool.length < MIN_POOL_SIZE) {
-    baseExcludeIds = [];
-    if (seenIds.lastTopPickId !== null) {
-      baseExcludeIds = [seenIds.lastTopPickId];
-    }
-    availablePool = pool.filter((r) => !baseExcludeIds.includes(r.id));
+    excludeIds = seenIds.lastTopPickId !== null ? [seenIds.lastTopPickId] : [];
+    availablePool = pool.filter((r) => !excludeIds.includes(r.id));
   }
 
   // Optionally exclude lastTopPickId if pool is large enough
-  const excludeIds =
-    seenIds.lastTopPickId !== null && availablePool.length > count + 2
-      ? Array.from(new Set([...baseExcludeIds, seenIds.lastTopPickId]))
-      : baseExcludeIds;
+  if (
+    seenIds.lastTopPickId !== null &&
+    availablePool.length > count + 2 &&
+    !excludeIds.includes(seenIds.lastTopPickId)
+  ) {
+    excludeIds = [...excludeIds, seenIds.lastTopPickId];
+    availablePool = pool.filter((r) => !excludeIds.includes(r.id));
+  }
 
-  const nextTopPick = getTopPick(
-    pool,
+  // If exclusions are too strict, relax all recent exclusion while preserving eligibility.
+  if (availablePool.length === 0) {
+    availablePool = [...pool];
+  }
+
+  const reference =
+    pool.find((restaurant) => restaurant.id === seenIds.lastTopPickId) ?? null;
+
+  const rankedTopCandidates = sortRecommendationPool(
+    availablePool,
     filters,
-    excludeIds,
-    seenIds.lastTopPickId,
-    fallbackMode,
+    reference,
+    false,
     direction,
   );
+
+  const nextTopPick = rankedTopCandidates[0] ?? null;
 
   let nextAlternatives: Restaurant[] = [];
   if (nextTopPick) {
     let altExclude = [...excludeIds, nextTopPick.id];
     let altPool = pool.filter((r) => !altExclude.includes(r.id));
-    // Prevent tight fallback loops: if too few alternatives, rebuild from full pool except lastTopPickId
+    // Prevent tight fallback loops: if too few alternatives, relax recent exclusions but keep eligibility.
     if (altPool.length < count - 1) {
       altExclude =
         seenIds.lastTopPickId !== null
           ? [seenIds.lastTopPickId, nextTopPick.id]
           : [nextTopPick.id];
+      altPool = pool.filter((r) => !altExclude.includes(r.id));
     }
-    nextAlternatives = getAlternativeRecommendations(
-      nextTopPick,
-      pool,
+
+    if (altPool.length === 0) {
+      altPool = pool.filter((r) => r.id !== nextTopPick.id);
+    }
+
+    nextAlternatives = sortRecommendationPool(
+      altPool,
       filters,
-      altExclude,
-      count - 1,
+      nextTopPick,
+      false,
       direction,
-    );
+    ).slice(0, count - 1);
   }
 
   return {
