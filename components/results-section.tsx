@@ -6,8 +6,13 @@ import { PickAgainAction } from "@/components/pick-again-action"
 import { RestaurantCard } from "@/components/restaurant-card"
 import { ArrowLeft, RefreshCw, Sparkles, ChevronDown } from "lucide-react"
 import type { Filters } from "@/app/page"
-import { getAlternativeRecommendations, getCandidatePool, getNextPickSet, type RecommendationSessionState } from "@/lib/recommendations"
-import { type Restaurant } from "@/data/restaurants"
+import {
+  getAlternativeRecommendations,
+  getCandidatePool,
+  getNextPickSet,
+  type RecommendationSessionState,
+} from "@/lib/recommendations"
+import { RESTAURANTS, type Restaurant } from "@/data/restaurants"
 
 function getMatchReason(
   restaurant: Restaurant,
@@ -313,6 +318,7 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
   const [currentAlternativeIds, setCurrentAlternativeIds] = useState<number[]>([])
   const [selectedDirection, setSelectedDirection] = useState<string | null>(null)
   const [directionHelperText, setDirectionHelperText] = useState<string | null>(null)
+  const [directionSeenAltIds, setDirectionSeenAltIds] = useState<Record<string, number[]>>({})
   const [hasUserInteracted, setHasUserInteracted] = useState(false)
   const [isExplorationVisible, setIsExplorationVisible] = useState(false)
   const alternativesRef = useRef<HTMLDivElement | null>(null)
@@ -339,6 +345,19 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
     "Trust me on this one 👀",
   ]
 
+  // Reset all chip-related recommendation state for a fresh recommendation flow
+  const resetRecommendationState = () => {
+    setSessionState({
+      seenTopPickIds: [],
+      seenAlternativeIds: [],
+      lastTopPickId: null,
+    })
+    setCurrentAlternativeIds([])
+    setSelectedDirection(null)
+    setDirectionHelperText(null)
+    setDirectionSeenAltIds({})
+  }
+
   const handleRandomizeClick = () => {
     setLoadingIndex(0)
     setIsFaded(true)
@@ -350,12 +369,20 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
       return
     }
 
+    // Reset all chip-related state for a fresh neutral reroll
+    resetRecommendationState()
+
     revealExploration()
     window.scrollTo({ top: 0, behavior: "smooth" })
 
     setTimeout(() => {
       setIsFirstLoad(false)
-      const nextPickSet = getNextPickSet(filters, sessionState, fallbackMode, 3)
+      // After reset, sessionState is fresh, so generate a neutral recommendation
+      const nextPickSet = getNextPickSet(filters, {
+        seenTopPickIds: [],
+        seenAlternativeIds: [],
+        lastTopPickId: null,
+      }, fallbackMode, 3)
       if (!nextPickSet.newTopPick) {
         return
       }
@@ -370,14 +397,14 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
         const swapDelay = window.setTimeout(() => {
           setCurrentRestaurants([topPick, ...nextPickSet.newAlternatives])
           setCurrentAlternativeIds(nextPickSet.newAlternatives.map((restaurant) => restaurant.id))
-          setSessionState((prev) => ({
-            seenTopPickIds: Array.from(new Set([...prev.seenTopPickIds, topPick.id])),
-            seenAlternativeIds: Array.from(new Set([
-              ...prev.seenAlternativeIds,
-              ...nextPickSet.newAlternatives.map((restaurant) => restaurant.id),
-            ])),
+          setSelectedDirection(null)
+          setDirectionHelperText(null)
+          setDirectionSeenAltIds({})
+          setSessionState({
+            seenTopPickIds: [topPick.id],
+            seenAlternativeIds: nextPickSet.newAlternatives.map((restaurant) => restaurant.id),
             lastTopPickId: topPick.id,
-          }))
+          })
           setHeaderTitle((current) => getNextResultCopy(rerollHeaderTitles, current))
           setHeaderSubtitle((current) => getNextResultCopy(rerollHeaderSubtitles, current))
           setTopPickCaption((current) => getNextResultCopy(rerollTopPickCaptions, current))
@@ -476,6 +503,9 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
     if (pickSet.newTopPick) {
       setCurrentRestaurants([pickSet.newTopPick, ...pickSet.newAlternatives])
       setCurrentAlternativeIds(pickSet.newAlternatives.map((restaurant) => restaurant.id))
+      setSelectedDirection(null)
+      setDirectionHelperText(null)
+      setDirectionSeenAltIds({})
       setSessionState({
         seenTopPickIds: [pickSet.newTopPick.id],
         seenAlternativeIds: pickSet.newAlternatives.map((restaurant) => restaurant.id),
@@ -519,6 +549,8 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
     setCurrentRestaurants([])
     setCurrentAlternativeIds([])
     setSelectedDirection(null)
+    setDirectionHelperText(null)
+    setDirectionSeenAltIds({})
     setSessionState({
       seenTopPickIds: [],
       seenAlternativeIds: [],
@@ -560,27 +592,79 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
       return
     }
 
+    const currentTopPick = restaurants[0]
+    if (!currentTopPick) {
+      return
+    }
+
+    const isDifferentChip = selectedDirection !== direction
+    const seenForDirection = isDifferentChip ? [] : (directionSeenAltIds[direction] ?? [])
+
     setSelectedDirection(direction)
     setDirectionHelperText(directionHelperCopy[direction] ?? "Looking for a new direction…")
     setIsRefreshingAlternatives(true)
     setAlternativeStage(-1)
 
-    const pool = getCandidatePool(filters, fallbackMode)
-    const targetCount = Math.min(2, pool.length - 1)
-    const newAlternatives = getAlternativeRecommendations(
-      restaurants[0],
-      pool,
-      filters,
-      [restaurants[0].id, ...currentAlternativeIds],
-      targetCount,
-      direction
+    const candidatePool = getCandidatePool(filters, fallbackMode).filter(
+      (restaurant) => restaurant.id !== currentTopPick.id,
     )
+
+    let nextAlternatives = getAlternativeRecommendations(
+      currentTopPick,
+      candidatePool,
+      filters,
+      [currentTopPick.id, ...seenForDirection],
+      2,
+      direction,
+    )
+
+    const currentBatchIds = new Set(currentAlternativeIds)
+
+    if (nextAlternatives.length < 2) {
+      const refillAlternatives = getAlternativeRecommendations(
+        currentTopPick,
+        candidatePool,
+        filters,
+        [currentTopPick.id, ...currentAlternativeIds],
+        2,
+        direction,
+      )
+
+      const chosenIds = new Set(nextAlternatives.map((restaurant) => restaurant.id))
+      nextAlternatives = [
+        ...nextAlternatives,
+        ...refillAlternatives.filter((restaurant) => !chosenIds.has(restaurant.id)),
+      ].slice(0, 2)
+    }
+
+    if (nextAlternatives.length === 2 && nextAlternatives.every((restaurant) => currentBatchIds.has(restaurant.id))) {
+      const forcedRefreshAlternatives = getAlternativeRecommendations(
+        currentTopPick,
+        candidatePool,
+        filters,
+        [currentTopPick.id, ...currentAlternativeIds],
+        3,
+        direction,
+      ).filter((restaurant) => !currentBatchIds.has(restaurant.id)).slice(0, 2)
+
+      if (forcedRefreshAlternatives.length > 0) {
+        nextAlternatives = forcedRefreshAlternatives
+      }
+    }
 
     const loadingDuration = 380 + Math.floor(Math.random() * 120)
     window.setTimeout(() => {
-      if (newAlternatives.length > 0) {
-        setCurrentRestaurants([restaurants[0], ...newAlternatives])
-        setCurrentAlternativeIds(newAlternatives.map((restaurant) => restaurant.id))
+      if (nextAlternatives.length > 0) {
+        const nextAlternativeIds = nextAlternatives.map((restaurant) => restaurant.id)
+
+        setCurrentRestaurants([currentTopPick, ...nextAlternatives])
+        setCurrentAlternativeIds(nextAlternativeIds)
+        setDirectionSeenAltIds((current) => ({
+          ...current,
+          [direction]: isDifferentChip
+            ? nextAlternativeIds
+            : [...seenForDirection, ...nextAlternativeIds],
+        }))
         setAlternativeStage(0)
         window.setTimeout(() => {
           setAlternativeStage(1)

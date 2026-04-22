@@ -38,6 +38,8 @@ export const AURA_MARKET_RESTAURANTS: Restaurant[] = [
     experienceTags: ["Group"],
     budgetMin: 500,
     priceBucket: "premium",
+    category: "casual",
+    mealType: "full-meal",
   },
 {
     id: 9,
@@ -76,6 +78,8 @@ export const AURA_MARKET_RESTAURANTS: Restaurant[] = [
     experienceTags: ["Group"],
     budgetMin: 350,
     priceBucket: "premium",
+    category: "casual",
+    mealType: "full-meal",
   },
 {
     id: 14,
@@ -114,6 +118,7 @@ export const AURA_MARKET_RESTAURANTS: Restaurant[] = [
     experienceTags: ["Solo", "Group"],
     budgetMin: 250,
     priceBucket: "mid",
+    mealType: "fast-casual",
   },
 {
     id: 25,
@@ -133,6 +138,8 @@ export const AURA_MARKET_RESTAURANTS: Restaurant[] = [
     experienceTags: ["Group"],
     budgetMin: 450,
     priceBucket: "premium",
+    category: "casual",
+    mealType: "full-meal",
   },
 {
     id: 28,
@@ -152,6 +159,8 @@ export const AURA_MARKET_RESTAURANTS: Restaurant[] = [
     experienceTags: ["Group"],
     budgetMin: 350,
     priceBucket: "premium",
+    category: "casual",
+    mealType: "full-meal",
   },
 {
     id: 39,
@@ -171,6 +180,9 @@ export const AURA_MARKET_RESTAURANTS: Restaurant[] = [
     experienceTags: ["Group"],
     budgetMin: 1000,
     priceBucket: "premium",
+    category: "buffet",
+    mealType: "full-meal",
+    occasions: ["celebration", "family"],
   },
 {
     id: 41,
@@ -190,6 +202,7 @@ export const AURA_MARKET_RESTAURANTS: Restaurant[] = [
     experienceTags: ["Solo"],
     budgetMin: 250,
     priceBucket: "mid",
+    mealType: "fast-casual",
   },
 {
     id: 42,
@@ -247,6 +260,7 @@ export const AURA_MARKET_RESTAURANTS: Restaurant[] = [
     experienceTags: ["Solo"],
     budgetMin: 280,
     priceBucket: "mid",
+    mealType: "fast-casual",
   },
 {
     id: 46,
@@ -264,5 +278,7 @@ export const AURA_MARKET_RESTAURANTS: Restaurant[] = [
     experienceTags: ["Group"],
     budgetMin: 450,
     priceBucket: "premium",
+    category: "casual",
+    mealType: "full-meal",
   }
 ];

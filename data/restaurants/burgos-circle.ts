@@ -1,7 +1,7 @@
 import type { Restaurant } from "../restaurant.types";
 
 export const BURGOS_CIRCLE_RESTAURANTS: Restaurant[] = [
-{
+  {
     id: 49,
     name: "Keizo",
     area: "Burgos Circle",
@@ -19,7 +19,7 @@ export const BURGOS_CIRCLE_RESTAURANTS: Restaurant[] = [
     budgetMin: 450,
     priceBucket: "premium",
   },
-{
+  {
     id: 50,
     name: "L'Entrecôte",
     area: "Burgos Circle",
@@ -38,7 +38,7 @@ export const BURGOS_CIRCLE_RESTAURANTS: Restaurant[] = [
     budgetMin: 900,
     priceBucket: "premium",
   },
-{
+  {
     id: 51,
     name: "Noor Manila",
     area: "Burgos Circle",
@@ -57,7 +57,7 @@ export const BURGOS_CIRCLE_RESTAURANTS: Restaurant[] = [
     budgetMin: 500,
     priceBucket: "premium",
   },
-{
+  {
     id: 52,
     name: "Eesome",
     area: "Burgos Circle",
@@ -76,7 +76,7 @@ export const BURGOS_CIRCLE_RESTAURANTS: Restaurant[] = [
     budgetMin: 350,
     priceBucket: "premium",
   },
-{
+  {
     id: 53,
     name: "Mendiola's Resto - BGC",
     area: "Burgos Circle",
@@ -95,7 +95,7 @@ export const BURGOS_CIRCLE_RESTAURANTS: Restaurant[] = [
     budgetMin: 250,
     priceBucket: "mid",
   },
-{
+  {
     id: 54,
     name: "ChiMac BGC",
     area: "Burgos Circle",
@@ -114,7 +114,7 @@ export const BURGOS_CIRCLE_RESTAURANTS: Restaurant[] = [
     budgetMin: 350,
     priceBucket: "mid",
   },
-{
+  {
     id: 55,
     name: "Melo's Forbestown",
     area: "Burgos Circle",
@@ -133,7 +133,7 @@ export const BURGOS_CIRCLE_RESTAURANTS: Restaurant[] = [
     budgetMin: 900,
     priceBucket: "premium",
   },
-{
+  {
     id: 56,
     name: "Big Belly Burger Bar",
     area: "Burgos Circle",
@@ -152,7 +152,7 @@ export const BURGOS_CIRCLE_RESTAURANTS: Restaurant[] = [
     budgetMin: 250,
     priceBucket: "mid",
   },
-{
+  {
     id: 57,
     name: "Tea & Toast",
     area: "Burgos Circle",
@@ -171,7 +171,7 @@ export const BURGOS_CIRCLE_RESTAURANTS: Restaurant[] = [
     budgetMin: 250,
     priceBucket: "mid",
   },
-{
+  {
     id: 58,
     name: "Vito's BBQ",
     area: "Burgos Circle",
@@ -190,7 +190,7 @@ export const BURGOS_CIRCLE_RESTAURANTS: Restaurant[] = [
     budgetMin: 180,
     priceBucket: "budget",
   },
-{
+  {
     id: 59,
     name: "Tipsy Pig",
     area: "Burgos Circle",
@@ -209,7 +209,7 @@ export const BURGOS_CIRCLE_RESTAURANTS: Restaurant[] = [
     budgetMin: 350,
     priceBucket: "premium",
   },
-{
+  {
     id: 60,
     name: "UCC Cafe Terrace",
     area: "Burgos Circle",
@@ -228,7 +228,7 @@ export const BURGOS_CIRCLE_RESTAURANTS: Restaurant[] = [
     budgetMin: 300,
     priceBucket: "mid",
   },
-{
+  {
     id: 61,
     name: "Pizzulu",
     area: "Burgos Circle",
@@ -247,7 +247,7 @@ export const BURGOS_CIRCLE_RESTAURANTS: Restaurant[] = [
     budgetMin: 400,
     priceBucket: "premium",
   },
-{
+  {
     id: 62,
     name: "Starbucks",
     area: "Burgos Circle",
@@ -266,7 +266,7 @@ export const BURGOS_CIRCLE_RESTAURANTS: Restaurant[] = [
     budgetMin: 180,
     priceBucket: "mid",
   },
-{
+  {
     id: 63,
     name: "CoCo Ichibanya",
     area: "Burgos Circle",
@@ -285,7 +285,7 @@ export const BURGOS_CIRCLE_RESTAURANTS: Restaurant[] = [
     budgetMin: 300,
     priceBucket: "mid",
   },
-{
+  {
     id: 64,
     name: "Max's Restaurant",
     area: "Burgos Circle",
@@ -304,7 +304,7 @@ export const BURGOS_CIRCLE_RESTAURANTS: Restaurant[] = [
     budgetMin: 250,
     priceBucket: "mid",
   },
-{
+  {
     id: 65,
     name: "Dr. Wine BGC",
     area: "Burgos Circle",
@@ -323,7 +323,7 @@ export const BURGOS_CIRCLE_RESTAURANTS: Restaurant[] = [
     budgetMin: 700,
     priceBucket: "premium",
   },
-{
+  {
     id: 66,
     name: "Zion-1 PH",
     area: "Burgos Circle",
@@ -342,7 +342,7 @@ export const BURGOS_CIRCLE_RESTAURANTS: Restaurant[] = [
     budgetMin: 500,
     priceBucket: "premium",
   },
-{
+  {
     id: 68,
     name: "Al Dente Pasta Bar",
     area: "Burgos Circle",
@@ -361,7 +361,7 @@ export const BURGOS_CIRCLE_RESTAURANTS: Restaurant[] = [
     budgetMin: 350,
     priceBucket: "mid",
   },
-{
+  {
     id: 69,
     name: "Reserve PH",
     area: "Burgos Circle",
@@ -380,7 +380,7 @@ export const BURGOS_CIRCLE_RESTAURANTS: Restaurant[] = [
     budgetMin: 600,
     priceBucket: "premium",
   },
-{
+  {
     id: 70,
     name: "Purple Rice",
     area: "Burgos Circle",
@@ -399,7 +399,7 @@ export const BURGOS_CIRCLE_RESTAURANTS: Restaurant[] = [
     budgetMin: 300,
     priceBucket: "mid",
   },
-{
+  {
     id: 71,
     name: "Rue Bourbon",
     area: "Burgos Circle",
@@ -418,7 +418,7 @@ export const BURGOS_CIRCLE_RESTAURANTS: Restaurant[] = [
     budgetMin: 400,
     priceBucket: "premium",
   },
-{
+  {
     id: 72,
     name: "The Coffee Bean & Tea Leaf",
     area: "Burgos Circle",
@@ -437,7 +437,7 @@ export const BURGOS_CIRCLE_RESTAURANTS: Restaurant[] = [
     budgetMin: 200,
     priceBucket: "mid",
   },
-{
+  {
     id: 73,
     name: "UCC Clockwork",
     area: "Burgos Circle",
@@ -456,7 +456,7 @@ export const BURGOS_CIRCLE_RESTAURANTS: Restaurant[] = [
     budgetMin: 300,
     priceBucket: "mid",
   },
-{
+  {
     id: 74,
     name: "Pancake House",
     area: "Burgos Circle",
@@ -475,7 +475,7 @@ export const BURGOS_CIRCLE_RESTAURANTS: Restaurant[] = [
     budgetMin: 250,
     priceBucket: "mid",
   },
-{
+  {
     id: 75,
     name: "Yellow Cab Pizza Co.",
     area: "Burgos Circle",
@@ -492,9 +492,9 @@ export const BURGOS_CIRCLE_RESTAURANTS: Restaurant[] = [
     moodTags: ["Comfort", "Filling"],
     experienceTags: ["Group"],
     budgetMin: 350,
-    priceBucket: "premium",
+    priceBucket: "mid",
   },
-{
+  {
     id: 76,
     name: "Gringo Chicken Ribs Friends",
     area: "Burgos Circle",
@@ -513,7 +513,7 @@ export const BURGOS_CIRCLE_RESTAURANTS: Restaurant[] = [
     budgetMin: 300,
     priceBucket: "mid",
   },
-{
+  {
     id: 77,
     name: "Tokyo Bubble Tea",
     area: "Burgos Circle",
@@ -531,5 +531,5 @@ export const BURGOS_CIRCLE_RESTAURANTS: Restaurant[] = [
     experienceTags: ["Solo"],
     budgetMin: 150,
     priceBucket: "budget",
-  }
+  },
 ];
