@@ -1,6 +1,25 @@
 import type { Restaurant } from "../restaurant.types";
 
 export const BURGOS_CIRCLE_RESTAURANTS: Restaurant[] = [
+    {
+    id: 7,
+    name: "Brick Corner",
+    area: "Burgos Circle",
+    cuisine: "Indian",
+    priceRange: "₱300-550",
+    dishes: ["Butter Chicken", "Tandoori", "Biryani"],
+    tags: ["comfort", "filling", "indian"],
+    attributes: ["comfort", "filling", "indian", "solo", "pair", "group"],
+    budgetMax: 600,
+    diningTypes: ["solo", "pair", "group"],
+    slug: "brick-corner-bgc-7",
+    cuisinePrimary: "Indian",
+    foodCategories: ["Asian"],
+    moodTags: ["Comfort", "Filling"],
+    experienceTags: ["Solo", "Group"],
+    budgetMin: 300,
+    priceBucket: "mid",
+  },
   {
     id: 49,
     name: "Keizo",

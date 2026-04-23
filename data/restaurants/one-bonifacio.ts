@@ -1,7 +1,7 @@
 import type { Restaurant } from "../restaurant.types";
 
 export const ONE_BONIFACIO_RESTAURANTS: Restaurant[] = [
-{
+  {
     id: 21,
     name: "Elephant Grounds",
     area: "One Bonifacio High Street",
@@ -20,7 +20,7 @@ export const ONE_BONIFACIO_RESTAURANTS: Restaurant[] = [
     budgetMin: 250,
     priceBucket: "mid",
   },
-{
+  {
     id: 23,
     name: "Hawker Chan",
     area: "One Bonifacio High Street",
@@ -39,7 +39,7 @@ export const ONE_BONIFACIO_RESTAURANTS: Restaurant[] = [
     budgetMin: 180,
     priceBucket: "budget",
   },
-{
+  {
     id: 27,
     name: "Botejyu",
     area: "One Bonifacio High Street",
@@ -58,7 +58,7 @@ export const ONE_BONIFACIO_RESTAURANTS: Restaurant[] = [
     budgetMin: 350,
     priceBucket: "premium",
   },
-{
+  {
     id: 32,
     name: "Amici",
     area: "One Bonifacio High Street",
@@ -77,7 +77,7 @@ export const ONE_BONIFACIO_RESTAURANTS: Restaurant[] = [
     budgetMin: 250,
     priceBucket: "mid",
   },
-{
+  {
     id: 34,
     name: "Lore by Chef Tatung",
     area: "One Bonifacio High Street",
@@ -96,7 +96,7 @@ export const ONE_BONIFACIO_RESTAURANTS: Restaurant[] = [
     budgetMin: 600,
     priceBucket: "premium",
   },
-{
+  {
     id: 36,
     name: "Wolfgang's Steakhouse",
     area: "BGC",
@@ -115,7 +115,7 @@ export const ONE_BONIFACIO_RESTAURANTS: Restaurant[] = [
     budgetMin: 1000,
     priceBucket: "premium",
   },
-{
+  {
     id: 77,
     name: "Basil",
     area: "One Bonifacio High Street",
@@ -134,7 +134,7 @@ export const ONE_BONIFACIO_RESTAURANTS: Restaurant[] = [
     budgetMin: 450,
     priceBucket: "premium",
   },
-{
+  {
     id: 78,
     name: "Chili's",
     area: "One Bonifacio High Street",
@@ -153,7 +153,7 @@ export const ONE_BONIFACIO_RESTAURANTS: Restaurant[] = [
     budgetMin: 450,
     priceBucket: "premium",
   },
-{
+  {
     id: 79,
     name: "M Bakery",
     area: "One Bonifacio High Street",
@@ -172,7 +172,7 @@ export const ONE_BONIFACIO_RESTAURANTS: Restaurant[] = [
     budgetMin: 180,
     priceBucket: "mid",
   },
-{
+  {
     id: 80,
     name: "Romulo Cafe",
     area: "One Bonifacio High Street",
@@ -191,7 +191,7 @@ export const ONE_BONIFACIO_RESTAURANTS: Restaurant[] = [
     budgetMin: 400,
     priceBucket: "premium",
   },
-{
+  {
     id: 81,
     name: "Soban K-Town Grill",
     area: "One Bonifacio High Street",
@@ -210,7 +210,7 @@ export const ONE_BONIFACIO_RESTAURANTS: Restaurant[] = [
     budgetMin: 500,
     priceBucket: "premium",
   },
-{
+  {
     id: 82,
     name: "Yayoi",
     area: "One Bonifacio High Street",
@@ -229,7 +229,7 @@ export const ONE_BONIFACIO_RESTAURANTS: Restaurant[] = [
     budgetMin: 350,
     priceBucket: "mid",
   },
-{
+  {
     id: 83,
     name: "a mano",
     area: "One Bonifacio High Street",
@@ -248,7 +248,7 @@ export const ONE_BONIFACIO_RESTAURANTS: Restaurant[] = [
     budgetMin: 500,
     priceBucket: "premium",
   },
-{
+  {
     id: 84,
     name: "Red Lotus",
     area: "One Bonifacio High Street",
@@ -267,7 +267,7 @@ export const ONE_BONIFACIO_RESTAURANTS: Restaurant[] = [
     budgetMin: 550,
     priceBucket: "premium",
   },
-{
+  {
     id: 85,
     name: "Harlan + Holden Coffee",
     area: "One Bonifacio High Street",
@@ -286,7 +286,7 @@ export const ONE_BONIFACIO_RESTAURANTS: Restaurant[] = [
     budgetMin: 180,
     priceBucket: "mid",
   },
-{
+  {
     id: 86,
     name: "Sentro 1771",
     area: "One Bonifacio High Street",
@@ -305,7 +305,7 @@ export const ONE_BONIFACIO_RESTAURANTS: Restaurant[] = [
     budgetMin: 450,
     priceBucket: "premium",
   },
-{
+  {
     id: 87,
     name: "Bistrot Le Coucou",
     area: "One Bonifacio High Street",
@@ -324,7 +324,7 @@ export const ONE_BONIFACIO_RESTAURANTS: Restaurant[] = [
     budgetMin: 1200,
     priceBucket: "premium",
   },
-{
+  {
     id: 88,
     name: "Maison Ladurée",
     area: "One Bonifacio High Street",
@@ -343,7 +343,7 @@ export const ONE_BONIFACIO_RESTAURANTS: Restaurant[] = [
     budgetMin: 450,
     priceBucket: "premium",
   },
-{
+  {
     id: 89,
     name: "Nikkei Nama Bar",
     area: "One Bonifacio High Street",
@@ -362,7 +362,7 @@ export const ONE_BONIFACIO_RESTAURANTS: Restaurant[] = [
     budgetMin: 500,
     priceBucket: "premium",
   },
-{
+  {
     id: 90,
     name: "Zhenbao Hotpot",
     area: "One Bonifacio High Street",
@@ -381,7 +381,7 @@ export const ONE_BONIFACIO_RESTAURANTS: Restaurant[] = [
     budgetMin: 700,
     priceBucket: "premium",
   },
-{
+  {
     id: 91,
     name: "Hawker Chan",
     area: "One Bonifacio High Street",
@@ -400,7 +400,7 @@ export const ONE_BONIFACIO_RESTAURANTS: Restaurant[] = [
     budgetMin: 200,
     priceBucket: "budget",
   },
-{
+  {
     id: 92,
     name: "Macao Imperial Milk Tea",
     area: "One Bonifacio High Street",
@@ -419,7 +419,7 @@ export const ONE_BONIFACIO_RESTAURANTS: Restaurant[] = [
     budgetMin: 120,
     priceBucket: "budget",
   },
-{
+  {
     id: 93,
     name: "Zark's Burger",
     area: "One Bonifacio High Street",
@@ -438,7 +438,7 @@ export const ONE_BONIFACIO_RESTAURANTS: Restaurant[] = [
     budgetMin: 200,
     priceBucket: "budget",
   },
-{
+  {
     id: 94,
     name: "Pepper Lunch",
     area: "One Bonifacio High Street",
@@ -457,7 +457,7 @@ export const ONE_BONIFACIO_RESTAURANTS: Restaurant[] = [
     budgetMin: 250,
     priceBucket: "mid",
   },
-{
+  {
     id: 95,
     name: "Banh Mi Kitchen",
     area: "One Bonifacio High Street",
@@ -476,7 +476,7 @@ export const ONE_BONIFACIO_RESTAURANTS: Restaurant[] = [
     budgetMin: 180,
     priceBucket: "budget",
   },
-{
+  {
     id: 96,
     name: "Avocadoria",
     area: "One Bonifacio High Street",
@@ -495,7 +495,7 @@ export const ONE_BONIFACIO_RESTAURANTS: Restaurant[] = [
     budgetMin: 150,
     priceBucket: "budget",
   },
-{
+  {
     id: 97,
     name: "Llao Llao",
     area: "One Bonifacio High Street",
@@ -514,7 +514,7 @@ export const ONE_BONIFACIO_RESTAURANTS: Restaurant[] = [
     budgetMin: 150,
     priceBucket: "budget",
   },
-{
+  {
     id: 98,
     name: "Bakmi Nyonya",
     area: "One Bonifacio High Street",
@@ -532,5 +532,24 @@ export const ONE_BONIFACIO_RESTAURANTS: Restaurant[] = [
     experienceTags: ["Quick"],
     budgetMin: 250,
     priceBucket: "mid",
-  }
+  },
+  {
+    id: 124,
+    name: "Sakagura",
+    area: "One Bonifacio High Street",
+    cuisine: "Japanese",
+    priceRange: "₱600-1200",
+    dishes: ["Sushi", "Sashimi", "Tempura"],
+    tags: ["premium", "light", "japanese"],
+    attributes: ["premium", "light", "japanese", "pair", "group"],
+    budgetMax: 1200,
+    diningTypes: ["pair", "group"],
+    slug: "sakagura-one-bonifacio-high-street-124",
+    cuisinePrimary: "Japanese",
+    foodCategories: ["Asian"],
+    moodTags: ["Premium", "Light"],
+    experienceTags: ["Group"],
+    budgetMin: 600,
+    priceBucket: "premium",
+  },
 ];

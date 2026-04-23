@@ -22,7 +22,8 @@ export const CUISINE_PRIMARY = [
   "Spanish",
   "Vegetarian",
   "Indonesian",
-  "Peruvian"
+  "Peruvian",
+  "Snacks"
 ] as const
 export type CuisinePrimary = (typeof CUISINE_PRIMARY)[number]
 
@@ -57,6 +58,7 @@ export const MOOD_TAGS = [
   "Premium",
   "Casual",
   "Energetic",
+  "Quick",
 ] as const
 export type MoodTag = (typeof MOOD_TAGS)[number]
 
@@ -67,7 +69,8 @@ export const EXPERIENCE_TAGS = [
   "Solo",
   "Family",
   "Group",
-  "Quick"
+  "Quick",
+  "Pair"
 ] as const
 export type ExperienceTag = (typeof EXPERIENCE_TAGS)[number]
 
