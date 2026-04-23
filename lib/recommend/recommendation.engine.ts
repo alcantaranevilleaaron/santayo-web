@@ -315,11 +315,14 @@ function getRecommendationScore(
   reference: Restaurant | null,
   direction: string | null = null,
 ) {
+  const randomFactor = Math.random() * 5;
+
   // Strengthen direction influence: multiply direction boost by 3
   return (
     getMatchScore(restaurant, filters) +
     getVarietyBoost(restaurant, reference) +
-    getDirectionBoost(restaurant, direction) * 3
+    getDirectionBoost(restaurant, direction) * 3 +
+    randomFactor
   );
 }
 
@@ -381,7 +384,7 @@ function chooseFromTopBand(
   );
 
   // Allow similarly strong candidates to rotate.
-  const TOP_BAND_DELTA = 5;
+  const TOP_BAND_DELTA = 12;
 
   const topBand = sorted.filter(
     (restaurant) =>
@@ -698,7 +701,7 @@ export function getNextPickSet(
 
   // Strictly limit exclusion window
   const RECENT_TOP_PICKS = 2;
-  const RECENT_ALTERNATIVES = 2;
+  const RECENT_ALTERNATIVES = 5;
   const MIN_POOL_SIZE = 12;
   const recentTopPickIds = seenIds.seenTopPickIds.slice(-RECENT_TOP_PICKS);
   const recentAlternativeIds =
@@ -744,14 +747,37 @@ export function getNextPickSet(
 
   let nextAlternatives: Restaurant[] = [];
   if (nextTopPick) {
-    let altExclude = [...excludeIds, nextTopPick.id];
+    const recentTopPickIdsForAlternatives = seenIds.seenTopPickIds.slice(-2);
+    const recentAlternativeIdsForAlternatives =
+      seenIds.seenAlternativeIds.slice(-5);
+
+    let altExclude = Array.from(
+      new Set([
+        ...recentTopPickIdsForAlternatives,
+        ...recentAlternativeIdsForAlternatives,
+        nextTopPick.id,
+      ]),
+    );
     let altPool = pool.filter((r) => !altExclude.includes(r.id));
-    // Prevent tight fallback loops: if too few alternatives, relax recent exclusions but keep eligibility.
-    if (altPool.length < count - 1) {
-      altExclude =
-        seenIds.lastTopPickId !== null
-          ? [seenIds.lastTopPickId, nextTopPick.id]
-          : [nextTopPick.id];
+
+    // Prevent tight fallback loops: gradually relax exclusion if the pool is too small.
+    const minAlternativePoolSize = Math.max(1, (count - 1) * 2);
+    if (altPool.length < minAlternativePoolSize) {
+      const relaxedAlternativeIds = seenIds.seenAlternativeIds.slice(-3);
+      altExclude = Array.from(
+        new Set([
+          ...recentTopPickIdsForAlternatives,
+          ...relaxedAlternativeIds,
+          nextTopPick.id,
+        ]),
+      );
+      altPool = pool.filter((r) => !altExclude.includes(r.id));
+    }
+
+    if (altPool.length < minAlternativePoolSize) {
+      altExclude = Array.from(
+        new Set([...recentTopPickIdsForAlternatives, nextTopPick.id]),
+      );
       altPool = pool.filter((r) => !altExclude.includes(r.id));
     }
 
@@ -759,13 +785,32 @@ export function getNextPickSet(
       altPool = pool.filter((r) => r.id !== nextTopPick.id);
     }
 
-    nextAlternatives = sortRecommendationPool(
-      altPool,
-      filters,
-      nextTopPick,
-      false,
-      direction,
-    ).slice(0, count - 1);
+    const targetAlternativeCount = Math.max(0, count - 1);
+    const selectedAlternatives: Restaurant[] = [];
+    let remainingPool = [...altPool];
+
+    // Use top-band randomized picks for alternatives to improve rotation.
+    while (
+      selectedAlternatives.length < targetAlternativeCount &&
+      remainingPool.length > 0
+    ) {
+      const picked = chooseFromTopBand(
+        remainingPool,
+        filters,
+        nextTopPick,
+        false,
+        direction,
+      );
+
+      if (!picked) {
+        break;
+      }
+
+      selectedAlternatives.push(picked);
+      remainingPool = remainingPool.filter((r) => r.id !== picked.id);
+    }
+
+    nextAlternatives = selectedAlternatives;
   }
 
   return {
