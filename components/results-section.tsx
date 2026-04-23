@@ -8,7 +8,6 @@ import { ArrowLeft, RefreshCw, Sparkles, ChevronDown } from "lucide-react"
 import type { Filters } from "@/app/page"
 import {
   getAlternativeRecommendations,
-  getCandidatePool,
   getNextPickSet,
   type RecommendationSessionState,
 } from "@/lib/recommendations"
@@ -358,6 +357,15 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
     setDirectionSeenAltIds({})
   }
 
+  const handleReturnToSearch = () => {
+    resetRecommendationState()
+    setCurrentRestaurants([])
+    setAlternativeStage(0)
+    setIsRefreshingAlternatives(false)
+    setIsPickingAgain(false)
+    onBack()
+  }
+
   const handleRandomizeClick = () => {
     setLoadingIndex(0)
     setIsFaded(true)
@@ -397,9 +405,6 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
         const swapDelay = window.setTimeout(() => {
           setCurrentRestaurants([topPick, ...nextPickSet.newAlternatives])
           setCurrentAlternativeIds(nextPickSet.newAlternatives.map((restaurant) => restaurant.id))
-          setSelectedDirection(null)
-          setDirectionHelperText(null)
-          setDirectionSeenAltIds({})
           setSessionState({
             seenTopPickIds: [topPick.id],
             seenAlternativeIds: nextPickSet.newAlternatives.map((restaurant) => restaurant.id),
@@ -503,8 +508,6 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
     if (pickSet.newTopPick) {
       setCurrentRestaurants([pickSet.newTopPick, ...pickSet.newAlternatives])
       setCurrentAlternativeIds(pickSet.newAlternatives.map((restaurant) => restaurant.id))
-      setSelectedDirection(null)
-      setDirectionHelperText(null)
       setDirectionSeenAltIds({})
       setSessionState({
         seenTopPickIds: [pickSet.newTopPick.id],
@@ -549,7 +552,6 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
     setCurrentRestaurants([])
     setCurrentAlternativeIds([])
     setSelectedDirection(null)
-    setDirectionHelperText(null)
     setDirectionSeenAltIds({})
     setSessionState({
       seenTopPickIds: [],
@@ -592,78 +594,53 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
       return
     }
 
+    const isDifferentChip = selectedDirection !== direction
     const currentTopPick = restaurants[0]
     if (!currentTopPick) {
       return
     }
 
-    const isDifferentChip = selectedDirection !== direction
-    const seenForDirection = isDifferentChip ? [] : (directionSeenAltIds[direction] ?? [])
+    const seenForDirection = directionSeenAltIds[direction] ?? []
 
     setSelectedDirection(direction)
     setDirectionHelperText(directionHelperCopy[direction] ?? "Looking for a new direction…")
     setIsRefreshingAlternatives(true)
     setAlternativeStage(-1)
 
-    const candidatePool = getCandidatePool(filters, fallbackMode).filter(
-      (restaurant) => restaurant.id !== currentTopPick.id,
+    const candidatePool = RESTAURANTS.filter(
+      (restaurant) =>
+        restaurant.operatingStatus !== "closed" &&
+        restaurant.id !== currentTopPick.id,
     )
 
-    let nextAlternatives = getAlternativeRecommendations(
+    const currentlyShownAlternativeIds = restaurants.slice(1).map((restaurant) => restaurant.id)
+
+    const altExcludeIds = isDifferentChip
+      ? [currentTopPick.id, ...currentlyShownAlternativeIds]
+      : [currentTopPick.id, ...currentlyShownAlternativeIds, ...seenForDirection]
+
+    const nextAlternatives = getAlternativeRecommendations(
       currentTopPick,
       candidatePool,
       filters,
-      [currentTopPick.id, ...seenForDirection],
+      altExcludeIds,
       2,
       direction,
     )
-
-    const currentBatchIds = new Set(currentAlternativeIds)
-
-    if (nextAlternatives.length < 2) {
-      const refillAlternatives = getAlternativeRecommendations(
-        currentTopPick,
-        candidatePool,
-        filters,
-        [currentTopPick.id, ...currentAlternativeIds],
-        2,
-        direction,
-      )
-
-      const chosenIds = new Set(nextAlternatives.map((restaurant) => restaurant.id))
-      nextAlternatives = [
-        ...nextAlternatives,
-        ...refillAlternatives.filter((restaurant) => !chosenIds.has(restaurant.id)),
-      ].slice(0, 2)
-    }
-
-    if (nextAlternatives.length === 2 && nextAlternatives.every((restaurant) => currentBatchIds.has(restaurant.id))) {
-      const forcedRefreshAlternatives = getAlternativeRecommendations(
-        currentTopPick,
-        candidatePool,
-        filters,
-        [currentTopPick.id, ...currentAlternativeIds],
-        3,
-        direction,
-      ).filter((restaurant) => !currentBatchIds.has(restaurant.id)).slice(0, 2)
-
-      if (forcedRefreshAlternatives.length > 0) {
-        nextAlternatives = forcedRefreshAlternatives
-      }
-    }
 
     const loadingDuration = 380 + Math.floor(Math.random() * 120)
     window.setTimeout(() => {
       if (nextAlternatives.length > 0) {
         const nextAlternativeIds = nextAlternatives.map((restaurant) => restaurant.id)
 
+        // Preserve top pick; chip clicking only refreshes alternatives.
         setCurrentRestaurants([currentTopPick, ...nextAlternatives])
         setCurrentAlternativeIds(nextAlternativeIds)
         setDirectionSeenAltIds((current) => ({
           ...current,
           [direction]: isDifferentChip
             ? nextAlternativeIds
-            : [...seenForDirection, ...nextAlternativeIds],
+            : Array.from(new Set([...(current[direction] ?? []), ...nextAlternativeIds])),
         }))
         setAlternativeStage(0)
         window.setTimeout(() => {
@@ -682,11 +659,11 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <Button variant="ghost" size="sm" onClick={onBack} className="gap-2">
+        <Button variant="ghost" size="sm" onClick={handleReturnToSearch} className="gap-2">
           <ArrowLeft className="size-4" />
           Back
         </Button>
-        <Button variant="outline" size="sm" onClick={() => window.location.reload()} className="gap-2">
+        <Button variant="outline" size="sm" onClick={handleReturnToSearch} className="gap-2">
           <RefreshCw className="size-4" />
           New search
         </Button>
@@ -857,7 +834,7 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
                   <Sparkles className="size-5 text-rose-600" />
                 </div>
               </Button>
-              <Button variant="outline" onClick={onBack} size="lg" className="w-full sm:w-auto">
+              <Button variant="outline" onClick={handleReturnToSearch} size="lg" className="w-full sm:w-auto">
                 Adjust filters
               </Button>
             </div>
