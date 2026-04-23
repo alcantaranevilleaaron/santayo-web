@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { PickAgainAction } from "@/components/pick-again-action"
 import { RestaurantCard } from "@/components/restaurant-card"
-import { ArrowLeft, RefreshCw, Sparkles, ChevronDown } from "lucide-react"
+import { ArrowLeft, RefreshCw, Sparkles } from "lucide-react"
 import type { Filters } from "@/app/page"
 import {
   getAlternativeRecommendations,
@@ -378,6 +378,21 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
     setDirectionSeenAltIds({})
   }
 
+  const resetForReroll = () => {
+    setSessionState({
+      seenTopPickIds: [],
+      seenAlternativeIds: [],
+      lastTopPickId: null,
+    })
+    setCurrentAlternativeIds([])
+    setSelectedDirection(null)
+    setPreviousDirection(null)
+    setDirectionHelperText(null)
+    //to leave chip-refresh mode before starting the reroll animation
+    setIsRefreshingAlternatives(false)
+    setAlternativeStage(0)
+  }
+
   const hardResetSession = () => {
     clearAllTimeouts()
     resetRecommendationState()
@@ -416,13 +431,27 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
     setIsRandomizing(true)
   }
 
-  const handlePickAgain = () => {
-    if (isPickingAgain || currentRestaurants.length === 0) {
+  // Guard against spamming the pick again button or direction chips, which can cause state conflicts and a poor experience
+  const pickAgainLockRef = useRef(false)
+  const chipActionLockRef = useRef(false)
+
+  const handlePickAgain = () => {   
+    // if (isPickingAgain || isRefreshingAlternatives || currentRestaurants.length === 0) {
+    //   return
+    // }
+
+    if (pickAgainLockRef.current || chipActionLockRef.current || currentRestaurants.length === 0) {
       return
-    }
+    }    
 
     // Reset all chip-related state for a fresh neutral reroll
-    resetRecommendationState()
+    // resetRecommendationState()
+    pickAgainLockRef.current = true
+    setIsPickingAgain(true)
+    clearAllTimeouts()
+    resetForReroll()
+    setDirectionHelperText(null)
+    setIsRefreshingAlternatives(false)
 
     revealExploration()
     window.scrollTo({ top: 0, behavior: "smooth" })
@@ -436,11 +465,13 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
         lastTopPickId: null,
       }, fallbackMode, 3)
       if (!nextPickSet.newTopPick) {
+        setIsPickingAgain(false)
+        pickAgainLockRef.current = false
         return
       }
 
       const topPick = nextPickSet.newTopPick
-      setIsPickingAgain(true)
+      // setIsPickingAgain(true)
 
       setManagedTimeout(() => {
         setCardsMounted(false)
@@ -457,14 +488,18 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
           setHeaderTitle((current) => getNextResultCopy(rerollHeaderTitles, current))
           setHeaderSubtitle((current) => getNextResultCopy(rerollHeaderSubtitles, current))
           setTopPickCaption((current) => getNextResultCopy(rerollTopPickCaptions, current))
-          setIsPickingAgain(false)
+          // setIsPickingAgain(false)
 
           setManagedTimeout(() => {
             setCardsMounted(true)
             setManagedTimeout(() => setAlternativeStage(1), 120)
             setManagedTimeout(() => setAlternativeStage(2), 220)
             setFreshTopPick(true)
-            setManagedTimeout(() => setFreshTopPick(false), 260)
+            setManagedTimeout(() => {
+              setFreshTopPick(false)
+              setIsPickingAgain(false)
+              pickAgainLockRef.current = false
+            }, 260)
           }, 20)
         }, 180)
       }, 500 + Math.floor(Math.random() * 301))
@@ -636,17 +671,28 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
   }
 
   const handleDirectionSelect = (direction: string) => {
-    if (isRefreshingAlternatives || restaurants.length <= 1) {
+    if (
+      pickAgainLockRef.current ||
+      chipActionLockRef.current ||
+      isInitialLoading ||
+      restaurants.length <= 1
+    ) {
       return
     }
 
-    const isDifferentChip = selectedDirection !== direction
+    chipActionLockRef.current = true
+    setIsRefreshingAlternatives(true)
+    clearAllTimeouts()
+
     const currentTopPick = restaurants[0]
     if (!currentTopPick) {
+      setIsRefreshingAlternatives(false)
+      chipActionLockRef.current = false
       return
     }
 
-    const seenForDirection = directionSeenAltIds[direction] ?? []
+    const directionKey = `${currentTopPick.id}:${direction}`
+    const seenForDirection = directionSeenAltIds[directionKey] ?? []
 
     setPreviousDirection(selectedDirection)
     setSelectedDirection(direction)
@@ -698,20 +744,31 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
         //     : Array.from(new Set([...(current[direction] ?? []), ...nextAlternativeIds])),
         // }))
 
+        // setDirectionSeenAltIds((current) => ({
+        //   ...current,
+        //   [direction]: Array.from(new Set([...(current[direction] ?? []), ...nextAlternativeIds])),
+        // }))
+
         setDirectionSeenAltIds((current) => ({
           ...current,
-          [direction]: Array.from(new Set([...(current[direction] ?? []), ...nextAlternativeIds])),
+          [directionKey]: Array.from(new Set([...(current[directionKey] ?? []), ...nextAlternativeIds])),
         }))
 
         setAlternativeStage(0)
         setManagedTimeout(() => {
           setAlternativeStage(1)
-          setManagedTimeout(() => setAlternativeStage(2), 120)
+          setManagedTimeout(() => {
+            setAlternativeStage(2)
+            setDirectionHelperText(null)
+            setIsRefreshingAlternatives(false)
+            chipActionLockRef.current = false            
+          }, 120)
           alternativesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
           setDirectionHelperText(null)
         }, 20)
       } else {
         setDirectionHelperText(null)
+        chipActionLockRef.current = false 
       }
       setIsRefreshingAlternatives(false)
     }, loadingDuration)
@@ -799,7 +856,19 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
                   key={direction.key}
                   type="button"
                   onClick={() => handleDirectionSelect(direction.key)}
-                  className={`flex-shrink-0 min-w-max snap-start rounded-full border px-4 py-2 text-sm font-semibold transition duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${isActive ? "border-primary bg-primary/15 text-primary shadow-sm" : "border-border bg-background text-foreground hover:border-primary/50 hover:bg-primary/5"}`}
+                  disabled={isPickingAgain || isInitialLoading} // for now, disable direction chips during the picking again flow and initial loading. We can consider allowing direction changes during picking again in the future if it doesn't create a confusing experience.
+                  // className={`flex-shrink-0 min-w-max snap-start rounded-full border px-4 py-2 text-sm font-semibold transition duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${isActive ? "border-primary bg-primary/15 text-primary shadow-sm" : "border-border bg-background text-foreground hover:border-primary/50 hover:bg-primary/5"}`}
+
+                  className={`flex-shrink-0 min-w-max snap-start rounded-full border px-4 py-2 text-sm font-semibold transition duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
+                    isActive
+                      ? "border-primary bg-primary/15 text-primary shadow-sm"
+                      : "border-border bg-background text-foreground hover:border-primary/50 hover:bg-primary/5"
+                  } ${
+                    isPickingAgain || isInitialLoading
+                      ? "pointer-events-none opacity-50"
+                      : ""
+                  }`}
+
                   aria-pressed={isActive}
                 >
                   {direction.label}
