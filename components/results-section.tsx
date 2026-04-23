@@ -291,12 +291,13 @@ function getFilterSummary(filters: Filters): string {
 type ResultsSectionProps = {
   filters: Filters
   onBack: () => void
+  onNewSearch: () => void
   onRandomize: () => void
   fallbackMode: boolean
   resultHint: string | null
 }
 
-export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, resultHint }: ResultsSectionProps) {
+export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fallbackMode, resultHint }: ResultsSectionProps) {
   const [currentRestaurants, setCurrentRestaurants] = useState<Restaurant[]>([])
   const [sessionState, setSessionState] = useState<RecommendationSessionState>({
     seenTopPickIds: [],
@@ -318,13 +319,32 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
   const [selectedDirection, setSelectedDirection] = useState<string | null>(null)
   const [directionHelperText, setDirectionHelperText] = useState<string | null>(null)
   const [directionSeenAltIds, setDirectionSeenAltIds] = useState<Record<string, number[]>>({})
+  const [previousDirection, setPreviousDirection] = useState<string | null>(null)
   const [hasUserInteracted, setHasUserInteracted] = useState(false)
   const [isExplorationVisible, setIsExplorationVisible] = useState(false)
   const alternativesRef = useRef<HTMLDivElement | null>(null)
   const topPickRef = useRef<HTMLDivElement | null>(null)
+  const timeoutsRef = useRef<number[]>([])
   const [headerTitle, setHeaderTitle] = useState(initialHeaderTitle)
   const [headerSubtitle, setHeaderSubtitle] = useState(initialHeaderSubtitle)
   const [topPickCaption, setTopPickCaption] = useState(initialTopPickCaption)
+
+  const clearAllTimeouts = () => {
+    for (const timeoutId of timeoutsRef.current) {
+      window.clearTimeout(timeoutId)
+    }
+    timeoutsRef.current = []
+  }
+
+  const setManagedTimeout = (callback: () => void, delay: number) => {
+    const timeoutId = window.setTimeout(() => {
+      timeoutsRef.current = timeoutsRef.current.filter((id) => id !== timeoutId)
+      callback()
+    }, delay)
+
+    timeoutsRef.current.push(timeoutId)
+    return timeoutId
+  }
 
   const revealExploration = () => {
     if (isExplorationVisible) {
@@ -353,17 +373,41 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
     })
     setCurrentAlternativeIds([])
     setSelectedDirection(null)
+    setPreviousDirection(null)
     setDirectionHelperText(null)
     setDirectionSeenAltIds({})
   }
 
-  const handleReturnToSearch = () => {
+  const hardResetSession = () => {
+    clearAllTimeouts()
     resetRecommendationState()
-    setCurrentRestaurants([])
+
+    setIsFirstLoad(true)
+    setIsInitialLoading(true)
+    setIsExplorationVisible(false)
+    setCardsMounted(false)
+    setHeaderMounted(false)
     setAlternativeStage(0)
+    setFreshTopPick(false)
     setIsRefreshingAlternatives(false)
     setIsPickingAgain(false)
+    setIsRandomizing(false)
+    setLoadingIndex(0)
+    setIsFaded(true)
+    setHeaderTitle(initialHeaderTitle)
+    setHeaderSubtitle(initialHeaderSubtitle)
+    setTopPickCaption(initialTopPickCaption)
+    setHasUserInteracted(false)
+  }
+
+  const handleBack = () => {
+    hardResetSession()
     onBack()
+  }
+
+  const handleNewSearch = () => {
+    hardResetSession()
+    onNewSearch()
   }
 
   const handleRandomizeClick = () => {
@@ -383,7 +427,7 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
     revealExploration()
     window.scrollTo({ top: 0, behavior: "smooth" })
 
-    setTimeout(() => {
+    setManagedTimeout(() => {
       setIsFirstLoad(false)
       // After reset, sessionState is fresh, so generate a neutral recommendation
       const nextPickSet = getNextPickSet(filters, {
@@ -398,11 +442,11 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
       const topPick = nextPickSet.newTopPick
       setIsPickingAgain(true)
 
-      const thinkingDelay = window.setTimeout(() => {
+      setManagedTimeout(() => {
         setCardsMounted(false)
         setAlternativeStage(0)
 
-        const swapDelay = window.setTimeout(() => {
+        setManagedTimeout(() => {
           setCurrentRestaurants([topPick, ...nextPickSet.newAlternatives])
           setCurrentAlternativeIds(nextPickSet.newAlternatives.map((restaurant) => restaurant.id))
           setSessionState({
@@ -415,18 +459,14 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
           setTopPickCaption((current) => getNextResultCopy(rerollTopPickCaptions, current))
           setIsPickingAgain(false)
 
-          window.setTimeout(() => {
+          setManagedTimeout(() => {
             setCardsMounted(true)
-            window.setTimeout(() => setAlternativeStage(1), 120)
-            window.setTimeout(() => setAlternativeStage(2), 220)
+            setManagedTimeout(() => setAlternativeStage(1), 120)
+            setManagedTimeout(() => setAlternativeStage(2), 220)
             setFreshTopPick(true)
-            window.setTimeout(() => setFreshTopPick(false), 260)
+            setManagedTimeout(() => setFreshTopPick(false), 260)
           }, 20)
-
-          window.clearTimeout(swapDelay)
         }, 180)
-
-        window.clearTimeout(thinkingDelay)
       }, 500 + Math.floor(Math.random() * 301))
     }, 120)
   }
@@ -449,7 +489,7 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
     }
 
     setIsFaded(false)
-    const fadeTimer = window.setTimeout(() => setIsFaded(true), 50)
+    const fadeTimer = setManagedTimeout(() => setIsFaded(true), 50)
 
     return () => window.clearTimeout(fadeTimer)
   }, [loadingIndex, isRandomizing])
@@ -459,7 +499,7 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
       return
     }
 
-    const delay = window.setTimeout(() => {
+    const delay = setManagedTimeout(() => {
       onRandomize()
       setIsRandomizing(false)
     }, 2000)
@@ -472,7 +512,7 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
       return
     }
 
-    const idleDelay = window.setTimeout(() => {
+    const idleDelay = setManagedTimeout(() => {
       revealExploration()
     }, 1400)
 
@@ -530,14 +570,14 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
 
       const revealDelay = 700 + Math.floor(Math.random() * 501)
       let cardTimer: number | undefined
-      const headerTimer = window.setTimeout(() => {
+      const headerTimer = setManagedTimeout(() => {
         setIsInitialLoading(false)
         setHeaderMounted(true)
 
-        cardTimer = window.setTimeout(() => {
+        cardTimer = setManagedTimeout(() => {
           setCardsMounted(true)
-          window.setTimeout(() => setAlternativeStage(1), 120)
-          window.setTimeout(() => setAlternativeStage(2), 220)
+          setManagedTimeout(() => setAlternativeStage(1), 120)
+          setManagedTimeout(() => setAlternativeStage(2), 220)
         }, 220)
       }, revealDelay)
 
@@ -564,6 +604,12 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
     setAlternativeStage(0)
     setFreshTopPick(false)
   }, [filters, fallbackMode])
+
+  useEffect(() => {
+    return () => {
+      clearAllTimeouts()
+    }
+  }, [])
 
   const usedPrimaryPhrases = new Set<string>()
   const usedContextPhrases = new Set<string>()
@@ -602,6 +648,7 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
 
     const seenForDirection = directionSeenAltIds[direction] ?? []
 
+    setPreviousDirection(selectedDirection)
     setSelectedDirection(direction)
     setDirectionHelperText(directionHelperCopy[direction] ?? "Looking for a new direction…")
     setIsRefreshingAlternatives(true)
@@ -615,9 +662,17 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
 
     const currentlyShownAlternativeIds = restaurants.slice(1).map((restaurant) => restaurant.id)
 
-    const altExcludeIds = isDifferentChip
-      ? [currentTopPick.id, ...currentlyShownAlternativeIds]
-      : [currentTopPick.id, ...currentlyShownAlternativeIds, ...seenForDirection]
+    // const altExcludeIds = isDifferentChip
+    //   ? [currentTopPick.id, ...currentlyShownAlternativeIds]
+    //   : [currentTopPick.id, ...currentlyShownAlternativeIds, ...seenForDirection]
+
+    const altExcludeIds = Array.from(
+      new Set([
+        currentTopPick.id,
+        ...currentlyShownAlternativeIds,
+        ...seenForDirection,
+      ])
+    )
 
     const nextAlternatives = getAlternativeRecommendations(
       currentTopPick,
@@ -629,23 +684,29 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
     )
 
     const loadingDuration = 380 + Math.floor(Math.random() * 120)
-    window.setTimeout(() => {
+    setManagedTimeout(() => {
       if (nextAlternatives.length > 0) {
         const nextAlternativeIds = nextAlternatives.map((restaurant) => restaurant.id)
 
         // Preserve top pick; chip clicking only refreshes alternatives.
         setCurrentRestaurants([currentTopPick, ...nextAlternatives])
         setCurrentAlternativeIds(nextAlternativeIds)
+        // setDirectionSeenAltIds((current) => ({
+        //   ...current,
+        //   [direction]: isDifferentChip
+        //     ? nextAlternativeIds
+        //     : Array.from(new Set([...(current[direction] ?? []), ...nextAlternativeIds])),
+        // }))
+
         setDirectionSeenAltIds((current) => ({
           ...current,
-          [direction]: isDifferentChip
-            ? nextAlternativeIds
-            : Array.from(new Set([...(current[direction] ?? []), ...nextAlternativeIds])),
+          [direction]: Array.from(new Set([...(current[direction] ?? []), ...nextAlternativeIds])),
         }))
+
         setAlternativeStage(0)
-        window.setTimeout(() => {
+        setManagedTimeout(() => {
           setAlternativeStage(1)
-          window.setTimeout(() => setAlternativeStage(2), 120)
+          setManagedTimeout(() => setAlternativeStage(2), 120)
           alternativesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
           setDirectionHelperText(null)
         }, 20)
@@ -659,11 +720,11 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <Button variant="ghost" size="sm" onClick={handleReturnToSearch} className="gap-2">
+        <Button variant="ghost" size="sm" onClick={handleBack} className="gap-2">
           <ArrowLeft className="size-4" />
           Back
         </Button>
-        <Button variant="outline" size="sm" onClick={handleReturnToSearch} className="gap-2">
+        <Button variant="outline" size="sm" onClick={handleNewSearch} className="gap-2">
           <RefreshCw className="size-4" />
           New search
         </Button>
@@ -834,7 +895,7 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
                   <Sparkles className="size-5 text-rose-600" />
                 </div>
               </Button>
-              <Button variant="outline" onClick={handleReturnToSearch} size="lg" className="w-full sm:w-auto">
+              <Button variant="outline" onClick={handleNewSearch} size="lg" className="w-full sm:w-auto">
                 Adjust filters
               </Button>
             </div>
