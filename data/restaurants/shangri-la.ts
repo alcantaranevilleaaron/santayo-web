@@ -4,7 +4,7 @@ export const SHANGRI_LA_RESTAURANTS: Restaurant[] = [
 {
     id: 47,
     name: "Brotzeit",
-    area: "BGC",
+    area: "Shangri-La",
     cuisine: "German",
     priceRange: "₱350-650",
     dishes: ["Bratwurst Platter", "Sauerkraut", "Pretzel"],

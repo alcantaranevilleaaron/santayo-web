@@ -1,7 +1,7 @@
 import type { Restaurant } from "../restaurant.types";
 
 export const BGC_RESTAURANTS: Restaurant[] = [
-{
+  {
     id: 3,
     name: "Wildflour Cafe + Bakery",
     area: "BGC",
@@ -23,29 +23,29 @@ export const BGC_RESTAURANTS: Restaurant[] = [
     mealType: "light-meal",
     occasions: ["date", "casual-hangout"],
   },
-{
-    id: 7,
-    name: "Brick Corner",
-    area: "BGC",
-    cuisine: "Indian",
-    priceRange: "₱300-550",
-    dishes: ["Butter Chicken", "Tandoori", "Biryani"],
-    tags: ["comfort", "filling", "indian"],
-    attributes: ["comfort", "filling", "indian", "solo", "pair", "group"],
-    budgetMax: 600,
+  {
+    id: 10,
+    name: "Señor Pollo",
+    area: "Crossroads",
+    cuisine: "Western",
+    priceRange: "₱200-350",
+    dishes: ["Rotisserie Chicken", "Aji Verde Rice", "Plantains"],
+    tags: ["filling", "comfort", "western"],
+    attributes: ["filling", "comfort", "western", "solo", "pair", "group"],
+    budgetMax: 400,
     diningTypes: ["solo", "pair", "group"],
-    slug: "brick-corner-bgc-7",
-    cuisinePrimary: "Indian",
-    foodCategories: ["Asian"],
-    moodTags: ["Comfort", "Filling"],
+    slug: "se-or-pollo-bonifacio-high-street-10",
+    cuisinePrimary: "Western",
+    foodCategories: ["Western"],
+    moodTags: ["Filling", "Comfort"],
     experienceTags: ["Solo", "Group"],
-    budgetMin: 300,
-    priceBucket: "mid",
+    budgetMin: 200,
+    priceBucket: "budget",
   },
-{
+  {
     id: 18,
     name: "Frankie's New York Buffalo Wings",
-    area: "BGC",
+    area: "Crossroads",
     cuisine: "Western",
     priceRange: "₱220-380",
     dishes: ["Buffalo Wings", "Salted Egg Wings", "Fries"],
@@ -61,10 +61,10 @@ export const BGC_RESTAURANTS: Restaurant[] = [
     budgetMin: 220,
     priceBucket: "budget",
   },
-{
+  {
     id: 20,
     name: "Recovery Food",
-    area: "BGC",
+    area: "Crossroads",
     cuisine: "Filipino",
     priceRange: "₱180-320",
     dishes: ["Tapa de Morning", "Breakfast Burrito", "Charlie Chan"],
@@ -80,7 +80,7 @@ export const BGC_RESTAURANTS: Restaurant[] = [
     budgetMin: 180,
     priceBucket: "budget",
   },
-{
+  {
     id: 33,
     name: "Bar Pintxos",
     area: "BGC",
@@ -100,7 +100,7 @@ export const BGC_RESTAURANTS: Restaurant[] = [
     mealType: "full-meal",
     occasions: ["date", "casual-hangout"],
   },
-{
+  {
     id: 37,
     name: "Smith & Wollensky",
     area: "Finance Centre",
@@ -108,7 +108,7 @@ export const BGC_RESTAURANTS: Restaurant[] = [
     priceRange: "₱1000+",
     dishes: ["Ribeye", "Steakhouse Sides", "Cocktails"],
     tags: ["filling", "western", "premium"],
-    attributes: ["filling", "western", "premium", "pair", "group","sosyal"],
+    attributes: ["filling", "western", "premium", "pair", "group", "sosyal"],
     budgetMax: 1000,
     diningTypes: ["pair", "group"],
     slug: "smith-wollensky-finance-centre-37",
@@ -122,7 +122,7 @@ export const BGC_RESTAURANTS: Restaurant[] = [
     mealType: "full-meal",
     occasions: ["date", "business", "celebration"],
   },
-{
+  {
     id: 38,
     name: "Ruth's Chris Steak House",
     area: "BGC",
@@ -143,5 +143,5 @@ export const BGC_RESTAURANTS: Restaurant[] = [
     category: "steakhouse",
     mealType: "full-meal",
     occasions: ["date", "business", "celebration"],
-  }
+  },
 ];
