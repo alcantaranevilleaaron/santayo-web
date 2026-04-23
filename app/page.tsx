@@ -117,6 +117,7 @@ export default function Home() {
           <ResultsSection
             filters={filters}
             onBack={handleBack}
+            onNewSearch={handleReset}
             onRandomize={handleRandomize}
             fallbackMode={fallbackRandom}
             resultHint={resultsHint}

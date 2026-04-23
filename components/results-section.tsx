@@ -4,11 +4,10 @@ import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { PickAgainAction } from "@/components/pick-again-action"
 import { RestaurantCard } from "@/components/restaurant-card"
-import { ArrowLeft, RefreshCw, Sparkles, ChevronDown } from "lucide-react"
+import { ArrowLeft, RefreshCw, Sparkles } from "lucide-react"
 import type { Filters } from "@/app/page"
 import {
   getAlternativeRecommendations,
-  getCandidatePool,
   getNextPickSet,
   type RecommendationSessionState,
 } from "@/lib/recommendations"
@@ -292,12 +291,13 @@ function getFilterSummary(filters: Filters): string {
 type ResultsSectionProps = {
   filters: Filters
   onBack: () => void
+  onNewSearch: () => void
   onRandomize: () => void
   fallbackMode: boolean
   resultHint: string | null
 }
 
-export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, resultHint }: ResultsSectionProps) {
+export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fallbackMode, resultHint }: ResultsSectionProps) {
   const [currentRestaurants, setCurrentRestaurants] = useState<Restaurant[]>([])
   const [sessionState, setSessionState] = useState<RecommendationSessionState>({
     seenTopPickIds: [],
@@ -319,13 +319,32 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
   const [selectedDirection, setSelectedDirection] = useState<string | null>(null)
   const [directionHelperText, setDirectionHelperText] = useState<string | null>(null)
   const [directionSeenAltIds, setDirectionSeenAltIds] = useState<Record<string, number[]>>({})
+  const [previousDirection, setPreviousDirection] = useState<string | null>(null)
   const [hasUserInteracted, setHasUserInteracted] = useState(false)
   const [isExplorationVisible, setIsExplorationVisible] = useState(false)
   const alternativesRef = useRef<HTMLDivElement | null>(null)
   const topPickRef = useRef<HTMLDivElement | null>(null)
+  const timeoutsRef = useRef<number[]>([])
   const [headerTitle, setHeaderTitle] = useState(initialHeaderTitle)
   const [headerSubtitle, setHeaderSubtitle] = useState(initialHeaderSubtitle)
   const [topPickCaption, setTopPickCaption] = useState(initialTopPickCaption)
+
+  const clearAllTimeouts = () => {
+    for (const timeoutId of timeoutsRef.current) {
+      window.clearTimeout(timeoutId)
+    }
+    timeoutsRef.current = []
+  }
+
+  const setManagedTimeout = (callback: () => void, delay: number) => {
+    const timeoutId = window.setTimeout(() => {
+      timeoutsRef.current = timeoutsRef.current.filter((id) => id !== timeoutId)
+      callback()
+    }, delay)
+
+    timeoutsRef.current.push(timeoutId)
+    return timeoutId
+  }
 
   const revealExploration = () => {
     if (isExplorationVisible) {
@@ -354,8 +373,56 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
     })
     setCurrentAlternativeIds([])
     setSelectedDirection(null)
+    setPreviousDirection(null)
     setDirectionHelperText(null)
     setDirectionSeenAltIds({})
+  }
+
+  const resetForReroll = () => {
+    setSessionState({
+      seenTopPickIds: [],
+      seenAlternativeIds: [],
+      lastTopPickId: null,
+    })
+    setCurrentAlternativeIds([])
+    setSelectedDirection(null)
+    setPreviousDirection(null)
+    setDirectionHelperText(null)
+    //to leave chip-refresh mode before starting the reroll animation
+    setIsRefreshingAlternatives(false)
+    setAlternativeStage(0)
+  }
+
+  const hardResetSession = () => {
+    clearAllTimeouts()
+    resetRecommendationState()
+
+    setIsFirstLoad(true)
+    setIsInitialLoading(true)
+    setIsExplorationVisible(false)
+    setCardsMounted(false)
+    setHeaderMounted(false)
+    setAlternativeStage(0)
+    setFreshTopPick(false)
+    setIsRefreshingAlternatives(false)
+    setIsPickingAgain(false)
+    setIsRandomizing(false)
+    setLoadingIndex(0)
+    setIsFaded(true)
+    setHeaderTitle(initialHeaderTitle)
+    setHeaderSubtitle(initialHeaderSubtitle)
+    setTopPickCaption(initialTopPickCaption)
+    setHasUserInteracted(false)
+  }
+
+  const handleBack = () => {
+    hardResetSession()
+    onBack()
+  }
+
+  const handleNewSearch = () => {
+    hardResetSession()
+    onNewSearch()
   }
 
   const handleRandomizeClick = () => {
@@ -364,18 +431,32 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
     setIsRandomizing(true)
   }
 
-  const handlePickAgain = () => {
-    if (isPickingAgain || currentRestaurants.length === 0) {
+  // Guard against spamming the pick again button or direction chips, which can cause state conflicts and a poor experience
+  const pickAgainLockRef = useRef(false)
+  const chipActionLockRef = useRef(false)
+
+  const handlePickAgain = () => {   
+    // if (isPickingAgain || isRefreshingAlternatives || currentRestaurants.length === 0) {
+    //   return
+    // }
+
+    if (pickAgainLockRef.current || chipActionLockRef.current || currentRestaurants.length === 0) {
       return
-    }
+    }    
 
     // Reset all chip-related state for a fresh neutral reroll
-    resetRecommendationState()
+    // resetRecommendationState()
+    pickAgainLockRef.current = true
+    setIsPickingAgain(true)
+    clearAllTimeouts()
+    resetForReroll()
+    setDirectionHelperText(null)
+    setIsRefreshingAlternatives(false)
 
     revealExploration()
     window.scrollTo({ top: 0, behavior: "smooth" })
 
-    setTimeout(() => {
+    setManagedTimeout(() => {
       setIsFirstLoad(false)
       // After reset, sessionState is fresh, so generate a neutral recommendation
       const nextPickSet = getNextPickSet(filters, {
@@ -384,22 +465,21 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
         lastTopPickId: null,
       }, fallbackMode, 3)
       if (!nextPickSet.newTopPick) {
+        setIsPickingAgain(false)
+        pickAgainLockRef.current = false
         return
       }
 
       const topPick = nextPickSet.newTopPick
-      setIsPickingAgain(true)
+      // setIsPickingAgain(true)
 
-      const thinkingDelay = window.setTimeout(() => {
+      setManagedTimeout(() => {
         setCardsMounted(false)
         setAlternativeStage(0)
 
-        const swapDelay = window.setTimeout(() => {
+        setManagedTimeout(() => {
           setCurrentRestaurants([topPick, ...nextPickSet.newAlternatives])
           setCurrentAlternativeIds(nextPickSet.newAlternatives.map((restaurant) => restaurant.id))
-          setSelectedDirection(null)
-          setDirectionHelperText(null)
-          setDirectionSeenAltIds({})
           setSessionState({
             seenTopPickIds: [topPick.id],
             seenAlternativeIds: nextPickSet.newAlternatives.map((restaurant) => restaurant.id),
@@ -408,20 +488,20 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
           setHeaderTitle((current) => getNextResultCopy(rerollHeaderTitles, current))
           setHeaderSubtitle((current) => getNextResultCopy(rerollHeaderSubtitles, current))
           setTopPickCaption((current) => getNextResultCopy(rerollTopPickCaptions, current))
-          setIsPickingAgain(false)
+          // setIsPickingAgain(false)
 
-          window.setTimeout(() => {
+          setManagedTimeout(() => {
             setCardsMounted(true)
-            window.setTimeout(() => setAlternativeStage(1), 120)
-            window.setTimeout(() => setAlternativeStage(2), 220)
+            setManagedTimeout(() => setAlternativeStage(1), 120)
+            setManagedTimeout(() => setAlternativeStage(2), 220)
             setFreshTopPick(true)
-            window.setTimeout(() => setFreshTopPick(false), 260)
+            setManagedTimeout(() => {
+              setFreshTopPick(false)
+              setIsPickingAgain(false)
+              pickAgainLockRef.current = false
+            }, 260)
           }, 20)
-
-          window.clearTimeout(swapDelay)
         }, 180)
-
-        window.clearTimeout(thinkingDelay)
       }, 500 + Math.floor(Math.random() * 301))
     }, 120)
   }
@@ -444,7 +524,7 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
     }
 
     setIsFaded(false)
-    const fadeTimer = window.setTimeout(() => setIsFaded(true), 50)
+    const fadeTimer = setManagedTimeout(() => setIsFaded(true), 50)
 
     return () => window.clearTimeout(fadeTimer)
   }, [loadingIndex, isRandomizing])
@@ -454,7 +534,7 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
       return
     }
 
-    const delay = window.setTimeout(() => {
+    const delay = setManagedTimeout(() => {
       onRandomize()
       setIsRandomizing(false)
     }, 2000)
@@ -467,7 +547,7 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
       return
     }
 
-    const idleDelay = window.setTimeout(() => {
+    const idleDelay = setManagedTimeout(() => {
       revealExploration()
     }, 1400)
 
@@ -503,8 +583,6 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
     if (pickSet.newTopPick) {
       setCurrentRestaurants([pickSet.newTopPick, ...pickSet.newAlternatives])
       setCurrentAlternativeIds(pickSet.newAlternatives.map((restaurant) => restaurant.id))
-      setSelectedDirection(null)
-      setDirectionHelperText(null)
       setDirectionSeenAltIds({})
       setSessionState({
         seenTopPickIds: [pickSet.newTopPick.id],
@@ -527,14 +605,14 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
 
       const revealDelay = 700 + Math.floor(Math.random() * 501)
       let cardTimer: number | undefined
-      const headerTimer = window.setTimeout(() => {
+      const headerTimer = setManagedTimeout(() => {
         setIsInitialLoading(false)
         setHeaderMounted(true)
 
-        cardTimer = window.setTimeout(() => {
+        cardTimer = setManagedTimeout(() => {
           setCardsMounted(true)
-          window.setTimeout(() => setAlternativeStage(1), 120)
-          window.setTimeout(() => setAlternativeStage(2), 220)
+          setManagedTimeout(() => setAlternativeStage(1), 120)
+          setManagedTimeout(() => setAlternativeStage(2), 220)
         }, 220)
       }, revealDelay)
 
@@ -549,7 +627,6 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
     setCurrentRestaurants([])
     setCurrentAlternativeIds([])
     setSelectedDirection(null)
-    setDirectionHelperText(null)
     setDirectionSeenAltIds({})
     setSessionState({
       seenTopPickIds: [],
@@ -562,6 +639,12 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
     setAlternativeStage(0)
     setFreshTopPick(false)
   }, [filters, fallbackMode])
+
+  useEffect(() => {
+    return () => {
+      clearAllTimeouts()
+    }
+  }, [])
 
   const usedPrimaryPhrases = new Set<string>()
   const usedContextPhrases = new Set<string>()
@@ -588,92 +671,104 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
   }
 
   const handleDirectionSelect = (direction: string) => {
-    if (isRefreshingAlternatives || restaurants.length <= 1) {
+    if (
+      pickAgainLockRef.current ||
+      chipActionLockRef.current ||
+      isInitialLoading ||
+      restaurants.length <= 1
+    ) {
       return
     }
+
+    chipActionLockRef.current = true
+    setIsRefreshingAlternatives(true)
+    clearAllTimeouts()
 
     const currentTopPick = restaurants[0]
     if (!currentTopPick) {
+      setIsRefreshingAlternatives(false)
+      chipActionLockRef.current = false
       return
     }
 
-    const isDifferentChip = selectedDirection !== direction
-    const seenForDirection = isDifferentChip ? [] : (directionSeenAltIds[direction] ?? [])
+    const directionKey = `${currentTopPick.id}:${direction}`
+    const seenForDirection = directionSeenAltIds[directionKey] ?? []
 
+    setPreviousDirection(selectedDirection)
     setSelectedDirection(direction)
     setDirectionHelperText(directionHelperCopy[direction] ?? "Looking for a new direction…")
     setIsRefreshingAlternatives(true)
     setAlternativeStage(-1)
 
-    const candidatePool = getCandidatePool(filters, fallbackMode).filter(
-      (restaurant) => restaurant.id !== currentTopPick.id,
+    const candidatePool = RESTAURANTS.filter(
+      (restaurant) =>
+        restaurant.operatingStatus !== "closed" &&
+        restaurant.id !== currentTopPick.id,
     )
 
-    let nextAlternatives = getAlternativeRecommendations(
+    const currentlyShownAlternativeIds = restaurants.slice(1).map((restaurant) => restaurant.id)
+
+    // const altExcludeIds = isDifferentChip
+    //   ? [currentTopPick.id, ...currentlyShownAlternativeIds]
+    //   : [currentTopPick.id, ...currentlyShownAlternativeIds, ...seenForDirection]
+
+    const altExcludeIds = Array.from(
+      new Set([
+        currentTopPick.id,
+        ...currentlyShownAlternativeIds,
+        ...seenForDirection,
+      ])
+    )
+
+    const nextAlternatives = getAlternativeRecommendations(
       currentTopPick,
       candidatePool,
       filters,
-      [currentTopPick.id, ...seenForDirection],
+      altExcludeIds,
       2,
       direction,
     )
 
-    const currentBatchIds = new Set(currentAlternativeIds)
-
-    if (nextAlternatives.length < 2) {
-      const refillAlternatives = getAlternativeRecommendations(
-        currentTopPick,
-        candidatePool,
-        filters,
-        [currentTopPick.id, ...currentAlternativeIds],
-        2,
-        direction,
-      )
-
-      const chosenIds = new Set(nextAlternatives.map((restaurant) => restaurant.id))
-      nextAlternatives = [
-        ...nextAlternatives,
-        ...refillAlternatives.filter((restaurant) => !chosenIds.has(restaurant.id)),
-      ].slice(0, 2)
-    }
-
-    if (nextAlternatives.length === 2 && nextAlternatives.every((restaurant) => currentBatchIds.has(restaurant.id))) {
-      const forcedRefreshAlternatives = getAlternativeRecommendations(
-        currentTopPick,
-        candidatePool,
-        filters,
-        [currentTopPick.id, ...currentAlternativeIds],
-        3,
-        direction,
-      ).filter((restaurant) => !currentBatchIds.has(restaurant.id)).slice(0, 2)
-
-      if (forcedRefreshAlternatives.length > 0) {
-        nextAlternatives = forcedRefreshAlternatives
-      }
-    }
-
     const loadingDuration = 380 + Math.floor(Math.random() * 120)
-    window.setTimeout(() => {
+    setManagedTimeout(() => {
       if (nextAlternatives.length > 0) {
         const nextAlternativeIds = nextAlternatives.map((restaurant) => restaurant.id)
 
+        // Preserve top pick; chip clicking only refreshes alternatives.
         setCurrentRestaurants([currentTopPick, ...nextAlternatives])
         setCurrentAlternativeIds(nextAlternativeIds)
+        // setDirectionSeenAltIds((current) => ({
+        //   ...current,
+        //   [direction]: isDifferentChip
+        //     ? nextAlternativeIds
+        //     : Array.from(new Set([...(current[direction] ?? []), ...nextAlternativeIds])),
+        // }))
+
+        // setDirectionSeenAltIds((current) => ({
+        //   ...current,
+        //   [direction]: Array.from(new Set([...(current[direction] ?? []), ...nextAlternativeIds])),
+        // }))
+
         setDirectionSeenAltIds((current) => ({
           ...current,
-          [direction]: isDifferentChip
-            ? nextAlternativeIds
-            : [...seenForDirection, ...nextAlternativeIds],
+          [directionKey]: Array.from(new Set([...(current[directionKey] ?? []), ...nextAlternativeIds])),
         }))
+
         setAlternativeStage(0)
-        window.setTimeout(() => {
+        setManagedTimeout(() => {
           setAlternativeStage(1)
-          window.setTimeout(() => setAlternativeStage(2), 120)
+          setManagedTimeout(() => {
+            setAlternativeStage(2)
+            setDirectionHelperText(null)
+            setIsRefreshingAlternatives(false)
+            chipActionLockRef.current = false            
+          }, 120)
           alternativesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
           setDirectionHelperText(null)
         }, 20)
       } else {
         setDirectionHelperText(null)
+        chipActionLockRef.current = false 
       }
       setIsRefreshingAlternatives(false)
     }, loadingDuration)
@@ -682,11 +777,11 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <Button variant="ghost" size="sm" onClick={onBack} className="gap-2">
+        <Button variant="ghost" size="sm" onClick={handleBack} className="gap-2">
           <ArrowLeft className="size-4" />
           Back
         </Button>
-        <Button variant="outline" size="sm" onClick={() => window.location.reload()} className="gap-2">
+        <Button variant="outline" size="sm" onClick={handleNewSearch} className="gap-2">
           <RefreshCw className="size-4" />
           New search
         </Button>
@@ -761,7 +856,19 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
                   key={direction.key}
                   type="button"
                   onClick={() => handleDirectionSelect(direction.key)}
-                  className={`flex-shrink-0 min-w-max snap-start rounded-full border px-4 py-2 text-sm font-semibold transition duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${isActive ? "border-primary bg-primary/15 text-primary shadow-sm" : "border-border bg-background text-foreground hover:border-primary/50 hover:bg-primary/5"}`}
+                  disabled={isPickingAgain || isInitialLoading} // for now, disable direction chips during the picking again flow and initial loading. We can consider allowing direction changes during picking again in the future if it doesn't create a confusing experience.
+                  // className={`flex-shrink-0 min-w-max snap-start rounded-full border px-4 py-2 text-sm font-semibold transition duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${isActive ? "border-primary bg-primary/15 text-primary shadow-sm" : "border-border bg-background text-foreground hover:border-primary/50 hover:bg-primary/5"}`}
+
+                  className={`flex-shrink-0 min-w-max snap-start rounded-full border px-4 py-2 text-sm font-semibold transition duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
+                    isActive
+                      ? "border-primary bg-primary/15 text-primary shadow-sm"
+                      : "border-border bg-background text-foreground hover:border-primary/50 hover:bg-primary/5"
+                  } ${
+                    isPickingAgain || isInitialLoading
+                      ? "pointer-events-none opacity-50"
+                      : ""
+                  }`}
+
                   aria-pressed={isActive}
                 >
                   {direction.label}
@@ -857,7 +964,7 @@ export function ResultsSection({ filters, onBack, onRandomize, fallbackMode, res
                   <Sparkles className="size-5 text-rose-600" />
                 </div>
               </Button>
-              <Button variant="outline" onClick={onBack} size="lg" className="w-full sm:w-auto">
+              <Button variant="outline" onClick={handleNewSearch} size="lg" className="w-full sm:w-auto">
                 Adjust filters
               </Button>
             </div>
