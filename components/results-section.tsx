@@ -7,9 +7,9 @@ import { RestaurantCard } from "@/components/restaurant-card"
 import { ArrowLeft, RefreshCw, Sparkles } from "lucide-react"
 import type { Filters } from "@/app/page"
 import {
+  createRecommendationSession,
   getAlternativeRecommendations,
   getNextPickSet,
-  createRecommendationSession,
   type RecommendationSession,
   type RecommendationSessionState,
 } from "@/lib/recommendations"
@@ -129,9 +129,7 @@ function getMatchReason(
   }
 
   const chooseUniquePhrase = (options: string[], seed: string, used: Set<string>): string => {
-    if (options.length === 0) {
-      return "Recommended pick"
-    }
+    if (options.length === 0) return "Recommended pick"
 
     const start = options.indexOf(getSeededChoice(options, seed))
     const ordered = [...options.slice(start), ...options.slice(0, start)]
@@ -175,9 +173,9 @@ function getMatchReason(
     "solo",
   ]
 
-  const primaryAttribute = primaryAttributePriority.find((attribute) =>
+  const primaryAttribute = primaryAttributePriority.find((attribute) => 
     normalizedAttributes.includes(attribute)
-  ) ?? normalizedAttributes[0]
+    ) ?? normalizedAttributes[0]
 
   const primaryPhraseOptions = primaryAttribute
     ? attributePhraseOptions[primaryAttribute] ?? ["Recommended pick"]
@@ -202,31 +200,6 @@ function getMatchReason(
   return `${primaryPhrase} — ${contextPhrase}`
 }
 
-function getTopPickExplanation(mood: string): string {
-  const explanations: Record<string, string[]> = {
-    random: [
-      "Can’t go wrong with this one.",
-      "Safe, satisfying choice.",
-      "Works for almost any craving.",
-    ],
-    filling: [
-      "Top choice for hearty, satisfying plates.",
-      "Most satisfying option for a full meal.",
-    ],
-    light: [
-      "Best pick for a clean, easy meal.",
-      "Top option for a lighter, refined meal.",
-    ],
-    comfort: [
-      "Best choice for warm, comforting flavors.",
-      "Top option for familiar, feel-good meals.",
-    ],
-  }
-
-  const options = explanations[mood] ?? explanations.random
-  return options[0]
-}
-
 const initialHeaderTitle = "This is our pick for you ✨"
 const initialHeaderSubtitle = "Based on your vibe"
 const initialTopPickCaption = "Can’t go wrong with this one."
@@ -249,6 +222,22 @@ const rerollTopPickCaptions = [
   "Another strong option.",
 ]
 
+const directionOptions = [
+  { key: "light", label: "Light" },
+  { key: "comfort", label: "Comfort" },
+  { key: "premium", label: "Premium" },
+  { key: "quick bite", label: "Quick bite" },
+  { key: "healthy", label: "Healthy" },
+]
+
+const directionHelperCopy: Record<string, string> = {
+  light: "Showing lighter options",
+  comfort: "Switching to comfort food",
+  premium: "Exploring premium picks",
+  "quick bite": "Looking for quick bites",
+  healthy: "Showing healthier options",
+}
+
 function getNextResultCopy<T extends string>(options: T[], previous?: T): T {
   const available = previous ? options.filter((option) => option !== previous) : options
   const pool = available.length > 0 ? available : options
@@ -259,35 +248,39 @@ function capitalize(text: string): string {
   return text.charAt(0).toUpperCase() + text.slice(1)
 }
 
-function getFilterSummary(filters: Filters): string {
-  const parts: string[] = []
+function getDirectionPool(direction: string, pool: Restaurant[]) {
+  switch (direction) {
+    case "premium":
+      return pool.filter((restaurant) =>
+        restaurant.priceBucket === "premium" || restaurant.priceBucket === "splurge"
+      )
 
-  if (filters.mood && filters.mood !== "random") {
-    parts.push(capitalize(filters.mood))
+    case "light":
+      return pool.filter((restaurant) => restaurant.tags?.includes("light"))
+
+    case "comfort":
+      return pool.filter((restaurant) => restaurant.tags?.includes("comfort"))
+
+    case "healthy":
+      return pool.filter(
+        (restaurant) =>
+          restaurant.cuisine?.toLowerCase().includes("healthy") ||
+          restaurant.tags?.includes("healthy")
+      )
+
+    case "quick bite":
+      return pool.filter(
+        (restaurant) =>
+          restaurant.tags?.includes("quick") ||
+          restaurant.tags?.includes("snack") ||
+          restaurant.tags?.includes("grab-and-go") ||
+          restaurant.moodTags?.includes("Quick") ||
+          restaurant.experienceTags?.includes("Quick")
+      )
+
+    default:
+      return pool
   }
-
-  if (filters.budget && filters.budget !== "1000") {
-    parts.push(`Under ₱${filters.budget}`)
-  }
-
-  if (filters.cuisine && filters.cuisine !== "any") {
-    parts.push(capitalize(filters.cuisine))
-  }
-
-  if (filters.dining) {
-    parts.push(capitalize(filters.dining))
-  }
-
-  // return parts.length > 0 ? parts.join(" · ") : "Based on your preferences"
-
-  if (filters.mood === "random") {
-    if (parts.length > 0) {
-      return `A mix of solid picks ${parts.join(" · ")}`
-    }
-    return "Kami na pumili"
-  }
-
-  return parts.join(" · ")
 }
 
 type ResultsSectionProps = {
@@ -299,15 +292,25 @@ type ResultsSectionProps = {
   resultHint: string | null
 }
 
-export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fallbackMode, resultHint }: ResultsSectionProps) {
-  // Debugging utility to trace recommendation flow and decisions
-  const DEBUG_RECO = true
+function shuffle<T>(array: T[]): T[] {
+  const result = [...array]
 
-  const debugReco = (label: string, data?: unknown) => {
-    if (!DEBUG_RECO) return
-    console.log(`[SanTayo Reco] ${label}`, data)
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[result[i], result[j]] = [result[j], result[i]]
   }
-  
+
+  return result
+}
+
+export function ResultsSection({
+  filters,
+  onBack,
+  onNewSearch,
+  onRandomize,
+  fallbackMode,
+  resultHint,
+}: ResultsSectionProps) {
   const [currentRestaurants, setCurrentRestaurants] = useState<Restaurant[]>([])
   const [sessionState, setSessionState] = useState<RecommendationSessionState>({
     seenTopPickIds: [],
@@ -329,15 +332,46 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
   const [selectedDirection, setSelectedDirection] = useState<string | null>(null)
   const [directionHelperText, setDirectionHelperText] = useState<string | null>(null)
   const [hasUserInteracted, setHasUserInteracted] = useState(false)
-  // Centralized session container — parallel to existing state, not yet wired to behavior
   const [recommendationSession, setRecommendationSession] = useState<RecommendationSession | null>(null)
   const [isExplorationVisible, setIsExplorationVisible] = useState(false)
-  const alternativesRef = useRef<HTMLDivElement | null>(null)
-  const topPickRef = useRef<HTMLDivElement | null>(null)
-  const timeoutsRef = useRef<number[]>([])
   const [headerTitle, setHeaderTitle] = useState(initialHeaderTitle)
   const [headerSubtitle, setHeaderSubtitle] = useState(initialHeaderSubtitle)
   const [topPickCaption, setTopPickCaption] = useState(initialTopPickCaption)
+
+  const alternativesRef = useRef<HTMLDivElement | null>(null)
+  const topPickRef = useRef<HTMLDivElement | null>(null)
+  const timeoutsRef = useRef<number[]>([])
+  const pickAgainLockRef = useRef(false)
+  const chipActionLockRef = useRef(false)
+
+  const restaurants = currentRestaurants
+
+  // Toggle this to true only when debugging recommendation/session behavior.
+  const DEBUG_RECO = true
+
+  const debugReco = (label: string, data?: unknown) => {
+    if (!DEBUG_RECO) return
+    console.log(`[SanTayo Reco] ${label}`, data)
+  }
+
+  const summarizeRestaurant = (restaurant: Restaurant | null | undefined) =>
+    restaurant
+      ? {
+          id: restaurant.id,
+          name: restaurant.name,
+          priceBucket: restaurant.priceBucket,
+        }
+      : null
+
+  const summarizeRestaurants = (items: Restaurant[]) =>
+    items.map((restaurant) => summarizeRestaurant(restaurant))
+
+  const loadingMessages = [
+    "Picking something good...",
+    "Checking the vibe...",
+    "Balancing your cravings...",
+    "Trust me on this one 👀",
+  ]
 
   const clearAllTimeouts = () => {
     for (const timeoutId of timeoutsRef.current) {
@@ -357,33 +391,15 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
   }
 
   const revealExploration = () => {
-    if (isExplorationVisible) {
-      return
-    }
-
+    if (isExplorationVisible) return
     setIsExplorationVisible(true)
     setHasUserInteracted(true)
   }
 
-  const restaurants = currentRestaurants
-
-  const loadingMessages = [
-    "Picking something good...",
-    "Checking the vibe...",
-    "Balancing your cravings...",
-    "Trust me on this one 👀",
-  ]
-
-  // Reset all chip-related recommendation state for a fresh recommendation flow
   const resetRecommendationState = () => {
-    // Debugging information for recommendation state reset
     debugReco("RESET recommendation state", {
       filters,
-      currentRestaurants: currentRestaurants.map((r) => ({
-        id: r.id,
-        name: r.name,
-        priceBucket: r.priceBucket,
-      })),
+      currentRestaurants: summarizeRestaurants(currentRestaurants),
     })
 
     setSessionState({
@@ -398,11 +414,10 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
   }
 
   const resetForReroll = () => {
-    // debug for reset reroll
-    debugReco("RESET FOR REROLL", {
+    debugReco("RESET for reroll", {
       previousSession: recommendationSession
         ? {
-            topPick: recommendationSession.topPick?.id,
+            topPick: summarizeRestaurant(recommendationSession.topPick),
             activeChip: recommendationSession.activeChip,
             usedAlternativeIds: [...recommendationSession.usedAlternativeIds],
             chipHistory: recommendationSession.chipHistory,
@@ -418,10 +433,7 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
     setCurrentAlternativeIds([])
     setSelectedDirection(null)
     setDirectionHelperText(null)
-    // Clear the session immediately so chip history and used IDs from the
-    // previous session cannot leak into the new one during the loading window.
     setRecommendationSession(null)
-    //to leave chip-refresh mode before starting the reroll animation
     setIsRefreshingAlternatives(false)
     setAlternativeStage(0)
   }
@@ -429,7 +441,6 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
   const hardResetSession = () => {
     clearAllTimeouts()
     resetRecommendationState()
-
     setIsFirstLoad(true)
     setIsInitialLoading(true)
     setIsExplorationVisible(false)
@@ -459,32 +470,27 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
   }
 
   const handleRandomizeClick = () => {
+    debugReco("Ikaw na bahala clicked", {
+      filters,
+      currentTopPick: summarizeRestaurant(currentRestaurants[0]),
+      currentAlternativeIds,
+      selectedDirection,
+    })
+
     setLoadingIndex(0)
     setIsFaded(true)
     setIsRandomizing(true)
   }
 
-  // Guard against spamming the pick again button or direction chips, which can cause state conflicts and a poor experience
-  const pickAgainLockRef = useRef(false)
-  const chipActionLockRef = useRef(false)
-
-  const handlePickAgain = () => {   
-
-    // Debugging information for pick again action
-    debugReco("PICK AGAIN clicked", {
+  const handlePickAgain = () => {
+    debugReco("Pick again clicked", {
       filters,
-      currentTopPick: currentRestaurants[0]
-        ? {
-            id: currentRestaurants[0].id,
-            name: currentRestaurants[0].name,
-            priceBucket: currentRestaurants[0].priceBucket,
-          }
-        : null,
+      currentTopPick: summarizeRestaurant(currentRestaurants[0]),
       currentAlternativeIds,
       sessionState,
       recommendationSession: recommendationSession
         ? {
-            topPick: recommendationSession.topPick?.id,
+            topPick: summarizeRestaurant(recommendationSession.topPick),
             activeChip: recommendationSession.activeChip,
             usedAlternativeIds: [...recommendationSession.usedAlternativeIds],
             chipHistory: recommendationSession.chipHistory,
@@ -494,45 +500,35 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
 
     if (pickAgainLockRef.current || chipActionLockRef.current || currentRestaurants.length === 0) {
       return
-    }    
+    }
 
-    // Reset all chip-related state for a fresh neutral reroll
-    // resetRecommendationState()
     pickAgainLockRef.current = true
     setIsPickingAgain(true)
     clearAllTimeouts()
     resetForReroll()
     setDirectionHelperText(null)
     setIsRefreshingAlternatives(false)
-
     revealExploration()
     window.scrollTo({ top: 0, behavior: "smooth" })
 
     setManagedTimeout(() => {
       setIsFirstLoad(false)
-      // After reset, sessionState is fresh, so generate a neutral recommendation
-      const nextPickSet = getNextPickSet(filters, {
-        seenTopPickIds: [],
-        seenAlternativeIds: [],
-        lastTopPickId: null,
-      }, fallbackMode, 3)
 
-      // Debugging information for pick again result
-      debugReco("PICK AGAIN result", {
-        topPick: nextPickSet.newTopPick
-          ? {
-              id: nextPickSet.newTopPick.id,
-              name: nextPickSet.newTopPick.name,
-              priceBucket: nextPickSet.newTopPick.priceBucket,
-            }
-          : null,
-        alternatives: nextPickSet.newAlternatives.map((r) => ({
-          id: r.id,
-          name: r.name,
-          priceBucket: r.priceBucket,
-        })),
+      const nextPickSet = getNextPickSet(
+        filters,
+        {
+          seenTopPickIds: [],
+          seenAlternativeIds: [],
+          lastTopPickId: null,
+        },
+        fallbackMode,
+        3
+      )
+
+      debugReco("Pick again result", {
+        topPick: summarizeRestaurant(nextPickSet.newTopPick),
+        alternatives: summarizeRestaurants(nextPickSet.newAlternatives),
       })
-
 
       if (!nextPickSet.newTopPick) {
         setIsPickingAgain(false)
@@ -541,7 +537,6 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
       }
 
       const topPick = nextPickSet.newTopPick
-      // setIsPickingAgain(true)
 
       setManagedTimeout(() => {
         setCardsMounted(false)
@@ -556,12 +551,11 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
             lastTopPickId: topPick.id,
           })
           setRecommendationSession(
-              createRecommendationSession(filters, fallbackMode, topPick, nextPickSet.newAlternatives),
+            createRecommendationSession(filters, fallbackMode, topPick, nextPickSet.newAlternatives)
           )
           setHeaderTitle((current) => getNextResultCopy(rerollHeaderTitles, current))
           setHeaderSubtitle((current) => getNextResultCopy(rerollHeaderSubtitles, current))
           setTopPickCaption((current) => getNextResultCopy(rerollTopPickCaptions, current))
-          // setIsPickingAgain(false)
 
           setManagedTimeout(() => {
             setCardsMounted(true)
@@ -579,22 +573,187 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
     }, 120)
   }
 
-  useEffect(() => {
-    if (!isRandomizing) {
+  const handleDirectionSelect = (direction: string) => {
+    debugReco("Chip clicked", {
+      direction,
+      filters,
+      currentTopPick: summarizeRestaurant(restaurants[0]),
+      session: recommendationSession
+        ? {
+            topPick: summarizeRestaurant(recommendationSession.topPick),
+            activeChip: recommendationSession.activeChip,
+            usedAlternativeIds: [...recommendationSession.usedAlternativeIds],
+            chipHistory: recommendationSession.chipHistory,
+          }
+        : null,
+    })
+
+    if (
+      pickAgainLockRef.current ||
+      chipActionLockRef.current ||
+      isInitialLoading ||
+      isRandomizing ||
+      isRefreshingAlternatives ||
+      restaurants.length <= 1 ||
+      !recommendationSession?.topPick
+    ) {
       return
     }
+
+    chipActionLockRef.current = true
+    setIsRefreshingAlternatives(true)
+    clearAllTimeouts()
+
+    const session = recommendationSession
+    const topPick = session.topPick
+
+    if (!topPick) {
+      chipActionLockRef.current = false
+      setIsRefreshingAlternatives(false)
+      return
+    }
+
+    setSelectedDirection(direction)
+    setDirectionHelperText(directionHelperCopy[direction] ?? "Looking for a new direction…")
+    setAlternativeStage(-1)
+
+    const seenForChip = session.chipHistory[direction] ?? []
+    const excludeIds = Array.from(new Set([topPick.id, ...currentAlternativeIds, ...seenForChip]))
+
+    debugReco("Chip exclude IDs", {
+      direction,
+      topPickId: topPick.id,
+      seenForChip,
+      excludeIds,
+    })
+
+    const candidatePool = RESTAURANTS.filter(
+      (restaurant) => restaurant.operatingStatus !== "closed" && restaurant.id !== topPick.id
+    )
+    const strictDirectionPool = getDirectionPool(direction, candidatePool)
+    const directionPool = strictDirectionPool.length >= 2 ? strictDirectionPool : candidatePool
+    const unseenDirectionPool = directionPool.filter((restaurant) => !excludeIds.includes(restaurant.id))
+    const finalDirectionPool = unseenDirectionPool.length >= 2 ? unseenDirectionPool : directionPool
+    // const variedDirectionPool = [...finalDirectionPool].sort(() => Math.random() - 0.5)
+
+    const lastFirstAlternativeId = currentAlternativeIds[0] ?? null
+
+    const unseenFirstPool = [
+      ...finalDirectionPool.filter(
+        (r) => !session.usedAlternativeIds.has(r.id) && r.id !== lastFirstAlternativeId
+      ),
+      ...finalDirectionPool.filter(
+        (r) => session.usedAlternativeIds.has(r.id) || r.id === lastFirstAlternativeId
+      ),
+    ]
+
+    const variedDirectionPool = shuffle(unseenFirstPool)
+
+    debugReco("Chip pool summary", {
+      direction,
+      candidatePoolSize: candidatePool.length,
+      strictDirectionPoolSize: strictDirectionPool.length,
+      directionPoolSize: directionPool.length,
+      unseenDirectionPoolSize: unseenDirectionPool.length,
+      finalDirectionPoolSize: finalDirectionPool.length,
+      fallbackUsed: strictDirectionPool.length < 2 || unseenDirectionPool.length < 2,
+      premiumCount: variedDirectionPool.filter((restaurant) => restaurant.priceBucket === "premium").length,
+      splurgeCount: variedDirectionPool.filter((restaurant) => restaurant.priceBucket === "splurge").length,
+      sample: variedDirectionPool.slice(0, 5).map((restaurant) => ({
+        id: restaurant.id,
+        name: restaurant.name,
+        priceBucket: restaurant.priceBucket,
+        tags: restaurant.tags,
+        moodTags: restaurant.moodTags,
+        foodCategories: restaurant.foodCategories,
+        experienceTags: restaurant.experienceTags,
+      })),
+    })
+
+    const expandedAlternatives = getAlternativeRecommendations(
+      topPick,
+      variedDirectionPool,
+      session.originalFilters,
+      excludeIds,
+      8,
+      direction,
+    )
+
+    const postScoredPool = [
+      ...expandedAlternatives.filter((r) => r.id !== lastFirstAlternativeId),
+      ...expandedAlternatives.filter((r) => r.id === lastFirstAlternativeId),
+    ]
+
+    const nextAlternatives = shuffle(postScoredPool).slice(0, 2)    
+
+    debugReco("Chip alternatives result", {
+      direction,
+      count: nextAlternatives.length,
+      alternatives: nextAlternatives.map((restaurant) => ({
+        id: restaurant.id,
+        name: restaurant.name,
+        priceBucket: restaurant.priceBucket,
+        tags: restaurant.tags,
+        moodTags: restaurant.moodTags,
+        experienceTags: restaurant.experienceTags,
+      })),
+    })
+
+    const loadingDuration = 380 + Math.floor(Math.random() * 120)
+    setManagedTimeout(() => {
+      if (nextAlternatives.length === 0) {
+        setDirectionHelperText(null)
+        setIsRefreshingAlternatives(false)
+        chipActionLockRef.current = false
+        return
+      }
+
+      const nextAlternativeIds = nextAlternatives.map((restaurant) => restaurant.id)
+      setCurrentRestaurants([topPick, ...nextAlternatives])
+      setCurrentAlternativeIds(nextAlternativeIds)
+      setRecommendationSession((current) => {
+        if (!current) return current
+
+        const updatedSeenForChip = Array.from(new Set([...seenForChip, ...nextAlternativeIds]))
+        return {
+          ...current,
+          alternatives: nextAlternatives,
+          usedAlternativeIds: new Set([...current.usedAlternativeIds, ...nextAlternativeIds]),
+          activeChip: direction,
+          chipHistory: {
+            ...current.chipHistory,
+            [direction]: updatedSeenForChip,
+          },
+        }
+      })
+
+      setAlternativeStage(0)
+      setManagedTimeout(() => {
+        setAlternativeStage(1)
+        setManagedTimeout(() => {
+          setAlternativeStage(2)
+          setDirectionHelperText(null)
+          setIsRefreshingAlternatives(false)
+          chipActionLockRef.current = false
+        }, 120)
+        alternativesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+        setDirectionHelperText(null)
+      }, 20)
+    }, loadingDuration)
+  }
+
+  useEffect(() => {
+    if (!isRandomizing) return
 
     const rotate = window.setInterval(() => {
       setLoadingIndex((current) => (current + 1) % loadingMessages.length)
     }, 650)
 
     return () => window.clearInterval(rotate)
-  }, [isRandomizing])
+  }, [isRandomizing, loadingMessages.length])
 
   useEffect(() => {
-    if (!isRandomizing) {
-      return
-    }
+    if (!isRandomizing) return
 
     setIsFaded(false)
     const fadeTimer = setManagedTimeout(() => setIsFaded(true), 50)
@@ -603,9 +762,7 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
   }, [loadingIndex, isRandomizing])
 
   useEffect(() => {
-    if (!isRandomizing) {
-      return
-    }
+    if (!isRandomizing) return
 
     const delay = setManagedTimeout(() => {
       onRandomize()
@@ -616,9 +773,7 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
   }, [isRandomizing, onRandomize])
 
   useEffect(() => {
-    if (isInitialLoading || isExplorationVisible || restaurants.length === 0) {
-      return
-    }
+    if (isInitialLoading || isExplorationVisible || restaurants.length === 0) return
 
     const idleDelay = setManagedTimeout(() => {
       revealExploration()
@@ -628,20 +783,14 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
   }, [isInitialLoading, isExplorationVisible, restaurants.length])
 
   useEffect(() => {
-    if (isExplorationVisible || restaurants.length === 0) {
-      return
-    }
+    if (isExplorationVisible || restaurants.length === 0) return
 
     const onScroll = () => {
       const topPickElement = topPickRef.current
-      if (!topPickElement) {
-        return
-      }
+      if (!topPickElement) return
 
       const rect = topPickElement.getBoundingClientRect()
-      if (rect.bottom < 40) {
-        revealExploration()
-      }
+      if (rect.bottom < 40) revealExploration()
     }
 
     window.addEventListener("scroll", onScroll, { passive: true })
@@ -651,8 +800,7 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
   }, [isExplorationVisible, restaurants.length])
 
   useEffect(() => {
-    // Debugging information for initial/new filter effect
-    debugReco("INITIAL/NEW FILTER effect triggered -- before getNextPickSet", {
+    debugReco("Initial/new filter effect", {
       filters,
       fallbackMode,
       sessionState,
@@ -660,20 +808,9 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
 
     const pickSet = getNextPickSet(filters, sessionState, fallbackMode, 3)
 
-    // Debugging information for initial/new filter result
-    debugReco("INITIAL/NEW FILTER result -- after getNextPickSet", {
-      topPick: pickSet.newTopPick
-        ? {
-            id: pickSet.newTopPick.id,
-            name: pickSet.newTopPick.name,
-            priceBucket: pickSet.newTopPick.priceBucket,
-          }
-        : null,
-      alternatives: pickSet.newAlternatives.map((r) => ({
-        id: r.id,
-        name: r.name,
-        priceBucket: r.priceBucket,
-      })),
+    debugReco("Initial/new filter result", {
+      topPick: summarizeRestaurant(pickSet.newTopPick),
+      alternatives: summarizeRestaurants(pickSet.newAlternatives),
     })
 
     if (pickSet.newTopPick) {
@@ -685,7 +822,7 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
         lastTopPickId: pickSet.newTopPick.id,
       })
       setRecommendationSession(
-        createRecommendationSession(filters, fallbackMode, pickSet.newTopPick, pickSet.newAlternatives),
+        createRecommendationSession(filters, fallbackMode, pickSet.newTopPick, pickSet.newAlternatives)
       )
 
       if (isFirstLoad) {
@@ -716,9 +853,7 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
 
       return () => {
         window.clearTimeout(headerTimer)
-        if (cardTimer) {
-          window.clearTimeout(cardTimer)
-        }
+        if (cardTimer) window.clearTimeout(cardTimer)
       }
     }
 
@@ -748,252 +883,12 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
   const matchReasons = restaurants.map((restaurant) =>
     getMatchReason(restaurant, filters, fallbackMode, usedPrimaryPhrases, usedContextPhrases)
   )
-
   const topPickExplanation = restaurants.length > 0 ? topPickCaption : undefined
-
-  const directionOptions = [
-    { key: "light", label: "Light" },
-    { key: "comfort", label: "Comfort" },
-    { key: "premium", label: "Premium" },
-    { key: "quick bite", label: "Quick bite" },
-    { key: "healthy", label: "Healthy" },
-  ]
-
-  const directionHelperCopy: Record<string, string> = {
-    light: "Showing lighter options",
-    comfort: "Switching to comfort food",
-    premium: "Exploring premium picks",
-    "quick bite": "Looking for quick bites",
-    healthy: "Showing healthier options",
-  }
-
-  const handleDirectionSelect = (direction: string) => {
-
-    // Debugging information for chip click action
-    debugReco("CHIP clicked", {
-      direction,
-      filters,
-      currentTopPick: restaurants[0]
-        ? {
-            id: restaurants[0].id,
-            name: restaurants[0].name,
-            priceBucket: restaurants[0].priceBucket,
-          }
-        : null,
-      session: recommendationSession
-        ? {
-            topPick: recommendationSession.topPick?.id,
-            activeChip: recommendationSession.activeChip,
-            usedAlternativeIds: [...recommendationSession.usedAlternativeIds],
-            chipHistory: recommendationSession.chipHistory,
-          }
-        : null,
-    })
-
-    if (
-      pickAgainLockRef.current ||
-      chipActionLockRef.current ||
-      isInitialLoading ||
-      isRandomizing ||
-      isRefreshingAlternatives ||
-      restaurants.length <= 1 ||
-      !recommendationSession?.topPick
-    ) {
-      return
-    }
-
-    chipActionLockRef.current = true
-    setIsRefreshingAlternatives(true)
-    clearAllTimeouts()
-
-    // Lock top pick to the session — never derive it from live UI state
-    const session = recommendationSession
-    const topPick = session.topPick
-    if (!topPick) {
-      chipActionLockRef.current = false
-      setIsRefreshingAlternatives(false)
-      return
-    }
-
-    setSelectedDirection(direction)
-    setDirectionHelperText(directionHelperCopy[direction] ?? "Looking for a new direction…")
-    setAlternativeStage(-1)
-
-    // Each chip direction has its own independent rotation history within the session.
-    // Same chip → accumulate excludes so we rotate through fresh alternatives.
-    // Different chip → starts from its own history (empty on first click).
-    const seenForChip = session.chipHistory[direction] ?? []
-    const excludeIds = Array.from(new Set([topPick.id, ...seenForChip]))
-
-    // Debugging information for chip exclude IDs
-    debugReco("CHIP excludeIds", {
-      direction,
-      topPickId: topPick.id,
-      seenForChip,
-      excludeIds,
-    })    
-
-    const candidatePool = RESTAURANTS.filter(
-      (r) => r.operatingStatus !== "closed" && r.id !== topPick.id,
-    )
-
-    // const directionPool =
-    //   direction === "premium"
-    //     ? candidatePool.filter(
-    //         (r) => r.priceBucket === "premium" || r.priceBucket === "splurge"
-    //       )
-    //     : candidatePool
-
-    const getDirectionPool = (direction: string, pool: Restaurant[]) => {
-      switch (direction) {
-        case "premium":
-          return pool.filter(
-            (r) => r.priceBucket === "premium" || r.priceBucket === "splurge"
-          )
-
-        case "light":
-          return pool.filter(
-            (r) =>
-              // r.moodTags?.includes("light") ||
-              r.tags?.includes("light") 
-              // ||
-              // r.foodCategories?.includes("salad") ||
-              // r.foodCategories?.includes("healthy")
-          )
-
-        case "comfort":
-          return pool.filter(
-            (r) =>
-              // r.moodTags?.includes("comfort") ||
-              r.tags?.includes("comfort") 
-              // ||
-              // r.experienceTags?.includes("casual")
-          )
-
-        case "healthy":
-          return pool.filter(
-            (r) =>
-              // r.moodTags?.includes("healthy") ||
-              r.cuisine?.includes("healthy") ||
-              r.tags?.includes("healthy") 
-              // ||
-              // r.foodCategories?.includes("healthy") ||
-              // r.foodCategories?.includes("salad")
-          )
-
-        case "quick bite":
-          return pool.filter(
-            (r) =>
-              r.tags?.includes("quick") ||
-              r.tags?.includes("snack") ||
-              r.tags?.includes("grab-and-go") ||
-              r.moodTags?.includes("Quick") ||
-              r.experienceTags?.includes("Quick") 
-          )
-
-        default:
-          return pool
-      }
-    }
-
-    const strictDirectionPool = getDirectionPool(direction, candidatePool)
-
-    const directionPool =
-      strictDirectionPool.length >= 2 ? strictDirectionPool : candidatePool
-
-    debugReco("CHIP candidate pool", {
-      direction,
-      candidatePoolSize: candidatePool.length,
-      premiumCount: candidatePool.filter((r) => r.priceBucket === "premium").length,
-      splurgeCount: candidatePool.filter((r) => r.priceBucket === "splurge").length,
-    })
-
-    debugReco("CHIP direction pool", {
-      direction,
-      before: candidatePool.length,
-      afterStrictFilter: strictDirectionPool.length,
-      finalPool: directionPool.length,
-      fallbackUsed: strictDirectionPool.length < 2,
-      sample: directionPool.slice(0, 5).map((r) => ({
-        id: r.id,
-        name: r.name,
-        priceBucket: r.priceBucket,
-        tags: r.tags,
-        moodTags: r.moodTags,
-        foodCategories: r.foodCategories,
-        experienceTags: r.experienceTags,
-      })),
-    })
-
-    const nextAlternatives = getAlternativeRecommendations(
-      topPick,
-      directionPool,
-      session.originalFilters,
-      excludeIds,
-      2,
-      direction,
-    )
-
-    debugReco("CHIP alternatives result", {
-      direction,
-      count: nextAlternatives.length,
-      alternatives: nextAlternatives.map((r) => ({
-        id: r.id,
-        name: r.name,
-        priceBucket: r.priceBucket,
-        tags: r.tags,
-        moodTags: r.moodTags,
-        experienceTags: r.experienceTags,
-      })),
-    })
-
-    const loadingDuration = 380 + Math.floor(Math.random() * 120)
-    setManagedTimeout(() => {
-      if (nextAlternatives.length > 0) {
-        const nextAlternativeIds = nextAlternatives.map((r) => r.id)
-
-        // Top pick is always session.topPick — alternatives are the only thing that changes
-        setCurrentRestaurants([topPick, ...nextAlternatives])
-        setCurrentAlternativeIds(nextAlternativeIds)
-
-        setRecommendationSession((current) => {
-          if (!current) return current
-          const updatedSeenForChip = Array.from(new Set([...seenForChip, ...nextAlternativeIds]))
-          return {
-            ...current,
-            alternatives: nextAlternatives,
-            usedAlternativeIds: new Set([...current.usedAlternativeIds, ...nextAlternativeIds]),
-            activeChip: direction,
-            chipHistory: {
-              ...current.chipHistory,
-              [direction]: updatedSeenForChip,
-            },
-          }
-        })
-
-        setAlternativeStage(0)
-        setManagedTimeout(() => {
-          setAlternativeStage(1)
-          setManagedTimeout(() => {
-            setAlternativeStage(2)
-            setDirectionHelperText(null)
-            setIsRefreshingAlternatives(false)
-            chipActionLockRef.current = false
-          }, 120)
-          alternativesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
-          setDirectionHelperText(null)
-        }, 20)
-      } else {
-        setDirectionHelperText(null)
-        setIsRefreshingAlternatives(false)
-        chipActionLockRef.current = false
-      }
-    }, loadingDuration)
-  }
+  const isChipDisabled = isPickingAgain || isInitialLoading || isRandomizing || isRefreshingAlternatives
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <Button variant="ghost" size="sm" onClick={handleBack} className="gap-2">
           <ArrowLeft className="size-4" />
           Back
@@ -1008,16 +903,24 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
         <div className="space-y-2">
           {isInitialLoading ? (
             <div className="space-y-2 rounded-2xl border border-border bg-card p-4">
-              <p className="text-sm font-medium text-foreground">{['Looking for the best fit...', 'Checking your options...', 'We found something good.'][Math.floor(Math.random() * 3)]}</p>
+              <p className="text-sm font-medium text-foreground">
+                {
+                  ["Looking for the best fit...", "Checking your options...", "We found something good."][
+                    Math.floor(Math.random() * 3)
+                  ]
+                }
+              </p>
               <div className="h-4 rounded-full bg-muted/30" />
             </div>
           ) : (
-            <div className={`transform transition-all duration-250 ease-out ${headerMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
+            <div
+              className={`transform transition-all duration-250 ease-out ${
+                headerMounted ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
+              }`}
+            >
               <h2 className="text-lg font-semibold text-foreground">{headerTitle}</h2>
               <p className="text-sm leading-6 text-muted-foreground">{headerSubtitle}</p>
-              {resultHint && (
-                <p className="text-sm leading-6 text-muted-foreground">{resultHint}</p>
-              )}
+              {resultHint && <p className="text-sm leading-6 text-muted-foreground">{resultHint}</p>}
               <div className="min-h-5">
                 {isPickingAgain && (
                   <p className="text-sm font-medium text-primary-foreground/80">
@@ -1034,8 +937,12 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
         <div className="mt-3" ref={topPickRef}>
           <div
             key={restaurants[0].id}
-            style={{ transitionDelay: `0ms` }}
-            className={`transform transition-all duration-250 ease-out ${cardsMounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"} ${isPickingAgain && cardsMounted ? "opacity-60 animate-pulse" : ""} ${freshTopPick ? "scale-[1.02] shadow-[0_14px_34px_rgba(0,0,0,0.08)]" : "scale-100"}`}
+            style={{ transitionDelay: "0ms" }}
+            className={`transform transition-all duration-250 ease-out ${
+              cardsMounted ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
+            } ${isPickingAgain && cardsMounted ? "animate-pulse opacity-60" : ""} ${
+              freshTopPick ? "scale-[1.02] shadow-[0_14px_34px_rgba(0,0,0,0.08)]" : "scale-100"
+            }`}
           >
             <RestaurantCard
               index={1}
@@ -1054,18 +961,17 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
 
       {restaurants.length > 0 && !isInitialLoading && (
         <div className="mt-4">
-          <PickAgainAction
-            onPickAgain={handlePickAgain}
-            isPickingAgain={isPickingAgain}
-          />
+          <PickAgainAction onPickAgain={handlePickAgain} isPickingAgain={isPickingAgain} />
         </div>
       )}
 
       {isExplorationVisible && restaurants.length > 0 && !isInitialLoading && (
         <div className="mt-4 rounded-2xl border border-border/60 bg-card/80 p-4 shadow-sm transition-all duration-250 ease-out">
-          <p className="text-sm font-semibold text-foreground mb-1">Not feeling this pick?</p>
-          <p className="text-sm leading-6 text-muted-foreground mb-3">Explore other directions without changing your top pick</p>
-          <div className="flex gap-2 flex-nowrap overflow-x-auto overflow-y-hidden px-1 pr-3 pb-1 snap-x snap-mandatory touch-pan-x">
+          <p className="mb-1 text-sm font-semibold text-foreground">Not feeling this pick?</p>
+          <p className="mb-3 text-sm leading-6 text-muted-foreground">
+            Explore other directions without changing your top pick
+          </p>
+          <div className="flex touch-pan-x snap-x snap-mandatory flex-nowrap gap-2 overflow-x-auto overflow-y-hidden px-1 pb-1 pr-3">
             {directionOptions.map((direction) => {
               const isActive = selectedDirection === direction.key
               return (
@@ -1073,19 +979,12 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
                   key={direction.key}
                   type="button"
                   onClick={() => handleDirectionSelect(direction.key)}
-                  disabled={isPickingAgain || isInitialLoading || isRandomizing || isRefreshingAlternatives} // for now, disable direction chips during the picking again flow and initial loading. We can consider allowing direction changes during picking again in the future if it doesn't create a confusing experience.
-                  // className={`flex-shrink-0 min-w-max snap-start rounded-full border px-4 py-2 text-sm font-semibold transition duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${isActive ? "border-primary bg-primary/15 text-primary shadow-sm" : "border-border bg-background text-foreground hover:border-primary/50 hover:bg-primary/5"}`}
-
-                  className={`flex-shrink-0 min-w-max snap-start rounded-full border px-4 py-2 text-sm font-semibold transition duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
+                  disabled={isChipDisabled}
+                  className={`min-w-max flex-shrink-0 snap-start rounded-full border px-4 py-2 text-sm font-semibold transition duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
                     isActive
                       ? "border-primary bg-primary/15 text-primary shadow-sm"
                       : "border-border bg-background text-foreground hover:border-primary/50 hover:bg-primary/5"
-                  } ${
-                    isPickingAgain || isInitialLoading
-                      ? "pointer-events-none opacity-50"
-                      : ""
-                  }`}
-
+                  } ${isChipDisabled ? "pointer-events-none opacity-50" : ""}`}
                   aria-pressed={isActive}
                 >
                   {direction.label}
@@ -1106,7 +1005,7 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
             <div className="space-y-3">
               <p className="text-sm text-muted-foreground">Looking for something different…</p>
               {[1, 2].map((item) => (
-                <div key={item} className="h-32 rounded-[28px] bg-muted/20 animate-pulse" />
+                <div key={item} className="h-32 animate-pulse rounded-[28px] bg-muted/20" />
               ))}
             </div>
           ) : (
@@ -1118,7 +1017,9 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
                   <div
                     key={restaurant.id}
                     style={{ transitionDelay: `${delay}ms` }}
-                    className={`transform transition-all duration-250 ease-out ${alternativeStage > index ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"} scale-100`}
+                    className={`scale-100 transform transition-all duration-250 ease-out ${
+                      alternativeStage > index ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
+                    }`}
                   >
                     <RestaurantCard
                       index={index + 2}
@@ -1139,15 +1040,11 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
 
       {restaurants.length === 0 && (
         <div className="rounded-2xl border border-dashed border-border bg-card p-6 text-center">
-          <p className="text-lg font-semibold text-foreground">
-            No exact match found.
-          </p>
+          <p className="text-lg font-semibold text-foreground">No exact match found.</p>
           <p className="mt-2 text-sm text-muted-foreground">
             But we’ve curated a few strong options for you.
           </p>
-          <p className="mt-3 text-sm text-muted-foreground">
-            Or let us decide — kami na bahala.
-          </p>
+          <p className="mt-3 text-sm text-muted-foreground">Or let us decide — kami na bahala.</p>
 
           {isRandomizing ? (
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
@@ -1155,11 +1052,15 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
                 variant="outline"
                 size="lg"
                 disabled
-                className="w-full sm:w-auto border-2 border-rose-500 bg-rose-100 text-rose-900 shadow-lg"
+                className="w-full border-2 border-rose-500 bg-rose-100 text-rose-900 shadow-lg sm:w-auto"
                 aria-busy="true"
               >
                 <div className="flex flex-col items-center gap-1">
-                  <span className={`text-sm font-semibold tracking-tight text-foreground transition-opacity duration-500 ${isFaded ? "opacity-100" : "opacity-0"}`}>
+                  <span
+                    className={`text-sm font-semibold tracking-tight text-foreground transition-opacity duration-500 ${
+                      isFaded ? "opacity-100" : "opacity-0"
+                    }`}
+                  >
                     {loadingMessages[loadingIndex]}
                   </span>
                   <span className="text-xs text-foreground/80">
@@ -1174,7 +1075,7 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
                 variant="outline"
                 onClick={handleRandomizeClick}
                 size="lg"
-                className="w-full sm:w-auto border-rose-300 bg-rose-50 text-rose-900 hover:border-rose-400 hover:bg-rose-100 hover:-translate-y-0.5 active:scale-95"
+                className="w-full border-rose-300 bg-rose-50 text-rose-900 hover:-translate-y-0.5 hover:border-rose-400 hover:bg-rose-100 active:scale-95 sm:w-auto"
               >
                 <div className="flex items-center justify-between gap-3">
                   <span>Ikaw na bahala</span>
