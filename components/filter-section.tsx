@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { FilterGroup } from "@/components/filter-group"
@@ -84,42 +84,6 @@ export function FilterSection({
   const isRandomSelected = filters.mood === "random"
   const ctaLabel = hasMoodSelected ? "Tara, hanap tayo! 🍽️" : "Pili ka muna ☝️"
   const loadingLabel = "Picking something good…🍜"
-  const randomLoadingMessages = [
-    "Picking something good...",
-    "Checking the vibe...",
-    "Balancing your cravings...",
-    "Trust me on this one 👀",
-  ]
-
-  const [loadingIndex, setLoadingIndex] = useState(0)
-  const [isFaded, setIsFaded] = useState(true)
-
-  useEffect(() => {
-    if (!isLoading || !isRandomSelected) {
-      setLoadingIndex(0)
-      return
-    }
-
-    const interval = window.setInterval(() => {
-      setLoadingIndex((current) => {
-        const next = Math.floor(Math.random() * randomLoadingMessages.length)
-        return next === current ? (next + 1) % randomLoadingMessages.length : next
-      })
-    }, 700)
-
-    return () => window.clearInterval(interval)
-  }, [isLoading, isRandomSelected])
-
-  useEffect(() => {
-    if (!isLoading || !isRandomSelected) {
-      return
-    }
-
-    setIsFaded(false)
-    const fadeTimer = window.setTimeout(() => setIsFaded(true), 50)
-
-    return () => window.clearTimeout(fadeTimer)
-  }, [loadingIndex, isLoading, isRandomSelected])
 
   return (
     <div className="relative">
@@ -177,17 +141,11 @@ export function FilterSection({
           >
             {isLoading ? (
               isRandomSelected ? (
-                <div className="flex w-full flex-col items-center gap-1">
-                  <span
-                    className={`text-sm font-semibold tracking-tight text-primary-foreground transition-opacity duration-500 ${
-                      isFaded ? "opacity-100" : "opacity-0"
-                    }`}
-                  >
-                    {randomLoadingMessages[loadingIndex]}
+                <div className="premium-soft-pulse flex w-full flex-col items-center gap-1">
+                  <span className="text-sm font-semibold tracking-tight text-primary-foreground">
+                    Picking something good...
                   </span>
-                  <span className="text-xs text-primary-foreground/80">
-                    Taking a moment to select the best match for you.
-                  </span>
+                  <span className="text-xs text-primary-foreground/80">Trust us on this one ✨</span>
                 </div>
               ) : (
                 <>
