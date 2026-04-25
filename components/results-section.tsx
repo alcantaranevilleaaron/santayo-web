@@ -9,6 +9,8 @@ import type { Filters } from "@/app/page"
 import {
   getAlternativeRecommendations,
   getNextPickSet,
+  createRecommendationSession,
+  type RecommendationSession,
   type RecommendationSessionState,
 } from "@/lib/recommendations"
 import { RESTAURANTS, type Restaurant } from "@/data/restaurants"
@@ -298,6 +300,14 @@ type ResultsSectionProps = {
 }
 
 export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fallbackMode, resultHint }: ResultsSectionProps) {
+  // Debugging utility to trace recommendation flow and decisions
+  const DEBUG_RECO = true
+
+  const debugReco = (label: string, data?: unknown) => {
+    if (!DEBUG_RECO) return
+    console.log(`[SanTayo Reco] ${label}`, data)
+  }
+  
   const [currentRestaurants, setCurrentRestaurants] = useState<Restaurant[]>([])
   const [sessionState, setSessionState] = useState<RecommendationSessionState>({
     seenTopPickIds: [],
@@ -318,9 +328,9 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
   const [currentAlternativeIds, setCurrentAlternativeIds] = useState<number[]>([])
   const [selectedDirection, setSelectedDirection] = useState<string | null>(null)
   const [directionHelperText, setDirectionHelperText] = useState<string | null>(null)
-  const [directionSeenAltIds, setDirectionSeenAltIds] = useState<Record<string, number[]>>({})
-  const [previousDirection, setPreviousDirection] = useState<string | null>(null)
   const [hasUserInteracted, setHasUserInteracted] = useState(false)
+  // Centralized session container — parallel to existing state, not yet wired to behavior
+  const [recommendationSession, setRecommendationSession] = useState<RecommendationSession | null>(null)
   const [isExplorationVisible, setIsExplorationVisible] = useState(false)
   const alternativesRef = useRef<HTMLDivElement | null>(null)
   const topPickRef = useRef<HTMLDivElement | null>(null)
@@ -366,6 +376,16 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
 
   // Reset all chip-related recommendation state for a fresh recommendation flow
   const resetRecommendationState = () => {
+    // Debugging information for recommendation state reset
+    debugReco("RESET recommendation state", {
+      filters,
+      currentRestaurants: currentRestaurants.map((r) => ({
+        id: r.id,
+        name: r.name,
+        priceBucket: r.priceBucket,
+      })),
+    })
+
     setSessionState({
       seenTopPickIds: [],
       seenAlternativeIds: [],
@@ -373,12 +393,23 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
     })
     setCurrentAlternativeIds([])
     setSelectedDirection(null)
-    setPreviousDirection(null)
     setDirectionHelperText(null)
-    setDirectionSeenAltIds({})
+    setRecommendationSession(null)
   }
 
   const resetForReroll = () => {
+    // debug for reset reroll
+    debugReco("RESET FOR REROLL", {
+      previousSession: recommendationSession
+        ? {
+            topPick: recommendationSession.topPick?.id,
+            activeChip: recommendationSession.activeChip,
+            usedAlternativeIds: [...recommendationSession.usedAlternativeIds],
+            chipHistory: recommendationSession.chipHistory,
+          }
+        : null,
+    })
+
     setSessionState({
       seenTopPickIds: [],
       seenAlternativeIds: [],
@@ -386,8 +417,10 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
     })
     setCurrentAlternativeIds([])
     setSelectedDirection(null)
-    setPreviousDirection(null)
     setDirectionHelperText(null)
+    // Clear the session immediately so chip history and used IDs from the
+    // previous session cannot leak into the new one during the loading window.
+    setRecommendationSession(null)
     //to leave chip-refresh mode before starting the reroll animation
     setIsRefreshingAlternatives(false)
     setAlternativeStage(0)
@@ -436,9 +469,28 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
   const chipActionLockRef = useRef(false)
 
   const handlePickAgain = () => {   
-    // if (isPickingAgain || isRefreshingAlternatives || currentRestaurants.length === 0) {
-    //   return
-    // }
+
+    // Debugging information for pick again action
+    debugReco("PICK AGAIN clicked", {
+      filters,
+      currentTopPick: currentRestaurants[0]
+        ? {
+            id: currentRestaurants[0].id,
+            name: currentRestaurants[0].name,
+            priceBucket: currentRestaurants[0].priceBucket,
+          }
+        : null,
+      currentAlternativeIds,
+      sessionState,
+      recommendationSession: recommendationSession
+        ? {
+            topPick: recommendationSession.topPick?.id,
+            activeChip: recommendationSession.activeChip,
+            usedAlternativeIds: [...recommendationSession.usedAlternativeIds],
+            chipHistory: recommendationSession.chipHistory,
+          }
+        : null,
+    })
 
     if (pickAgainLockRef.current || chipActionLockRef.current || currentRestaurants.length === 0) {
       return
@@ -464,6 +516,24 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
         seenAlternativeIds: [],
         lastTopPickId: null,
       }, fallbackMode, 3)
+
+      // Debugging information for pick again result
+      debugReco("PICK AGAIN result", {
+        topPick: nextPickSet.newTopPick
+          ? {
+              id: nextPickSet.newTopPick.id,
+              name: nextPickSet.newTopPick.name,
+              priceBucket: nextPickSet.newTopPick.priceBucket,
+            }
+          : null,
+        alternatives: nextPickSet.newAlternatives.map((r) => ({
+          id: r.id,
+          name: r.name,
+          priceBucket: r.priceBucket,
+        })),
+      })
+
+
       if (!nextPickSet.newTopPick) {
         setIsPickingAgain(false)
         pickAgainLockRef.current = false
@@ -485,6 +555,9 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
             seenAlternativeIds: nextPickSet.newAlternatives.map((restaurant) => restaurant.id),
             lastTopPickId: topPick.id,
           })
+          setRecommendationSession(
+              createRecommendationSession(filters, fallbackMode, topPick, nextPickSet.newAlternatives),
+          )
           setHeaderTitle((current) => getNextResultCopy(rerollHeaderTitles, current))
           setHeaderSubtitle((current) => getNextResultCopy(rerollHeaderSubtitles, current))
           setTopPickCaption((current) => getNextResultCopy(rerollTopPickCaptions, current))
@@ -578,17 +651,42 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
   }, [isExplorationVisible, restaurants.length])
 
   useEffect(() => {
+    // Debugging information for initial/new filter effect
+    debugReco("INITIAL/NEW FILTER effect triggered -- before getNextPickSet", {
+      filters,
+      fallbackMode,
+      sessionState,
+    })
+
     const pickSet = getNextPickSet(filters, sessionState, fallbackMode, 3)
+
+    // Debugging information for initial/new filter result
+    debugReco("INITIAL/NEW FILTER result -- after getNextPickSet", {
+      topPick: pickSet.newTopPick
+        ? {
+            id: pickSet.newTopPick.id,
+            name: pickSet.newTopPick.name,
+            priceBucket: pickSet.newTopPick.priceBucket,
+          }
+        : null,
+      alternatives: pickSet.newAlternatives.map((r) => ({
+        id: r.id,
+        name: r.name,
+        priceBucket: r.priceBucket,
+      })),
+    })
 
     if (pickSet.newTopPick) {
       setCurrentRestaurants([pickSet.newTopPick, ...pickSet.newAlternatives])
       setCurrentAlternativeIds(pickSet.newAlternatives.map((restaurant) => restaurant.id))
-      setDirectionSeenAltIds({})
       setSessionState({
         seenTopPickIds: [pickSet.newTopPick.id],
         seenAlternativeIds: pickSet.newAlternatives.map((restaurant) => restaurant.id),
         lastTopPickId: pickSet.newTopPick.id,
       })
+      setRecommendationSession(
+        createRecommendationSession(filters, fallbackMode, pickSet.newTopPick, pickSet.newAlternatives),
+      )
 
       if (isFirstLoad) {
         setHeaderTitle(initialHeaderTitle)
@@ -627,7 +725,6 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
     setCurrentRestaurants([])
     setCurrentAlternativeIds([])
     setSelectedDirection(null)
-    setDirectionSeenAltIds({})
     setSessionState({
       seenTopPickIds: [],
       seenAlternativeIds: [],
@@ -671,11 +768,36 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
   }
 
   const handleDirectionSelect = (direction: string) => {
+
+    // Debugging information for chip click action
+    debugReco("CHIP clicked", {
+      direction,
+      filters,
+      currentTopPick: restaurants[0]
+        ? {
+            id: restaurants[0].id,
+            name: restaurants[0].name,
+            priceBucket: restaurants[0].priceBucket,
+          }
+        : null,
+      session: recommendationSession
+        ? {
+            topPick: recommendationSession.topPick?.id,
+            activeChip: recommendationSession.activeChip,
+            usedAlternativeIds: [...recommendationSession.usedAlternativeIds],
+            chipHistory: recommendationSession.chipHistory,
+          }
+        : null,
+    })
+
     if (
       pickAgainLockRef.current ||
       chipActionLockRef.current ||
       isInitialLoading ||
-      restaurants.length <= 1
+      isRandomizing ||
+      isRefreshingAlternatives ||
+      restaurants.length <= 1 ||
+      !recommendationSession?.topPick
     ) {
       return
     }
@@ -684,75 +806,170 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
     setIsRefreshingAlternatives(true)
     clearAllTimeouts()
 
-    const currentTopPick = restaurants[0]
-    if (!currentTopPick) {
-      setIsRefreshingAlternatives(false)
+    // Lock top pick to the session — never derive it from live UI state
+    const session = recommendationSession
+    const topPick = session.topPick
+    if (!topPick) {
       chipActionLockRef.current = false
+      setIsRefreshingAlternatives(false)
       return
     }
 
-    const directionKey = `${currentTopPick.id}:${direction}`
-    const seenForDirection = directionSeenAltIds[directionKey] ?? []
-
-    setPreviousDirection(selectedDirection)
     setSelectedDirection(direction)
     setDirectionHelperText(directionHelperCopy[direction] ?? "Looking for a new direction…")
-    setIsRefreshingAlternatives(true)
     setAlternativeStage(-1)
 
+    // Each chip direction has its own independent rotation history within the session.
+    // Same chip → accumulate excludes so we rotate through fresh alternatives.
+    // Different chip → starts from its own history (empty on first click).
+    const seenForChip = session.chipHistory[direction] ?? []
+    const excludeIds = Array.from(new Set([topPick.id, ...seenForChip]))
+
+    // Debugging information for chip exclude IDs
+    debugReco("CHIP excludeIds", {
+      direction,
+      topPickId: topPick.id,
+      seenForChip,
+      excludeIds,
+    })    
+
     const candidatePool = RESTAURANTS.filter(
-      (restaurant) =>
-        restaurant.operatingStatus !== "closed" &&
-        restaurant.id !== currentTopPick.id,
+      (r) => r.operatingStatus !== "closed" && r.id !== topPick.id,
     )
 
-    const currentlyShownAlternativeIds = restaurants.slice(1).map((restaurant) => restaurant.id)
+    // const directionPool =
+    //   direction === "premium"
+    //     ? candidatePool.filter(
+    //         (r) => r.priceBucket === "premium" || r.priceBucket === "splurge"
+    //       )
+    //     : candidatePool
 
-    // const altExcludeIds = isDifferentChip
-    //   ? [currentTopPick.id, ...currentlyShownAlternativeIds]
-    //   : [currentTopPick.id, ...currentlyShownAlternativeIds, ...seenForDirection]
+    const getDirectionPool = (direction: string, pool: Restaurant[]) => {
+      switch (direction) {
+        case "premium":
+          return pool.filter(
+            (r) => r.priceBucket === "premium" || r.priceBucket === "splurge"
+          )
 
-    const altExcludeIds = Array.from(
-      new Set([
-        currentTopPick.id,
-        ...currentlyShownAlternativeIds,
-        ...seenForDirection,
-      ])
-    )
+        case "light":
+          return pool.filter(
+            (r) =>
+              // r.moodTags?.includes("light") ||
+              r.tags?.includes("light") 
+              // ||
+              // r.foodCategories?.includes("salad") ||
+              // r.foodCategories?.includes("healthy")
+          )
+
+        case "comfort":
+          return pool.filter(
+            (r) =>
+              // r.moodTags?.includes("comfort") ||
+              r.tags?.includes("comfort") 
+              // ||
+              // r.experienceTags?.includes("casual")
+          )
+
+        case "healthy":
+          return pool.filter(
+            (r) =>
+              // r.moodTags?.includes("healthy") ||
+              r.cuisine?.includes("healthy") ||
+              r.tags?.includes("healthy") 
+              // ||
+              // r.foodCategories?.includes("healthy") ||
+              // r.foodCategories?.includes("salad")
+          )
+
+        case "quick bite":
+          return pool.filter(
+            (r) =>
+              r.tags?.includes("quick") ||
+              r.tags?.includes("snack") ||
+              r.tags?.includes("grab-and-go") ||
+              r.moodTags?.includes("Quick") ||
+              r.experienceTags?.includes("Quick") 
+          )
+
+        default:
+          return pool
+      }
+    }
+
+    const strictDirectionPool = getDirectionPool(direction, candidatePool)
+
+    const directionPool =
+      strictDirectionPool.length >= 2 ? strictDirectionPool : candidatePool
+
+    debugReco("CHIP candidate pool", {
+      direction,
+      candidatePoolSize: candidatePool.length,
+      premiumCount: candidatePool.filter((r) => r.priceBucket === "premium").length,
+      splurgeCount: candidatePool.filter((r) => r.priceBucket === "splurge").length,
+    })
+
+    debugReco("CHIP direction pool", {
+      direction,
+      before: candidatePool.length,
+      afterStrictFilter: strictDirectionPool.length,
+      finalPool: directionPool.length,
+      fallbackUsed: strictDirectionPool.length < 2,
+      sample: directionPool.slice(0, 5).map((r) => ({
+        id: r.id,
+        name: r.name,
+        priceBucket: r.priceBucket,
+        tags: r.tags,
+        moodTags: r.moodTags,
+        foodCategories: r.foodCategories,
+        experienceTags: r.experienceTags,
+      })),
+    })
 
     const nextAlternatives = getAlternativeRecommendations(
-      currentTopPick,
-      candidatePool,
-      filters,
-      altExcludeIds,
+      topPick,
+      directionPool,
+      session.originalFilters,
+      excludeIds,
       2,
       direction,
     )
 
+    debugReco("CHIP alternatives result", {
+      direction,
+      count: nextAlternatives.length,
+      alternatives: nextAlternatives.map((r) => ({
+        id: r.id,
+        name: r.name,
+        priceBucket: r.priceBucket,
+        tags: r.tags,
+        moodTags: r.moodTags,
+        experienceTags: r.experienceTags,
+      })),
+    })
+
     const loadingDuration = 380 + Math.floor(Math.random() * 120)
     setManagedTimeout(() => {
       if (nextAlternatives.length > 0) {
-        const nextAlternativeIds = nextAlternatives.map((restaurant) => restaurant.id)
+        const nextAlternativeIds = nextAlternatives.map((r) => r.id)
 
-        // Preserve top pick; chip clicking only refreshes alternatives.
-        setCurrentRestaurants([currentTopPick, ...nextAlternatives])
+        // Top pick is always session.topPick — alternatives are the only thing that changes
+        setCurrentRestaurants([topPick, ...nextAlternatives])
         setCurrentAlternativeIds(nextAlternativeIds)
-        // setDirectionSeenAltIds((current) => ({
-        //   ...current,
-        //   [direction]: isDifferentChip
-        //     ? nextAlternativeIds
-        //     : Array.from(new Set([...(current[direction] ?? []), ...nextAlternativeIds])),
-        // }))
 
-        // setDirectionSeenAltIds((current) => ({
-        //   ...current,
-        //   [direction]: Array.from(new Set([...(current[direction] ?? []), ...nextAlternativeIds])),
-        // }))
-
-        setDirectionSeenAltIds((current) => ({
-          ...current,
-          [directionKey]: Array.from(new Set([...(current[directionKey] ?? []), ...nextAlternativeIds])),
-        }))
+        setRecommendationSession((current) => {
+          if (!current) return current
+          const updatedSeenForChip = Array.from(new Set([...seenForChip, ...nextAlternativeIds]))
+          return {
+            ...current,
+            alternatives: nextAlternatives,
+            usedAlternativeIds: new Set([...current.usedAlternativeIds, ...nextAlternativeIds]),
+            activeChip: direction,
+            chipHistory: {
+              ...current.chipHistory,
+              [direction]: updatedSeenForChip,
+            },
+          }
+        })
 
         setAlternativeStage(0)
         setManagedTimeout(() => {
@@ -761,16 +978,16 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
             setAlternativeStage(2)
             setDirectionHelperText(null)
             setIsRefreshingAlternatives(false)
-            chipActionLockRef.current = false            
+            chipActionLockRef.current = false
           }, 120)
           alternativesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
           setDirectionHelperText(null)
         }, 20)
       } else {
         setDirectionHelperText(null)
-        chipActionLockRef.current = false 
+        setIsRefreshingAlternatives(false)
+        chipActionLockRef.current = false
       }
-      setIsRefreshingAlternatives(false)
     }, loadingDuration)
   }
 
@@ -856,7 +1073,7 @@ export function ResultsSection({ filters, onBack, onNewSearch, onRandomize, fall
                   key={direction.key}
                   type="button"
                   onClick={() => handleDirectionSelect(direction.key)}
-                  disabled={isPickingAgain || isInitialLoading} // for now, disable direction chips during the picking again flow and initial loading. We can consider allowing direction changes during picking again in the future if it doesn't create a confusing experience.
+                  disabled={isPickingAgain || isInitialLoading || isRandomizing || isRefreshingAlternatives} // for now, disable direction chips during the picking again flow and initial loading. We can consider allowing direction changes during picking again in the future if it doesn't create a confusing experience.
                   // className={`flex-shrink-0 min-w-max snap-start rounded-full border px-4 py-2 text-sm font-semibold transition duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${isActive ? "border-primary bg-primary/15 text-primary shadow-sm" : "border-border bg-background text-foreground hover:border-primary/50 hover:bg-primary/5"}`}
 
                   className={`flex-shrink-0 min-w-max snap-start rounded-full border px-4 py-2 text-sm font-semibold transition duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
