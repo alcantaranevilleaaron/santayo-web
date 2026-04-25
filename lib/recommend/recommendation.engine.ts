@@ -19,6 +19,38 @@ export type RecommendationPickSet = {
   newAlternatives: Restaurant[];
 };
 
+export type RecommendationSession = {
+  sessionId: string;
+  originalFilters: Filters;
+  mode: "filtered" | "random";
+  topPick: Restaurant | null;
+  alternatives: Restaurant[];
+  usedTopPickIds: Set<number>;
+  usedAlternativeIds: Set<number>;
+  activeChip: string | null;
+  chipHistory: Record<string, number[]>;
+};
+
+export function createRecommendationSession(
+  filters: Filters,
+  fallbackMode: boolean,
+  topPick: Restaurant | null,
+  alternatives: Restaurant[],
+): RecommendationSession {
+  return {
+    sessionId: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    originalFilters: { ...filters },
+    // fallbackMode (randomize) is a mode signal independent of filters.mood
+    mode: filters.mood === "random" || fallbackMode ? "random" : "filtered",
+    topPick,
+    alternatives: [...alternatives],
+    usedTopPickIds: new Set(topPick ? [topPick.id] : []),
+    usedAlternativeIds: new Set(alternatives.map((r) => r.id)),
+    activeChip: null,
+    chipHistory: {},
+  };
+}
+
 function shuffle<T>(array: T[]): T[] {
   const result = [...array];
   for (let i = result.length - 1; i > 0; i--) {
