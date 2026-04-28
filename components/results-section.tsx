@@ -347,7 +347,7 @@ export function ResultsSection({
   const restaurants = currentRestaurants
 
   // Toggle this to true only when debugging recommendation/session behavior.
-  const DEBUG_RECO = true
+  const DEBUG_RECO = false
 
   const debugReco = (label: string, data?: unknown) => {
     if (!DEBUG_RECO) return
@@ -1075,11 +1075,14 @@ export function ResultsSection({
                 variant="outline"
                 onClick={handleRandomizeClick}
                 size="lg"
-                className="w-full border-rose-300 bg-rose-50 text-rose-900 hover:-translate-y-0.5 hover:border-rose-400 hover:bg-rose-100 active:scale-95 sm:w-auto"
+                className="w-full border-rose-300 bg-rose-50 hover:border-rose-400 hover:bg-rose-100 active:scale-[0.97] sm:w-auto transition duration-200 ease-out transform-gpu"
               >
                 <div className="flex items-center justify-between gap-3">
-                  <span>Ikaw na bahala</span>
-                  <Sparkles className="size-5 text-rose-600" />
+                  <div>
+                    <p className="text-base font-semibold text-rose-900">Ikaw na bahala</p>
+                    <p className="text-xs text-rose-700/70">You pick for me</p>
+                  </div>
+                  <Sparkles className="size-5 text-rose-600 flex-shrink-0" />
                 </div>
               </Button>
               <Button variant="outline" onClick={handleNewSearch} size="lg" className="w-full sm:w-auto">

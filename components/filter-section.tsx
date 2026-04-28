@@ -90,9 +90,12 @@ export function FilterSection({
       <div className="space-y-4 pb-16">
         {/* Mood - Required */}
         <div className="rounded-2xl border border-primary/10 bg-primary/5 p-4 shadow-[0_4px_12px_rgba(0,0,0,0.04)]">
-          <div className="space-y-3">
-            <p className="text-sm text-muted-foreground">
+          <div className="space-y-0.5">
+            <p className="text-sm font-medium leading-tight text-foreground">
               Anong trip mo today?
+            </p>
+            <p className="text-xs leading-tight text-muted-foreground">
+              What are you craving?
             </p>
           </div>
 
@@ -110,17 +113,18 @@ export function FilterSection({
               onClick={handleRandomMood}
               className={
                 isRandomSelected
-                  ? "w-full rounded-[14px] border-2 border-rose-500 bg-rose-100 px-4 py-4 text-left text-sm font-semibold text-rose-900 shadow-lg transition duration-200 ease-out transform-gpu"
-                  : "w-full rounded-[14px] border border-rose-300 bg-rose-50 px-4 py-4 text-left text-sm font-semibold text-rose-900 transition duration-200 ease-out transform-gpu hover:border-rose-400 hover:bg-rose-100 hover:-translate-y-0.5 active:scale-95"
+                  ? "w-full rounded-[14px] border border-rose-300 bg-rose-100 px-4 py-3 text-left shadow-[0_4px_12px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out transform-gpu active:scale-[0.97]"
+                  : "w-full rounded-[14px] border border-rose-300 bg-rose-50/80 px-4 py-3 text-left shadow-[0_4px_12px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out transform-gpu hover:border-rose-400 hover:bg-rose-100 active:scale-[0.97]"
               }
             >
               <div className="flex items-center justify-between gap-3">
-                <span>Ikaw na bahala</span>
-                <Sparkles className="size-5 text-rose-600" />
+                <div>
+                  <p className="text-base font-semibold leading-tight text-rose-900">Ikaw na bahala</p>
+                  <p className="text-[11px] leading-tight text-rose-700/70">You pick for me</p>
+                </div>
+                <Sparkles className="size-5 shrink-0 text-rose-500/80" />
               </div>
-              {/* <p className="mt-2 text-xs text-amber-700/90">
-                I’ll take care of the choice for you.
-              </p> */}
+
             </button>
           </div>
         </div>
@@ -129,9 +133,8 @@ export function FilterSection({
           <Button
             onClick={() => onSubmit()}
             disabled={!hasMoodSelected || isLoading}
-            size="lg"
             className={cn(
-              "w-full gap-2 text-sm leading-6 transition-all duration-250 ease-out",
+              "w-full rounded-[14px] px-4 py-3 text-left gap-2 transition duration-200 ease-out transform-gpu active:scale-[0.97]",
               hasMoodSelected && !isLoading
                 ? "border-primary bg-primary text-primary-foreground shadow-sm hover:bg-primary/90"
                 : isLoading && isRandomSelected
