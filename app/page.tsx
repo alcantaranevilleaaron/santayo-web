@@ -105,7 +105,7 @@ export default function Home() {
             <h1 className="text-balance text-2xl font-bold tracking-tight text-foreground md:text-3xl">
               Kami na bahala.
             </h1>
-            <div className="mt-4 flex items-center justify-center gap-1.5 text-muted-foreground">
+            <div className="mt-3 flex items-center justify-center gap-1.5 text-muted-foreground">
               <MapPin className="size-4" />
               <span className="text-sm">Bonifacio Global City</span>
             </div>
