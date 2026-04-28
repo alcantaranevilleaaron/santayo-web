@@ -884,6 +884,7 @@ export function ResultsSection({
     getMatchReason(restaurant, filters, fallbackMode, usedPrimaryPhrases, usedContextPhrases)
   )
   const topPickExplanation = restaurants.length > 0 ? topPickCaption : undefined
+  const isRecomputing = isRefreshingAlternatives
   const isChipDisabled = isPickingAgain || isInitialLoading || isRandomizing || isRefreshingAlternatives
 
   return (
@@ -961,7 +962,11 @@ export function ResultsSection({
 
       {restaurants.length > 0 && !isInitialLoading && (
         <div className="mt-4">
-          <PickAgainAction onPickAgain={handlePickAgain} isPickingAgain={isPickingAgain} />
+          <PickAgainAction
+            onPickAgain={handlePickAgain}
+            isPickingAgain={isPickingAgain}
+            disabled={isPickingAgain || isRecomputing || isInitialLoading}
+          />
         </div>
       )}
 
@@ -980,7 +985,7 @@ export function ResultsSection({
                   type="button"
                   onClick={() => handleDirectionSelect(direction.key)}
                   disabled={isChipDisabled}
-                  className={`min-w-max flex-shrink-0 snap-start rounded-full border px-4 py-2 text-sm font-semibold transition duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
+                  className={`min-w-max shrink-0 snap-start rounded-full border px-4 py-2 text-sm font-semibold transition duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
                     isActive
                       ? "border-primary bg-primary/15 text-primary shadow-sm"
                       : "border-border bg-background text-foreground hover:border-primary/50 hover:bg-primary/5"
@@ -1074,15 +1079,16 @@ export function ResultsSection({
               <Button
                 variant="outline"
                 onClick={handleRandomizeClick}
+                disabled={isRandomizing}
                 size="lg"
-                className="w-full border-rose-300 bg-rose-50 hover:border-rose-400 hover:bg-rose-100 active:scale-[0.97] sm:w-auto transition duration-200 ease-out transform-gpu"
+                className="w-full border-rose-300 bg-rose-50 hover:border-rose-400 hover:bg-rose-100 active:scale-[0.97] sm:w-auto transition duration-200 ease-out transform-gpu disabled:pointer-events-none disabled:opacity-60"
               >
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-base font-semibold text-rose-900">Ikaw na bahala</p>
                     <p className="text-xs text-rose-700/70">You pick for me</p>
                   </div>
-                  <Sparkles className="size-5 text-rose-600 flex-shrink-0" />
+                  <Sparkles className="size-5 shrink-0 text-rose-600" />
                 </div>
               </Button>
               <Button variant="outline" onClick={handleNewSearch} size="lg" className="w-full sm:w-auto">

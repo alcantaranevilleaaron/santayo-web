@@ -111,10 +111,11 @@ export function FilterSection({
             <button
               type="button"
               onClick={handleRandomMood}
+              disabled={isLoading}
               className={
                 isRandomSelected
-                  ? "w-full rounded-[14px] border border-rose-300 bg-rose-100 px-4 py-3 text-left shadow-[0_4px_12px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out transform-gpu active:scale-[0.97]"
-                  : "w-full rounded-[14px] border border-rose-300 bg-rose-50/80 px-4 py-3 text-left shadow-[0_4px_12px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out transform-gpu hover:border-rose-400 hover:bg-rose-100 active:scale-[0.97]"
+                  ? "w-full rounded-[14px] border border-rose-300 bg-rose-100 px-4 py-3 text-left shadow-[0_4px_12px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out transform-gpu active:scale-[0.97] disabled:pointer-events-none disabled:opacity-60"
+                  : "w-full rounded-[14px] border border-rose-300 bg-rose-50/80 px-4 py-3 text-left shadow-[0_4px_12px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out transform-gpu hover:border-rose-400 hover:bg-rose-100 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-60"
               }
             >
               <div className="flex items-center justify-between gap-3">
