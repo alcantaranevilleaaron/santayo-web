@@ -23,7 +23,7 @@ export function PickAgainAction({
         size="lg"
         onClick={onPickAgain}
         disabled={isBusy}
-        className="w-full rounded-[14px] border border-rose-200 bg-rose-50 px-4 py-4 text-left text-sm font-semibold text-rose-900 shadow-sm transition duration-150 ease-out transform-gpu hover:border-rose-300 hover:bg-rose-100 active:scale-[0.97]"
+        className="w-full rounded-[14px] border border-rose-300 bg-rose-50 px-4 py-3 text-left transition duration-200 ease-out transform-gpu hover:border-rose-400 hover:bg-rose-100 active:scale-[0.97] shadow-sm disabled:pointer-events-none disabled:opacity-60"
         aria-busy={isPickingAgain}
       >
         {isPickingAgain ? (
@@ -40,10 +40,18 @@ export function PickAgainAction({
             <span className="text-xs opacity-80">Trust us on this one ✨</span>
           </div>
         ) : (
-          <div className="flex items-center justify-between gap-3">
-            <span>Ikaw na bahala ulit</span>
-            <Sparkles className="size-5 text-rose-600" />
-          </div>
+            <div className="flex items-center gap-3">
+              <div className="flex-1 flex flex-col items-center text-center">
+                <p className="text-base font-semibold text-rose-900">
+                  Ikaw na bahala ulit
+                </p>
+                <p className="text-xs text-rose-700/70">
+                  Another option
+                </p>
+              </div>
+
+              <Sparkles className="size-5 shrink-0 text-rose-600" />
+            </div>
         )}
       </Button>
     </div>
