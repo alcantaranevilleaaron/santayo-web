@@ -82,7 +82,6 @@ export function FilterSection({
 
   const hasMoodSelected = !!filters.mood
   const isRandomSelected = filters.mood === "random"
-  // const ctaLabel = hasMoodSelected ? "Tara, hanap tayo! 🍽️" : "Pili ka muna ☝️"
   const ctaLabel = hasMoodSelected ? "Let’s find you something good 🍽️" : "Select a mood to continue"
   const loadingLabel = "Picking something good…🍜"
 
