@@ -82,7 +82,8 @@ export function FilterSection({
 
   const hasMoodSelected = !!filters.mood
   const isRandomSelected = filters.mood === "random"
-  const ctaLabel = hasMoodSelected ? "Tara, hanap tayo! 🍽️" : "Pili ka muna ☝️"
+  // const ctaLabel = hasMoodSelected ? "Tara, hanap tayo! 🍽️" : "Pili ka muna ☝️"
+  const ctaLabel = hasMoodSelected ? "Let’s find you something good 🍽️" : "Select a mood to continue"
   const loadingLabel = "Picking something good…🍜"
 
   return (
@@ -93,9 +94,6 @@ export function FilterSection({
           <div className="space-y-0.5">
             <p className="text-sm font-medium leading-tight text-foreground">
               Anong trip mo today?
-            </p>
-            <p className="text-xs leading-tight text-muted-foreground">
-              What are you craving?
             </p>
           </div>
 
@@ -121,7 +119,7 @@ export function FilterSection({
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-base font-semibold leading-tight text-rose-900">Ikaw na bahala</p>
-                  <p className="text-[11px] leading-tight text-rose-700/70">You pick for me</p>
+                  <p className="text-[11px] leading-tight text-rose-700/70">You decide for me</p>
                 </div>
                 <Sparkles className="size-5 shrink-0 text-rose-500/80" />
               </div>

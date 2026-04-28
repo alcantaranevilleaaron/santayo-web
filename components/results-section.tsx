@@ -1086,7 +1086,7 @@ export function ResultsSection({
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-base font-semibold text-rose-900">Ikaw na bahala</p>
-                    <p className="text-xs text-rose-700/70">You pick for me</p>
+                    <p className="text-xs text-rose-700/70">You decide for me</p>
                   </div>
                   <Sparkles className="size-5 shrink-0 text-rose-600" />
                 </div>

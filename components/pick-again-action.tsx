@@ -40,13 +40,18 @@ export function PickAgainAction({
             <span className="text-xs opacity-80">Trust us on this one ✨</span>
           </div>
         ) : (
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-base font-semibold text-rose-900">Ikaw na bahala ulit</p>
-              <p className="text-xs text-rose-700/70">Pick again</p>
+            <div className="flex items-center gap-3">
+              <div className="flex-1 flex flex-col items-center text-center">
+                <p className="text-base font-semibold text-rose-900">
+                  Ikaw na bahala ulit
+                </p>
+                <p className="text-xs text-rose-700/70">
+                  Another option
+                </p>
+              </div>
+
+              <Sparkles className="size-5 shrink-0 text-rose-600" />
             </div>
-            <Sparkles className="size-5 shrink-0 text-rose-600" />
-          </div>
         )}
       </Button>
     </div>
