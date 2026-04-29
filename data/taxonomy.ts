@@ -23,7 +23,8 @@ export const CUISINE_PRIMARY = [
   "Vegetarian",
   "Indonesian",
   "Peruvian",
-  "Snacks"
+  "Snacks",
+  "German",
 ] as const
 export type CuisinePrimary = (typeof CUISINE_PRIMARY)[number]
 
@@ -36,7 +37,29 @@ export const FOOD_CATEGORIES = [
   "Premium",
   "Buffet",
   "Middle Eastern",
-  "International"
+  "International",
+  "Filipino",
+  "Japanese",
+  "Korean",
+  "Chinese",
+  "Italian",
+  "American",
+  "French",
+  "Bakery",
+  "Peruvian",
+  "Hotpot",
+  "Vietnamese",
+  "Indonesian",
+  "German",
+  "Seafood",
+  "Latin American",
+  "Spanish",
+  "Steak",
+  "Beverage",
+  "Snacks",
+  "Thai",
+  "Burger",
+  "Sandwich",
 ] as const
 export type FoodCategory = (typeof FOOD_CATEGORIES)[number]
 
@@ -70,7 +93,12 @@ export const EXPERIENCE_TAGS = [
   "Family",
   "Group",
   "Quick",
-  "Pair"
+  "Pair",
+  "Casual",
+  "Sit-down",
+  "Special Occasion",
+  "Business",
+  "Occasion",
 ] as const
 export type ExperienceTag = (typeof EXPERIENCE_TAGS)[number]
 

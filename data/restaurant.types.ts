@@ -20,6 +20,7 @@ export type Restaurant = {
   dishes: string[]
   tags: string[]
   attributes: string[]
+  antiAttributes?: string[]
   budgetMax: number
   diningTypes: string[]
 
