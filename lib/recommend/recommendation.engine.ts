@@ -17,6 +17,7 @@ export type RecommendationSessionState = {
 export type RecommendationPickSet = {
   newTopPick: Restaurant | null;
   newAlternatives: Restaurant[];
+  rankedCandidates: Array<{ id: number; name: string; score: number }>;
 };
 
 export type RecommendationSession = {
@@ -356,6 +357,59 @@ function getRecommendationScore(
     getDirectionBoost(restaurant, direction) * 3 +
     randomFactor
   );
+}
+
+const SHOWN_PENALTY = 25;
+const PREVIOUS_TOP_PICK_PENALTY = 45;
+
+function getScoredCandidates(
+  restaurants: Restaurant[],
+  filters: Filters,
+  reference: Restaurant | null,
+  direction: string | null,
+  shownRestaurantIds: Set<number>,
+  previousTopPickIds: Set<number>,
+) {
+  return restaurants
+    .map((restaurant) => {
+      let score = getRecommendationScore(restaurant, filters, reference, direction);
+
+      if (shownRestaurantIds.has(restaurant.id)) {
+        score -= SHOWN_PENALTY;
+      }
+
+      if (previousTopPickIds.has(restaurant.id)) {
+        score -= PREVIOUS_TOP_PICK_PENALTY;
+      }
+
+      return { restaurant, score };
+    })
+    .sort((a, b) => b.score - a.score);
+}
+
+function pickWeightedTopCandidate(
+  rankedCandidates: Array<{ restaurant: Restaurant; score: number }>,
+) {
+  if (rankedCandidates.length === 0) return null;
+
+  const topPool = rankedCandidates.slice(0, Math.min(8, rankedCandidates.length));
+  const minScore = topPool[topPool.length - 1]?.score ?? 0;
+  const weighted = topPool.map((candidate) => ({
+    candidate,
+    weight: Math.max(1, candidate.score - minScore + 5),
+  }));
+
+  const totalWeight = weighted.reduce((sum, item) => sum + item.weight, 0);
+  let draw = Math.random() * totalWeight;
+
+  for (const item of weighted) {
+    draw -= item.weight;
+    if (draw <= 0) {
+      return item.candidate.restaurant;
+    }
+  }
+
+  return weighted[weighted.length - 1]?.candidate.restaurant ?? null;
 }
 
 function sortRecommendationPool(
@@ -715,19 +769,48 @@ export function getNextPickSet(
   count = 3,
   direction: string | null = null,
 ) {
-  void fallbackMode;
+  const filteredPool = getCandidatePool(filters, fallbackMode).filter((restaurant) =>
+    isEligibleForDirection(restaurant, direction),
+  );
+  const selectedCuisine =
+    filters.cuisine && filters.cuisine !== "any" ? normalize(filters.cuisine) : null;
+  const budgetMax = parseBudgetValue(filters.budget);
 
-  // Global-scoring model: start from all open restaurants and apply only light eligibility.
-  const pool = RESTAURANTS.filter(
+  const cuisineExpandedPool = selectedCuisine
+    ? RESTAURANTS.filter(
+        (restaurant) =>
+          isOpenRestaurant(restaurant) &&
+          isEligibleForDirection(restaurant, direction) &&
+          normalize(getEffectiveCuisine(restaurant)) === selectedCuisine &&
+          (filters.budget === "1000" || restaurant.budgetMax <= budgetMax) &&
+          (!filters.dining || getEffectiveDiningTypes(restaurant).includes(filters.dining)),
+      )
+    : [];
+
+  const globalPool = RESTAURANTS.filter(
     (restaurant) =>
       isOpenRestaurant(restaurant) &&
       isEligibleForDirection(restaurant, direction),
   );
 
+  const mergedFilteredCuisinePool = Array.from(
+    new Map([...filteredPool, ...cuisineExpandedPool].map((restaurant) => [restaurant.id, restaurant])).values(),
+  );
+
+  const pool =
+    filteredPool.length >= count
+      ? filteredPool
+      : mergedFilteredCuisinePool.length >= count
+      ? mergedFilteredCuisinePool
+      : mergedFilteredCuisinePool.length > 0
+      ? mergedFilteredCuisinePool
+      : globalPool;
+
   if (pool.length === 0) {
     return {
       newTopPick: null,
       newAlternatives: [] as Restaurant[],
+      rankedCandidates: [],
     };
   }
 
@@ -766,16 +849,39 @@ export function getNextPickSet(
 
   const reference =
     pool.find((restaurant) => restaurant.id === seenIds.lastTopPickId) ?? null;
+  const shownRestaurantIds = new Set([
+    ...seenIds.seenTopPickIds,
+    ...seenIds.seenAlternativeIds,
+  ]);
+  const previousTopPickIds = new Set(seenIds.seenTopPickIds);
+  const isReroll = seenIds.seenTopPickIds.length > 0 || seenIds.lastTopPickId !== null;
 
-  const rankedTopCandidates = sortRecommendationPool(
+  const rankedTopCandidates = getScoredCandidates(
     availablePool,
     filters,
     reference,
-    false,
     direction,
+    shownRestaurantIds,
+    previousTopPickIds,
   );
 
-  const nextTopPick = rankedTopCandidates[0] ?? null;
+  const rankedCandidatesForTopPick =
+    isReroll && seenIds.lastTopPickId !== null
+      ? (() => {
+          const withoutLastTopPick = rankedTopCandidates.filter(
+            (item) => item.restaurant.id !== seenIds.lastTopPickId,
+          );
+
+          // Keep relevance safe when the pool is narrow.
+          return withoutLastTopPick.length >= Math.max(3, count)
+            ? withoutLastTopPick
+            : rankedTopCandidates;
+        })()
+      : rankedTopCandidates;
+
+  const nextTopPick = isReroll
+    ? pickWeightedTopCandidate(rankedCandidatesForTopPick)
+    : rankedTopCandidates[0]?.restaurant ?? null;
 
   let nextAlternatives: Restaurant[] = [];
   if (nextTopPick) {
@@ -848,5 +954,10 @@ export function getNextPickSet(
   return {
     newTopPick: nextTopPick,
     newAlternatives: nextAlternatives,
+    rankedCandidates: rankedTopCandidates.slice(0, 8).map((item) => ({
+      id: item.restaurant.id,
+      name: item.restaurant.name,
+      score: Math.round(item.score),
+    })),
   };
 }

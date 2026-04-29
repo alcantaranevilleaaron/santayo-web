@@ -425,11 +425,6 @@ export function ResultsSection({
         : null,
     })
 
-    setSessionState({
-      seenTopPickIds: [],
-      seenAlternativeIds: [],
-      lastTopPickId: null,
-    })
     setCurrentAlternativeIds([])
     setSelectedDirection(null)
     setDirectionHelperText(null)
@@ -514,18 +509,27 @@ export function ResultsSection({
     setManagedTimeout(() => {
       setIsFirstLoad(false)
 
+      debugReco("Reroll candidate context", {
+        phase: "reroll",
+        filters,
+        shownRestaurantIds: Array.from(new Set([...sessionState.seenTopPickIds, ...sessionState.seenAlternativeIds])),
+        previousTopPickIds: sessionState.seenTopPickIds,
+        lastTopPickId: sessionState.lastTopPickId,
+      })
+
       const nextPickSet = getNextPickSet(
         filters,
-        {
-          seenTopPickIds: [],
-          seenAlternativeIds: [],
-          lastTopPickId: null,
-        },
+        sessionState,
         fallbackMode,
         3
       )
 
       debugReco("Pick again result", {
+        phase: "reroll",
+        filters,
+        shownRestaurantIds: Array.from(new Set([...sessionState.seenTopPickIds, ...sessionState.seenAlternativeIds])),
+        previousTopPickIds: sessionState.seenTopPickIds,
+        rankedCandidates: nextPickSet.rankedCandidates,
         topPick: summarizeRestaurant(nextPickSet.newTopPick),
         alternatives: summarizeRestaurants(nextPickSet.newAlternatives),
       })
@@ -545,11 +549,13 @@ export function ResultsSection({
         setManagedTimeout(() => {
           setCurrentRestaurants([topPick, ...nextPickSet.newAlternatives])
           setCurrentAlternativeIds(nextPickSet.newAlternatives.map((restaurant) => restaurant.id))
-          setSessionState({
-            seenTopPickIds: [topPick.id],
-            seenAlternativeIds: nextPickSet.newAlternatives.map((restaurant) => restaurant.id),
+          setSessionState((previous) => ({
+            seenTopPickIds: Array.from(new Set([...previous.seenTopPickIds, topPick.id])).slice(-12),
+            seenAlternativeIds: Array.from(
+              new Set([...previous.seenAlternativeIds, ...nextPickSet.newAlternatives.map((restaurant) => restaurant.id)])
+            ).slice(-24),
             lastTopPickId: topPick.id,
-          })
+          }))
           setRecommendationSession(
             createRecommendationSession(filters, fallbackMode, topPick, nextPickSet.newAlternatives)
           )
@@ -809,6 +815,11 @@ export function ResultsSection({
     const pickSet = getNextPickSet(filters, sessionState, fallbackMode, 3)
 
     debugReco("Initial/new filter result", {
+      phase: "initial",
+      filters,
+      shownRestaurantIds: Array.from(new Set([...sessionState.seenTopPickIds, ...sessionState.seenAlternativeIds])),
+      previousTopPickIds: sessionState.seenTopPickIds,
+      rankedCandidates: pickSet.rankedCandidates,
       topPick: summarizeRestaurant(pickSet.newTopPick),
       alternatives: summarizeRestaurants(pickSet.newAlternatives),
     })
